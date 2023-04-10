@@ -1,0 +1,144 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ANSI-C Compiler
+                                      3 ; Version 4.2.0 #13081 (MINGW64)
+                                      4 ;--------------------------------------------------------
+                                      5 	.module memory
+                                      6 	.optsdcc -mz80
+                                      7 	
+                                      8 ;--------------------------------------------------------
+                                      9 ; Public variables in this module
+                                     10 ;--------------------------------------------------------
+                                     11 	.globl _g_StackAddress
+                                     12 	.globl _Mem_HeapAlloc
+                                     13 	.globl _Mem_HeapFree
+                                     14 	.globl _Mem_Copy
+                                     15 	.globl _Mem_Set
+                                     16 	.globl _Mem_Set_16b
+                                     17 ;--------------------------------------------------------
+                                     18 ; special function registers
+                                     19 ;--------------------------------------------------------
+                                     20 ;--------------------------------------------------------
+                                     21 ; ram data
+                                     22 ;--------------------------------------------------------
+                                     23 	.area _DATA
+      000000                         24 _g_StackAddress::
+      000000                         25 	.ds 2
+                                     26 ;--------------------------------------------------------
+                                     27 ; ram data
+                                     28 ;--------------------------------------------------------
+                                     29 	.area _INITIALIZED
+                                     30 ;--------------------------------------------------------
+                                     31 ; absolute external ram data
+                                     32 ;--------------------------------------------------------
+                                     33 	.area _DABS (ABS)
+                                     34 ;--------------------------------------------------------
+                                     35 ; global & static initialisations
+                                     36 ;--------------------------------------------------------
+                                     37 	.area _HOME
+                                     38 	.area _GSINIT
+                                     39 	.area _GSFINAL
+                                     40 	.area _GSINIT
+                                     41 ;--------------------------------------------------------
+                                     42 ; Home
+                                     43 ;--------------------------------------------------------
+                                     44 	.area _HOME
+                                     45 	.area _HOME
+                                     46 ;--------------------------------------------------------
+                                     47 ; code
+                                     48 ;--------------------------------------------------------
+                                     49 	.area _CODE
+                                     50 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:22: void* Mem_HeapAlloc(u16 size)
+                                     51 ;	---------------------------------
+                                     52 ; Function Mem_HeapAlloc
+                                     53 ; ---------------------------------
+      000000                         54 _Mem_HeapAlloc::
+      000000 4D               [ 4]   55 	ld	c, l
+      000001 44               [ 4]   56 	ld	b, h
+                                     57 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:24: u16 addr = g_HeapStartAddress;
+      000002 ED 5Br00r00      [20]   58 	ld	de, (_g_HeapStartAddress)
+                                     59 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:25: g_HeapStartAddress += size;
+      000006 21r00r00         [10]   60 	ld	hl, #_g_HeapStartAddress
+      000009 7E               [ 7]   61 	ld	a, (hl)
+      00000A 81               [ 4]   62 	add	a, c
+      00000B 77               [ 7]   63 	ld	(hl), a
+      00000C 23               [ 6]   64 	inc	hl
+      00000D 7E               [ 7]   65 	ld	a, (hl)
+      00000E 88               [ 4]   66 	adc	a, b
+      00000F 77               [ 7]   67 	ld	(hl), a
+                                     68 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:26: return (void*)addr;
+                                     69 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:27: }
+      000010 C9               [10]   70 	ret
+                                     71 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:31: void Mem_HeapFree(u16 size)
+                                     72 ;	---------------------------------
+                                     73 ; Function Mem_HeapFree
+                                     74 ; ---------------------------------
+      000011                         75 _Mem_HeapFree::
+      000011 EB               [ 4]   76 	ex	de, hl
+                                     77 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:33: g_HeapStartAddress -= size;	
+      000012 21r00r00         [10]   78 	ld	hl, #_g_HeapStartAddress
+      000015 7E               [ 7]   79 	ld	a, (hl)
+      000016 93               [ 4]   80 	sub	a, e
+      000017 77               [ 7]   81 	ld	(hl), a
+      000018 23               [ 6]   82 	inc	hl
+      000019 7E               [ 7]   83 	ld	a, (hl)
+      00001A 9A               [ 4]   84 	sbc	a, d
+      00001B 77               [ 7]   85 	ld	(hl), a
+                                     86 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:34: }
+      00001C C9               [10]   87 	ret
+                                     88 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:38: void Mem_Copy(const void* src, void* dest, u16 size) __NAKED // Stack: 4 bytes
+                                     89 ;	---------------------------------
+                                     90 ; Function Mem_Copy
+                                     91 ; ---------------------------------
+      00001D                         92 _Mem_Copy::
+                                     93 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:57: __endasm;
+      00001D FD E1            [14]   94 	pop	iy
+      00001F C1               [10]   95 	pop	bc
+      000020 ED B0            [21]   96 	ldir
+      000022                         97 	 mem_copy_end:
+      000022 FD E9            [ 8]   98 	jp	(iy)
+                                     99 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:58: }
+                                    100 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:109: void Mem_Set(u8 val, void* dest, u16 size) __NAKED // Stack: 4 bytes
+                                    101 ;	---------------------------------
+                                    102 ; Function Mem_Set
+                                    103 ; ---------------------------------
+      000024                        104 _Mem_Set::
+                                    105 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:136: __endasm;
+      000024 D5               [11]  106 	push	de
+      000025 E1               [10]  107 	pop	hl
+      000026 77               [ 7]  108 	ld	(hl), a
+      000027 13               [ 6]  109 	inc	de
+      000028 FD E1            [14]  110 	pop	iy
+      00002A C1               [10]  111 	pop	bc
+      00002B 0B               [ 6]  112 	dec	bc
+      00002C ED B0            [21]  113 	ldir
+      00002E                        114 	 mem_fill_end:
+      00002E FD E9            [ 8]  115 	jp	(iy)
+                                    116 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:137: }
+                                    117 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:141: void Mem_Set_16b(u16 val, void* dest, u16 size)
+                                    118 ;	---------------------------------
+                                    119 ; Function Mem_Set_16b
+                                    120 ; ---------------------------------
+      000030                        121 _Mem_Set_16b::
+                                    122 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:175: __endasm;
+      000030 D5               [11]  123 	push	de
+      000031 EB               [ 4]  124 	ex	de, hl
+      000032 72               [ 7]  125 	ld	(hl), d
+      000033 23               [ 6]  126 	inc	hl
+      000034 73               [ 7]  127 	ld	(hl), e
+      000035 23               [ 6]  128 	inc	hl
+      000036 EB               [ 4]  129 	ex	de, hl
+      000037 E1               [10]  130 	pop	hl
+      000038 FD E1            [14]  131 	pop	iy
+      00003A C1               [10]  132 	pop	bc
+      00003B 0B               [ 6]  133 	dec	bc
+      00003C 0B               [ 6]  134 	dec	bc
+      00003D ED B0            [21]  135 	ldir
+      00003F                        136 	 mem_fill16_end:
+      00003F FD E9            [ 8]  137 	jp	(iy)
+                                    138 ;C:\Users\socia\Documents\www\MO5\MSX\engine/src/memory.c:176: }
+      000041 E1               [10]  139 	pop	hl
+      000042 F1               [10]  140 	pop	af
+      000043 E9               [ 4]  141 	jp	(hl)
+                                    142 	.area _CODE
+                                    143 	.area _INITIALIZER
+                                    144 	.area _CABS (ABS)

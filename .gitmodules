@@ -1,0 +1,3 @@
+[submodule "MSXgl"]
+	path = MSXgl
+	url = git@github.com:aoineko-fr/MSXgl.git

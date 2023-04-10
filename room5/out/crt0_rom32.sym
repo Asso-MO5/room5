@@ -1,0 +1,44 @@
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Zilog Z80 / Hitachi HD64180 / ZX-Next / eZ80), page 1.
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+    .__.$$$.=  002710 L   |     .__.ABS.=  000000 G   |     .__.CPU.=  000000 L
+    .__.H$L.=  000000 L   |     ADDR_BOO=  004000     |     APP_SIGN=  000001 
+    APP_SIGN=  005845     |     APP_SIGN=  004C47     |     DOS_ISR =  000000 
+    DOS_PARS=  000001     |     ENASLT  =  000024     |     EXPTBL  =  00FCC1 
+    HIMEM   =  00FC4A     |     H_STKE  =  00FEDA     |     ISR_SET_=  000000 
+    ISR_V999=  000002     |     ISR_VBLA=  000000     |     ISR_VHBL=  000001 
+    MSXVER  =  00002D     |     PPI_A   =  0000A8     |     ROMVER  =  00002B 
+    ROM_ASCI=  000002     |     ROM_ASCI=  000001     |     ROM_BCAL=  000000 
+    ROM_DELA=  000000     |     ROM_ISR =  000000     |     ROM_KONA=  000003 
+    ROM_KONA=  000004     |     ROM_MAPP=  000000     |     ROM_PLAI=  000000 
+    ROM_RAMI=  000000     |     RSLREG  =  000138     |     SLTSL   =  00FFFF 
+    START_AD=  004000     |     V9_P06  =  000066     |     VDP_A   =  000099 
+    VDP_S   =  000099     |   0 _g_AppSi   000010 GR  |   0 _g_First   000000 GR
+  0 _g_Heade   000000 GR  |   8 _g_HeapS   000000 GR  |   7 _g_LastA   000000 GR
+    _main      ****** GX  |   0 crt0_ini   000014 R   |   0 crt0_ini   00003D R
+  0 crt0_p1_   00001F R   |   0 crt0_rom   000000 R   |   0 crt0_ski   00004D R
+  0 crt0_sta   00004D R   |     l__INITI   ****** GX  |     s__GSFIN   ****** GX
+    s__HEADE   ****** GX  |     s__HEAP    ****** GX  |     s__INITI   ****** GX
+    s__INITI   ****** GX
+
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Zilog Z80 / Hitachi HD64180 / ZX-Next / eZ80), page 2.
+Hexadecimal [24-Bits]
+
+Area Table
+
+   0 _CODE      size     52   flags    0
+   1 _HEADER    size      0   flags    8
+   2 _HEADER0   size      0   flags    8
+   3 _HOME      size      0   flags    0
+   4 _RODATA    size      0   flags    0
+   5 _INITIAL   size      0   flags    0
+   6 _GSINIT    size      0   flags    0
+   7 _GSFINAL   size      0   flags    0
+   8 _DATA      size      2   flags    0
+   9 _INITIAL   size      0   flags    0
+   A _BSEG      size      0   flags    0
+   B _BSS       size      0   flags    0
+   C _HEAP      size      0   flags    0
+

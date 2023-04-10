@@ -60,10 +60,10 @@ struct PlayerDefinition g_Player;
 #include "aseprites/export/level001.h"
 #include "aseprites/export/level002.h"
 
-// Liste des chambres et de leur caracteristiques
+// Liste des pièces et de leur caracteristiques
 const struct RoomDefinition g_Rooms[] = {
 	{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "Room 1", 1},
-	{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 2", 0},
+	{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 0},
 };
 
 //=============================================================================
@@ -74,32 +74,38 @@ const struct RoomDefinition g_Rooms[] = {
 // Afficher une pièce
 void displayLevel(u8 levelIdx)
 {
+	// Nettoyage de l'écran (tuile n°0 partout)
 	g_CurrRoomIdx = levelIdx;
-	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
+	
+	// Nettoyage de l'écran (tuile n°0 partout)
+	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24); 
 
-	for (u8 i = 0; i < g_Rooms[levelIdx].Height; i++)
+	// Dessiner la pièce ligne par ligne
+	for (u8 i = 0; i < g_Rooms[levelIdx].Height; ++i)
 	{
 		VDP_WriteVRAM_16K(g_Rooms[levelIdx].Layout + g_Rooms[levelIdx].Width * i,
-		g_ScreenLayoutLow + 32 * (i + g_Rooms[levelIdx].Y) + (g_Rooms[levelIdx].X), g_Rooms[levelIdx].Width);
+		                  g_ScreenLayoutLow + 32 * (i + g_Rooms[levelIdx].Y) + (g_Rooms[levelIdx].X), g_Rooms[levelIdx].Width);
 
-		for (u8 j = 0; j < g_Rooms[levelIdx].Width; j++)
+		for (u8 j = 0; j < g_Rooms[levelIdx].Width; ++j)
 		{
 			u8 tile = g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * i + j];
-			if (tile == 63)
+			if (tile == 63) // Detection de la position initiale du joueur
 			{
-				// half tile
+				// Positionnement du joueur centré sur la tuile trouvée
 				g_Player.X = (g_Rooms[levelIdx].X + j) * 8 - 4;
 				g_Player.Y = (g_Rooms[levelIdx].Y + i) * 8 - 9;
 			}
 		}
 	}
 
+	// Intialisation de la couleur des tuiles
+	g_CurrentLightOn = false;
 	VDP_FillVRAM_16K(0x41, g_ScreenColorLow, 8);
 	VDP_FillVRAM_16K(0x41, g_ScreenColorLow + (64 / 8), 8);
 	VDP_FillVRAM_16K(0x51, g_ScreenColorLow + (128 / 8), 8);
 
+	// Afficher le nom de la pièce
 	Print_DrawTextAt(g_Rooms[levelIdx].X - 1, 0, g_Rooms[levelIdx].Name);
-	g_CurrentLightOn = false;
 }
 
 //-----------------------------------------------------------------------------

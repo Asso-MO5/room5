@@ -22,7 +22,7 @@
 //*****************************************************************************
 
 //-- Project name (string). Will be use for output filename
-ProjName = 'Room5'
+ProjName = 'room5'
 
 //-- List of project modules to build (array). If empty, ProjName will be added
 ProjModules = [ProjName]

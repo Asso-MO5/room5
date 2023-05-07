@@ -13,7 +13,7 @@ echo -- Export background tiles data...
 
 :: Export player sprite
 echo -- Export player sprite data...
-%MSXtk%\MSXimg.exe assets\sprt_player.png -out %Dest%/sprt_player.h -pos 0 8 -size 16 16 -num 8 1 -name g_SprtPlayer -mode sprt ^
+%MSXtk%\MSXimg.exe assets\sprt_player.png -out %Dest%/sprt_player.h -pos 0 8 -size 16 16 -num 12 1 -name g_SprtPlayer -mode sprt ^
 	-l i16 0 0 1 1 0xCCC35E ^
 	-l i16 0 0 1 1 0xFFFFFF ^
 	-l i16 0 0 1 1 0xDB6559 ^

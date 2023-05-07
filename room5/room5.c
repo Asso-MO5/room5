@@ -59,11 +59,18 @@ struct PlayerDefinition g_Player;
 // Données des pièces
 #include "data/level/level001.h"
 #include "data/level/level002.h"
+#include "data/level/level003.h"
+#include "data/level/level004.h"
+
+// Données des sprites de l'elevateur
+#include "data/sprt_elevator.h"
 
 // Liste des pièces et de leur caracteristiques
 const struct RoomDefinition g_Rooms[] = {
-	{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "Room 1", 1},
-	{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 0},
+	{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "Room 1",  1},
+	{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 2},
+	{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 2",  3},
+	{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 66", 0},
 };
 
 //=============================================================================
@@ -237,7 +244,7 @@ void main()
 
 		if (Keyboard_IsKeyPressed(KEY_SPACE))
 		{
-			interact(g_Player.X + 8, g_Player.Y + 8); // Interaction au milieu du personnage
+			interact(g_Player.X + 8, g_Player.Y + 4); // Interaction au milieu du personnage
 			while(Keyboard_IsKeyPressed(KEY_SPACE)) {}
 		}
 

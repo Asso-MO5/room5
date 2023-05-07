@@ -2,7 +2,7 @@
 // ██  ▀  █▄  ▀██▄ ▀ ▄█ ▄  ▄█▄█ ▄▀██
 // █  █ █  ▀▀  ▄█  █  █ ██ ██ █  ▀██
 // ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀          ▀▀
-// Data generated using MSXimg 1.16.5 on Sun May  7 14:43:41 2023
+// Data generated using MSXimg 1.16.5 on Sun May  7 15:05:17 2023
 // by Guillaume "Aoineko" Blanchard (2022) under CC BY-SA free license
 // ─────────────────────────────────────────────────────────────────────────────
 // Generation parameters:
@@ -16,7 +16,7 @@
 //  - Skip empty:     FALSE
 
 // Sprites table
-const unsigned char g_SprtPlayerSprt[] =
+const unsigned char g_SprtPlayer[] =
 {
 // ======== Frame[0]
 // ---- Layer[0] (16x16 0,0 1,1 inc 1)

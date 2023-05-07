@@ -71,6 +71,23 @@ const struct RoomDefinition g_Rooms[] = {
 //=============================================================================
 
 //-----------------------------------------------------------------------------
+// Récupère la tuile à la position indiquée
+void activateLight(bool bActivate)
+{
+	g_CurrentLightOn = bActivate;
+
+	u8 firstCol = g_CurrentLightOn ? 0xA1 : 0x41;
+	u8 secondCol = g_CurrentLightOn ? 0xB1 : 0x51;
+	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow, 8);
+	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow + (64 / 8), 8);
+	VDP_FillVRAM_16K(secondCol, g_ScreenColorLow + (128 / 8), 8);
+
+	VDP_SetSpriteColorSM1(0, g_CurrentLightOn ? COLOR_LIGHT_YELLOW : COLOR_LIGHT_BLUE);
+	VDP_SetSpriteColorSM1(1, g_CurrentLightOn ? COLOR_WHITE        : COLOR_CYAN);
+	VDP_SetSpriteColorSM1(2, g_CurrentLightOn ? COLOR_MEDIUM_RED   : COLOR_DARK_BLUE);
+}
+
+//-----------------------------------------------------------------------------
 // Afficher une pièce
 void displayLevel(u8 levelIdx)
 {
@@ -99,10 +116,7 @@ void displayLevel(u8 levelIdx)
 	}
 
 	// Intialisation de la couleur des tuiles
-	g_CurrentLightOn = false;
-	VDP_FillVRAM_16K(0x41, g_ScreenColorLow, 8);
-	VDP_FillVRAM_16K(0x41, g_ScreenColorLow + (64 / 8), 8);
-	VDP_FillVRAM_16K(0x51, g_ScreenColorLow + (128 / 8), 8);
+	activateLight(FALSE);
 
 	// Afficher le nom de la pièce
 	Print_DrawTextAt(g_Rooms[levelIdx].X - 1, 0, g_Rooms[levelIdx].Name);
@@ -123,26 +137,19 @@ void interact(u8 x, u8 y)
 	u8 tile = getTile(x, y);
 	switch (tile)
 	{
-	// tel
+	// Telephone
 	case 73:
 		Print_DrawTextAt(g_Rooms[g_CurrRoomIdx].X - 1, g_Rooms[g_CurrRoomIdx].Y + g_Rooms[g_CurrRoomIdx].Height + 2, "DRIIIING !!");
-		break;
+		return;
+	// Light ON/OFF
 	case 74:
-	{
-		g_CurrentLightOn = !g_CurrentLightOn;
-		u8 firstCol = g_CurrentLightOn ? 0xA1 : 0x41;
-		u8 secondCol = g_CurrentLightOn ? 0xB1 : 0x51;
-		VDP_FillVRAM_16K(firstCol, g_ScreenColorLow, 8);
-		VDP_FillVRAM_16K(firstCol, g_ScreenColorLow + (64 / 8), 8);
-		VDP_FillVRAM_16K(secondCol, g_ScreenColorLow + (128 / 8), 8);
-		break;
-	}
+		activateLight(!g_CurrentLightOn);
+		return;
+	// Open door
 	case 12:
 	case 13:
 		displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
-		break;
-	default:
-		break;
+		return;
 	}
 }
 
@@ -180,7 +187,7 @@ void main()
 	g_Player.X = 100;
 	g_Player.Y = 103;
 	// Chargement des formes des sprites
-	VDP_WriteVRAM_16K(g_SprtPlayerSprt, g_SpritePatternLow, sizeof(g_SprtPlayerSprt));
+	VDP_WriteVRAM_16K(g_SprtPlayer, g_SpritePatternLow, sizeof(g_SprtPlayer));
 	// Creation des 4 sprites du personnage
 	VDP_SetSpriteSM1(0, g_Player.X, g_Player.Y, 0, COLOR_DARK_YELLOW);
 	VDP_SetSpriteSM1(1, g_Player.X, g_Player.Y, 4, COLOR_WHITE);
@@ -191,7 +198,8 @@ void main()
 	displayLevel(0);
 
 	u8 count = 0;
-	while (!Keyboard_IsKeyPressed(KEY_ESC))
+
+	while (1)
 	{
 		// Attente de la synchronsation avec le processeur graphique (à 50 ou 60 Hz)
 		Halt();
@@ -229,8 +237,8 @@ void main()
 
 		if (Keyboard_IsKeyPressed(KEY_SPACE))
 		{
-			while (!Keyboard_IsKeyPressed(KEY_SPACE)) {}
 			interact(g_Player.X + 8, g_Player.Y + 8); // Interaction au milieu du personnage
+			while(Keyboard_IsKeyPressed(KEY_SPACE)) {}
 		}
 
 		// Mise à jour des sprites du joueur (1 par couleur)
@@ -239,6 +247,4 @@ void main()
 		VDP_SetSpritePosition(2, g_Player.X, g_Player.Y);
 		VDP_SetSpritePosition(3, g_Player.X, g_Player.Y);
 	}
-
-	Bios_Exit(0);
 }

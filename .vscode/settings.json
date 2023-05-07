@@ -39,5 +39,6 @@
     "*.ejs": "html",
     "sprt_elevator.h": "c",
     "*.asm": "c"
-  }
+  },
+  "editor.insertSpaces": false
 }

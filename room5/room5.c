@@ -51,14 +51,14 @@ struct PlayerDefinition g_Player;
 //=============================================================================
 
 // Données des sprites du joueur
-#include "sprites/player.h"
+#include "data/sprt_player.h"
 
 // Données des formes et couleurs des tuiles 
-#include "tilesets/tileset.h"
+#include "data/bg_tileset.h"
 
 // Données des pièces
-#include "aseprites/export/level001.h"
-#include "aseprites/export/level002.h"
+#include "data/level/level001.h"
+#include "data/level/level002.h"
 
 // Liste des pièces et de leur caracteristiques
 const struct RoomDefinition g_Rooms[] = {

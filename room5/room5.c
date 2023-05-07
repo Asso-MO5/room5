@@ -42,6 +42,12 @@ enum PlayerState
   PLAYER_STATE_ACTION
 };
 
+#define SPT_PLAYER_HAIR 1
+#define SPT_PLAYER_SKIN 2
+#define SPT_PLAYER_CHAIR 3
+#define SPT_PLAYER_OUTLINE 16
+#define SPT_ELEVATOR 0
+
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
 //=============================================================================
@@ -101,9 +107,9 @@ void activateLight(bool bActivate)
   VDP_FillVRAM_16K(firstCol, g_ScreenColorLow + (64 / 8), 8);
   VDP_FillVRAM_16K(secondCol, g_ScreenColorLow + (128 / 8), 8);
 
-  VDP_SetSpriteColorSM1(0, g_CurrentLightOn ? COLOR_LIGHT_YELLOW : COLOR_LIGHT_BLUE);
-  VDP_SetSpriteColorSM1(1, g_CurrentLightOn ? COLOR_WHITE : COLOR_CYAN);
-  VDP_SetSpriteColorSM1(2, g_CurrentLightOn ? COLOR_MEDIUM_RED : COLOR_DARK_BLUE);
+  VDP_SetSpriteColorSM1(SPT_PLAYER_HAIR, g_CurrentLightOn ? COLOR_LIGHT_YELLOW : COLOR_LIGHT_BLUE);
+  VDP_SetSpriteColorSM1(SPT_PLAYER_SKIN, g_CurrentLightOn ? COLOR_WHITE : COLOR_CYAN);
+  VDP_SetSpriteColorSM1(SPT_PLAYER_CHAIR, g_CurrentLightOn ? COLOR_MEDIUM_RED : COLOR_DARK_BLUE);
 }
 
 //-----------------------------------------------------------------------------
@@ -115,6 +121,9 @@ void displayLevel(u8 levelIdx)
   // Nettoyage de l'écran (tuile n°0 partout)
   VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 
+  bool bElevatorFound = FALSE;
+
+  VDP_HideSprite(SPT_ELEVATOR);
   // Dessiner la pièce ligne par ligne
   for (u8 i = 0; i < g_Rooms[levelIdx].Height; ++i)
   {
@@ -129,6 +138,12 @@ void displayLevel(u8 levelIdx)
         // Positionnement du joueur centré sur la tuile trouvée
         g_Player.X = (g_Rooms[levelIdx].X + j) * 8 - 4;
         g_Player.Y = (g_Rooms[levelIdx].Y + i) * 8 - 9;
+      }
+
+      if (tile == 39 && !bElevatorFound)
+      {
+        bElevatorFound = TRUE;
+        VDP_SetSpriteSM1(SPT_ELEVATOR, (g_Rooms[levelIdx].X + j) * 8, (g_Rooms[levelIdx].Y + i) * 8 - 9, 4 * 4 * 12, COLOR_WHITE);
       }
     }
   }
@@ -209,13 +224,16 @@ void main()
   g_Player.Y = 103;
   // Chargement des formes des sprites
   VDP_WriteVRAM_16K(g_SprtPlayer, g_SpritePatternLow, sizeof(g_SprtPlayer));
+  VDP_WriteVRAM_16K(g_SprtElevator, g_SpritePatternLow + 4 * 4 * 12 * 8, sizeof(g_SprtElevator));
   // Creation des 4 sprites du personnage
-  VDP_SetSpriteSM1(0, g_Player.X, g_Player.Y, 0, COLOR_DARK_YELLOW);
-  VDP_SetSpriteSM1(1, g_Player.X, g_Player.Y, 4, COLOR_WHITE);
-  VDP_SetSpriteSM1(2, g_Player.X, g_Player.Y, 8, COLOR_DARK_RED);
-  VDP_SetSpriteSM1(3, g_Player.X, g_Player.Y, 12, COLOR_BLACK);
+  VDP_SetSpriteSM1(SPT_PLAYER_HAIR, g_Player.X, g_Player.Y, 0, COLOR_DARK_YELLOW);
+  VDP_SetSpriteSM1(SPT_PLAYER_SKIN, g_Player.X, g_Player.Y, 4, COLOR_WHITE);
+  VDP_SetSpriteSM1(SPT_PLAYER_CHAIR, g_Player.X, g_Player.Y, 8, COLOR_DARK_RED);
+  VDP_SetSpriteSM1(SPT_PLAYER_OUTLINE, g_Player.X, g_Player.Y, 12, COLOR_BLACK);
+  // VDP_SetSpriteSM1(SPT_ELEVATOR, 100, 109, 4 * 4 * 12, COLOR_WHITE);
 
-  // Afficher la pièce n°0 (la première)
+  // Creation
+  //  Afficher la pièce n°0 (la première)
   displayLevel(0);
 
   u8 count = 0;
@@ -306,13 +324,13 @@ void main()
     }
 
     // Mise à jour des sprites du joueur (1 par couleur)
-    VDP_SetSpritePattern(0, baseNumPattern);
-    VDP_SetSpritePattern(1, baseNumPattern + 4);
-    VDP_SetSpritePattern(2, baseNumPattern + 8);
-    VDP_SetSpritePattern(3, baseNumPattern + 12);
-    VDP_SetSpritePosition(0, g_Player.X, g_Player.Y);
-    VDP_SetSpritePosition(1, g_Player.X, g_Player.Y);
-    VDP_SetSpritePosition(2, g_Player.X, g_Player.Y);
-    VDP_SetSpritePosition(3, g_Player.X, g_Player.Y);
+    VDP_SetSpritePattern(SPT_PLAYER_HAIR, baseNumPattern);
+    VDP_SetSpritePattern(SPT_PLAYER_SKIN, baseNumPattern + 4);
+    VDP_SetSpritePattern(SPT_PLAYER_CHAIR, baseNumPattern + 8);
+    VDP_SetSpritePattern(SPT_PLAYER_OUTLINE, baseNumPattern + 12);
+    VDP_SetSpritePosition(SPT_PLAYER_HAIR, g_Player.X, g_Player.Y - 8);
+    VDP_SetSpritePosition(SPT_PLAYER_SKIN, g_Player.X, g_Player.Y);
+    VDP_SetSpritePosition(SPT_PLAYER_CHAIR, g_Player.X, g_Player.Y + 8);
+    VDP_SetSpritePosition(SPT_PLAYER_OUTLINE, g_Player.X, g_Player.Y);
   }
 }

@@ -34,5 +34,10 @@
     "**/.vscode/**"
   ],
   "C_Cpp_Runner.useAddressSanitizer": false,
-  "C_Cpp_Runner.showCompilationTime": false
+  "C_Cpp_Runner.showCompilationTime": false,
+  "files.associations": {
+    "*.ejs": "html",
+    "sprt_elevator.h": "c",
+    "*.asm": "c"
+  }
 }

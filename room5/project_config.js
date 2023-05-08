@@ -120,7 +120,7 @@ AppID = 'EX'
 //*******************************************************************************
 
 //-- Force to generate MSXgl static library even if 'msxgl.lib' already exist (boolean)
-BuildLibrary = false
+BuildLibrary = false;
 
 //-- Prepare program for debug (boolean)
 // Debug = false;
@@ -157,7 +157,7 @@ BuildLibrary = false
 //*****************************************************************************
 
 //-- Activate verbose mode and get more build information (boolean)
-Verbose = true
+Verbose = true;
 
 //-- Output build information to the standard console (boolean)
 // LogStdout = true;

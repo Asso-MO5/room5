@@ -39,7 +39,8 @@ enum PlayerState
 {
 	PLAYER_STATE_IDLE,
 	PLAYER_STATE_MOVE,
-	PLAYER_STATE_ACTION
+	PLAYER_STATE_ACTION,
+	PLAYER_STATE_FALL,
 };
 
 #define SPT_PLAYER_HAIR 1
@@ -82,21 +83,22 @@ u8 g_PlayerState = PLAYER_STATE_IDLE;
 
 // Liste des pièces et de leur caracteristiques
 const struct RoomDefinition g_Rooms[] = {
-	{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "Room 1", 1},
-	{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 2},
-	{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 2", 3},
-	{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 66", 0},
+		{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "Room 1", 1},
+		{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 2},
+		{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 2", 3},
+		{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 66", 0},
 };
 
 const u8 g_NumPlayerFramesMove[] = {1, 2, 3, 4};
 const u8 g_NumPlayerFramesAction[] = {5, 6, 7, 8, 9, 10, 9, 11};
+const u8 g_NumPlayerFramesFall[] = {1, 2, 3, 4};
 
 //=============================================================================
 // FONCTIONS
 //=============================================================================
 
 //-----------------------------------------------------------------------------
-// Allume ou etteint la lumière
+// Allume ou éteint la lumière
 void activateLight(bool bActivate)
 {
 	g_CurrentLightOn = bActivate; // Enregistrement de l’état de la lumière
@@ -132,7 +134,7 @@ void displayLevel(u8 levelIdx)
 	{
 		// Copie une ligne de donnée en VRAM
 		VDP_WriteVRAM_16K(g_Rooms[levelIdx].Layout + g_Rooms[levelIdx].Width * i,
-		                  g_ScreenLayoutLow + 32 * (i + g_Rooms[levelIdx].Y) + (g_Rooms[levelIdx].X), g_Rooms[levelIdx].Width);
+											g_ScreenLayoutLow + 32 * (i + g_Rooms[levelIdx].Y) + (g_Rooms[levelIdx].X), g_Rooms[levelIdx].Width);
 
 		for (u8 j = 0; j < g_Rooms[levelIdx].Width; ++j)
 		{
@@ -141,7 +143,7 @@ void displayLevel(u8 levelIdx)
 			{
 				// Positionnement du joueur centré sur la tuile trouvée
 				g_Player.X = (g_Rooms[levelIdx].X + j) * 8 - 4;
-				g_Player.Y = (g_Rooms[levelIdx].Y + i) * 8 - 9;
+				g_Player.Y = (g_Rooms[levelIdx].Y + i) * 8 - 9 - 24;
 			}
 			if (tile == 39 && !bElevatorFound) // Detection des rails pour placer les élévateurs
 			{
@@ -228,9 +230,9 @@ void main()
 	VDP_WriteVRAM_16K(g_SprtElevator, g_SpritePatternLow + 4 * 4 * 12 * 8, sizeof(g_SprtElevator));
 
 	// Creation des 4 sprites du personnage (leur position et leur pattern seront mis-à-jour à chaque frame dans la boucle principale)
-	VDP_SetSpriteSM1(SPT_PLAYER_HAIR,    0, 0, 0,  COLOR_DARK_YELLOW);
-	VDP_SetSpriteSM1(SPT_PLAYER_SKIN,    0, 0, 4,  COLOR_WHITE);
-	VDP_SetSpriteSM1(SPT_PLAYER_CHAIR,   0, 0, 8,  COLOR_DARK_RED);
+	VDP_SetSpriteSM1(SPT_PLAYER_HAIR, 0, 0, 0, COLOR_DARK_YELLOW);
+	VDP_SetSpriteSM1(SPT_PLAYER_SKIN, 0, 0, 4, COLOR_WHITE);
+	VDP_SetSpriteSM1(SPT_PLAYER_CHAIR, 0, 0, 8, COLOR_DARK_RED);
 	VDP_SetSpriteSM1(SPT_PLAYER_OUTLINE, 0, 0, 12, COLOR_BLACK);
 	g_Player.X = 100;
 	g_Player.Y = 103;
@@ -241,7 +243,7 @@ void main()
 	u8 count = 0;
 	while (1) // Pour un jeu en cartouche (ROM) on a pas besoin de gérer la sortie de la boucle principale
 	{
-		// Attente de la synchronsation avec le processeur graphique (à 50 ou 60 Hz)
+		// Attente de la synchronisation avec le processeur graphique (à 50 ou 60 Hz)
 		Halt();
 
 		count++;
@@ -286,9 +288,11 @@ void main()
 				count = 0;
 				g_PlayerState = PLAYER_STATE_ACTION;
 			}
-			
+
 			// Test des collisions horizontales aux 4 coins du personnage
 			bool bCollide = false;
+			bool bFalling = true;
+
 			if (checkCollision(xTemp, yTemp))
 				bCollide = true;
 			if (checkCollision(xTemp + 15, yTemp))
@@ -298,7 +302,10 @@ void main()
 			if (checkCollision(xTemp, yTemp + 15))
 				bCollide = true;
 
-			if (!bCollide) // Application du déplacement si aucune collision n'est detecté
+			if (checkCollision(xTemp + 8, yTemp + 17))
+				bFalling = false;
+
+			if (!bCollide) // Application du déplacement si aucune collision n'est détectée
 			{
 				g_Player.X = xTemp;
 				// VDP_SetColor(COLOR_BLACK);
@@ -306,6 +313,15 @@ void main()
 			else
 			{
 				// VDP_SetColor(COLOR_DARK_RED);
+			}
+
+			if (bFalling)
+			{
+				g_Player.Y++;
+				g_PlayerState = PLAYER_STATE_FALL;
+			}
+			else
+			{
 			}
 		}
 
@@ -322,12 +338,15 @@ void main()
 		case PLAYER_STATE_ACTION:
 			baseNumPattern = g_NumPlayerFramesAction[count / 2 % 8] * 16;
 			break;
+		case PLAYER_STATE_FALL:
+			baseNumPattern = g_NumPlayerFramesFall[count / 4 % 4] * 16;
+			break;
 		}
 
 		// Mise à jour de la position et du pattern des sprites du joueur (1 par couleur)
-		VDP_SetSprite(SPT_PLAYER_HAIR,    g_Player.X, g_Player.Y - 8, baseNumPattern);
-		VDP_SetSprite(SPT_PLAYER_SKIN,    g_Player.X, g_Player.Y,     baseNumPattern + 4);
-		VDP_SetSprite(SPT_PLAYER_CHAIR,   g_Player.X, g_Player.Y + 8, baseNumPattern + 8);
-		VDP_SetSprite(SPT_PLAYER_OUTLINE, g_Player.X, g_Player.Y,     baseNumPattern + 12);
+		VDP_SetSprite(SPT_PLAYER_HAIR, g_Player.X, g_Player.Y - 8, baseNumPattern);
+		VDP_SetSprite(SPT_PLAYER_SKIN, g_Player.X, g_Player.Y, baseNumPattern + 4);
+		VDP_SetSprite(SPT_PLAYER_CHAIR, g_Player.X, g_Player.Y + 8, baseNumPattern + 8);
+		VDP_SetSprite(SPT_PLAYER_OUTLINE, g_Player.X, g_Player.Y, baseNumPattern + 12);
 	}
 }

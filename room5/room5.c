@@ -36,6 +36,17 @@ struct PlayerDefinition
 	i8 VelocityY;
 };
 
+// Structure des paramètres de l'élévateur
+
+struct ElevatorDefinition
+{
+	u8 X;
+	u8 Y;
+	i8 VelocityY;
+	u8 State;
+	u8 Timer;
+};
+
 enum PlayerState
 {
 	PLAYER_STATE_IDLE,
@@ -44,11 +55,19 @@ enum PlayerState
 	PLAYER_STATE_FALL,
 };
 
-#define SPT_PLAYER_HAIR 1
-#define SPT_PLAYER_SKIN 2
-#define SPT_PLAYER_CHAIR 3
+enum ElevatorState
+{
+	ELEVATOR_STATE_MOVE,
+	ELEVATOR_STATE_STAND,
+};
+
+#define SPT_PLAYER_HAIR 0
+#define SPT_PLAYER_SKIN 1
+#define SPT_PLAYER_CHAIR 2
 #define SPT_PLAYER_OUTLINE 16
-#define SPT_ELEVATOR 0
+#define SPT_ELEVATOR 3
+#define MAX_ELEVATOR 8
+#define RAILS_TILE_NUM 39
 
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
@@ -62,6 +81,12 @@ bool g_CurrentLightOn;
 struct PlayerDefinition g_Player;
 
 u8 g_PlayerState = PLAYER_STATE_IDLE;
+
+struct ElevatorDefinition g_Elevator[MAX_ELEVATOR];
+
+u8 g_ElevatorCount = 0;
+
+u8 g_FrameCounter = 0;
 
 //=============================================================================
 // DONNEES CONSTANTES (stockées dans le ROM)
@@ -99,6 +124,25 @@ const u8 g_NumPlayerFramesFall[] = {1, 2, 3, 4};
 //=============================================================================
 
 //-----------------------------------------------------------------------------
+
+// Récupère la tuile à la position indiquée
+u8 getTile(u8 x, u8 y)
+{
+	u8 tile = VDP_Peek_16K(g_ScreenLayoutLow + (y / 8) * 32 + (x / 8));
+	return tile;
+}
+
+// Point d'entrée du programme principal
+bool checkCollision(u8 x, u8 y)
+{
+	return getTile(x, y) >= 128;
+}
+
+bool checkRails(u8 x, u8 y)
+{
+	return getTile(x, y) == RAILS_TILE_NUM; // N° de la tuile des rails
+}
+
 // Allume ou éteint la lumière
 void activateLight(bool bActivate)
 {
@@ -118,19 +162,62 @@ void activateLight(bool bActivate)
 }
 
 //-----------------------------------------------------------------------------
+
+// initialise le personnage
+
+void initPlayer()
+{
+	g_Player.X = 100;
+	g_Player.Y = 103;
+	g_Player.VelocityY = 0;
+}
+
+void initElevator(u8 num, u8 x, u8 y)
+{
+	g_Elevator[num].X = x;
+	g_Elevator[num].Y = y;
+	g_Elevator[num].VelocityY = 1;
+	g_Elevator[num].State = ELEVATOR_STATE_MOVE;
+	g_Elevator[num].Timer = 0;
+
+	VDP_SetSpriteSM1(SPT_ELEVATOR + num, x, y, 4 * 4 * 12, COLOR_WHITE);
+}
+
+void updateElevator(u8 num)
+{
+	// si monte
+	if (g_Elevator[num].VelocityY < 0)
+	{
+		if (!checkRails(g_Elevator[num].X, g_Elevator[num].Y - 1))
+		{
+
+			g_Elevator[num].VelocityY = 1;
+			g_Elevator[num].State = ELEVATOR_STATE_STAND;
+		}
+	}
+	else
+	{
+		if (!checkRails(g_Elevator[num].X, g_Elevator[num].Y + 1))
+		{
+			g_Elevator[num].VelocityY = -1;
+			g_Elevator[num].State = ELEVATOR_STATE_STAND;
+		}
+	}
+
+	g_Elevator[num].Y += g_Elevator[num].VelocityY;
+	VDP_SetSpritePosition(SPT_ELEVATOR + num, g_Elevator[num].X, g_Elevator[num].Y - 9);
+}
 // Afficher une pièce
 void displayLevel(u8 levelIdx)
 {
 	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
+	g_ElevatorCount = 0;			// Initialisation du nombre d'élévateurs
 
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 
-	// Initialisation de la detection des élévateurs
-	bool bElevatorFound = FALSE;
-	VDP_HideSprite(SPT_ELEVATOR);
-
 	// Dessin de la pièce ligne par ligne
+	// I = ligne, J = colonne
 	for (u8 i = 0; i < g_Rooms[levelIdx].Height; ++i)
 	{
 		// Copie une ligne de donnée en VRAM
@@ -144,29 +231,33 @@ void displayLevel(u8 levelIdx)
 			{
 				// Positionnement du joueur centré sur la tuile trouvée
 				g_Player.X = (g_Rooms[levelIdx].X + j) * 8 - 4;
-				g_Player.Y = (g_Rooms[levelIdx].Y + i) * 8 - 9 - 24;
+				g_Player.Y = (g_Rooms[levelIdx].Y + i) * 8 - 9;
 			}
-			if (tile == 39 && !bElevatorFound) // Detection des rails pour placer les élévateurs
+			if ((tile == RAILS_TILE_NUM) && (g_ElevatorCount < MAX_ELEVATOR)) // Detection des rails pour placer les élévateurs
 			{
-				bElevatorFound = TRUE;
-				VDP_SetSpriteSM1(SPT_ELEVATOR, (g_Rooms[levelIdx].X + j) * 8, (g_Rooms[levelIdx].Y + i) * 8 - 9, 4 * 4 * 12, COLOR_WHITE);
+				if (g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * i + j - 1] != RAILS_TILE_NUM)
+				{
+					if (g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * (i - 1) + j] != RAILS_TILE_NUM)
+					{
+
+						initElevator(g_ElevatorCount, (g_Rooms[levelIdx].X + j) * 8, (g_Rooms[levelIdx].Y + i) * 8);
+						g_ElevatorCount++;
+					}
+				}
 			}
 		}
 	}
 
-	// Intialisation de la couleur des tuiles
+	// Initialisation de la couleur des tuiles
 	activateLight(FALSE);
+
+	for (u8 i = g_ElevatorCount; i < MAX_ELEVATOR; ++i)
+	{
+		VDP_HideSprite(SPT_ELEVATOR + i);
+	}
 
 	// Affichage du nom de la pièce
 	Print_DrawTextAt(g_Rooms[levelIdx].X - 1, 0, g_Rooms[levelIdx].Name);
-}
-
-//-----------------------------------------------------------------------------
-// Récupère la tuile à la position indiquée
-u8 getTile(u8 x, u8 y)
-{
-	u8 tile = VDP_Peek_16K(g_ScreenLayoutLow + (y / 8) * 32 + (x / 8));
-	return tile;
 }
 
 //-----------------------------------------------------------------------------
@@ -193,13 +284,6 @@ bool interact(u8 x, u8 y)
 		return FALSE;
 	}
 	return FALSE;
-}
-
-//-----------------------------------------------------------------------------
-// Point d'entrée du programme principal
-bool checkCollision(u8 x, u8 y)
-{
-	return getTile(x, y) >= 128;
 }
 
 //=============================================================================
@@ -235,9 +319,7 @@ void main()
 	VDP_SetSpriteSM1(SPT_PLAYER_SKIN, 0, 0, 4, COLOR_WHITE);
 	VDP_SetSpriteSM1(SPT_PLAYER_CHAIR, 0, 0, 8, COLOR_DARK_RED);
 	VDP_SetSpriteSM1(SPT_PLAYER_OUTLINE, 0, 0, 12, COLOR_BLACK);
-	g_Player.X = 100;
-	g_Player.Y = 103;
-	g_Player.VelocityY = 0;
+	initPlayer();
 
 	// Affichage de la pièce n°0 (la première)
 	displayLevel(0);
@@ -372,5 +454,14 @@ void main()
 		VDP_SetSprite(SPT_PLAYER_SKIN, g_Player.X, g_Player.Y - 1, baseNumPattern + 4);
 		VDP_SetSprite(SPT_PLAYER_CHAIR, g_Player.X, g_Player.Y + 8 - 1, baseNumPattern + 8);
 		VDP_SetSprite(SPT_PLAYER_OUTLINE, g_Player.X, g_Player.Y - 1, baseNumPattern + 12);
+		if (g_FrameCounter % 4 == 0)
+		{
+			for (u8 i = 0; i < g_ElevatorCount; i++)
+			{
+
+				updateElevator(i);
+			}
+		}
+		g_FrameCounter++;
 	}
 }

@@ -33,6 +33,7 @@ struct PlayerDefinition
 {
 	u8 X;
 	u8 Y;
+	i8 VelocityY;
 };
 
 enum PlayerState
@@ -236,11 +237,13 @@ void main()
 	VDP_SetSpriteSM1(SPT_PLAYER_OUTLINE, 0, 0, 12, COLOR_BLACK);
 	g_Player.X = 100;
 	g_Player.Y = 103;
+	g_Player.VelocityY = 0;
 
 	// Affichage de la pièce n°0 (la première)
 	displayLevel(0);
 
 	u8 count = 0;
+	bool alreadyJumping = FALSE;
 	while (1) // Pour un jeu en cartouche (ROM) on a pas besoin de gérer la sortie de la boucle principale
 	{
 		// Attente de la synchronisation avec le processeur graphique (à 50 ou 60 Hz)
@@ -289,39 +292,60 @@ void main()
 				g_PlayerState = PLAYER_STATE_ACTION;
 			}
 
+			// Test du bouton d'interaction
+			if (Keyboard_IsKeyPressed(KEY_UP) && !alreadyJumping)
+			{
+
+				alreadyJumping = TRUE;
+				g_Player.VelocityY = 0;
+				g_Player.Y -= 32;
+			}
+			else
+			{
+				alreadyJumping = FALSE;
+			}
+
 			// Test des collisions horizontales aux 4 coins du personnage
-			bool bCollide = false;
-			bool bFalling = true;
+			bool bCollide = FALSE;
+			bool bFalling = TRUE;
 
 			if (checkCollision(xTemp, yTemp))
-				bCollide = true;
+				bCollide = TRUE;
 			if (checkCollision(xTemp + 15, yTemp))
-				bCollide = true;
+				bCollide = TRUE;
 			if (checkCollision(xTemp + 15, yTemp + 15))
-				bCollide = true;
+				bCollide = TRUE;
 			if (checkCollision(xTemp, yTemp + 15))
-				bCollide = true;
+				bCollide = TRUE;
 
 			if (checkCollision(xTemp + 8, yTemp + 17))
-				bFalling = false;
+				bFalling = FALSE;
 
 			if (!bCollide) // Application du déplacement si aucune collision n'est détectée
 			{
 				g_Player.X = xTemp;
+
 				// VDP_SetColor(COLOR_BLACK);
 			}
 			else
 			{
+				g_Player.VelocityY = 0;
 				// VDP_SetColor(COLOR_DARK_RED);
 			}
 
 			if (bFalling)
 			{
-				g_Player.Y++;
+				if (g_Player.VelocityY < 8)
+					g_Player.VelocityY++;
+
+				g_Player.Y = yTemp + g_Player.VelocityY;
 				g_PlayerState = PLAYER_STATE_FALL;
 			}
 			else
 			{
+				g_Player.VelocityY = 0;
+				g_Player.Y &= 0b11111000;
+				// g_Player.Y--;
 			}
 		}
 
@@ -344,9 +368,9 @@ void main()
 		}
 
 		// Mise à jour de la position et du pattern des sprites du joueur (1 par couleur)
-		VDP_SetSprite(SPT_PLAYER_HAIR, g_Player.X, g_Player.Y - 8, baseNumPattern);
-		VDP_SetSprite(SPT_PLAYER_SKIN, g_Player.X, g_Player.Y, baseNumPattern + 4);
-		VDP_SetSprite(SPT_PLAYER_CHAIR, g_Player.X, g_Player.Y + 8, baseNumPattern + 8);
-		VDP_SetSprite(SPT_PLAYER_OUTLINE, g_Player.X, g_Player.Y, baseNumPattern + 12);
+		VDP_SetSprite(SPT_PLAYER_HAIR, g_Player.X, g_Player.Y - 8 - 1, baseNumPattern);
+		VDP_SetSprite(SPT_PLAYER_SKIN, g_Player.X, g_Player.Y - 1, baseNumPattern + 4);
+		VDP_SetSprite(SPT_PLAYER_CHAIR, g_Player.X, g_Player.Y + 8 - 1, baseNumPattern + 8);
+		VDP_SetSprite(SPT_PLAYER_OUTLINE, g_Player.X, g_Player.Y - 1, baseNumPattern + 12);
 	}
 }

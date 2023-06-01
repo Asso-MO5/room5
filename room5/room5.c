@@ -31,13 +31,14 @@ struct RoomDefinition
 // Structure des paramètres du joueur
 struct PlayerDefinition
 {
-	u8 X;
-	u8 Y;
-	i8 VelocityY;
+	u8 X; // Coordonnée X
+	u8 Y; // Coordonnée Y
+	i8 VelocityY; // Vélocité vertical
+	u8 State; // État du personnage
+	bool InAir; // Est-ce que le personnage est en train de sauter
 };
 
 // Structure des paramètres de l'élévateur
-
 struct ElevatorDefinition
 {
 	u8 X;
@@ -47,6 +48,7 @@ struct ElevatorDefinition
 	u8 Timer;
 };
 
+// Etats du joueur
 enum PlayerState
 {
 	PLAYER_STATE_IDLE,
@@ -55,19 +57,36 @@ enum PlayerState
 	PLAYER_STATE_FALL,
 };
 
+// Etats des élévateurs
 enum ElevatorState
 {
 	ELEVATOR_STATE_MOVE,
 	ELEVATOR_STATE_STAND,
 };
 
+// Configuration
+#define MAX_ELEVATOR 8
+
+// Numéros de tuile
+#define TILE_RAILS 39
+#define TILE_PHONE 73
+#define TILE_LIGHT1 74
+#define TILE_LIGHT2 76
+#define TILE_DOOR1 12
+#define TILE_DOOR2 13
+
+// Numéro de sprite
 #define SPT_PLAYER_HAIR 0
 #define SPT_PLAYER_SKIN 1
 #define SPT_PLAYER_CHAIR 2
 #define SPT_PLAYER_OUTLINE 16
 #define SPT_ELEVATOR 3
-#define MAX_ELEVATOR 8
-#define RAILS_TILE_NUM 39
+
+// Function prototypes
+void initElevator(u8 num, u8 x, u8 y);
+void updateElevator(u8 num);
+void initPlayer(u8 x, u8 y);
+void updatePlayer();
 
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
@@ -79,8 +98,6 @@ u8 g_CurrRoomIdx;
 bool g_CurrentLightOn;
 // Paramètres du joueur
 struct PlayerDefinition g_Player;
-
-u8 g_PlayerState = PLAYER_STATE_IDLE;
 
 struct ElevatorDefinition g_Elevator[MAX_ELEVATOR];
 
@@ -109,22 +126,47 @@ u8 g_FrameCounter = 0;
 
 // Liste des pièces et de leur caracteristiques
 const struct RoomDefinition g_Rooms[] = {
-		{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "Room 1", 1},
-		{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 2},
-		{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 2", 3},
-		{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 66", 0},
+	{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "Room 1",  1},
+	{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 2},
+	{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 2",  3},
+	{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 66", 0},
 };
 
-const u8 g_NumPlayerFramesMove[] = {1, 2, 3, 4};
-const u8 g_NumPlayerFramesAction[] = {5, 6, 7, 8, 9, 10, 9, 11};
-const u8 g_NumPlayerFramesFall[] = {1, 2, 3, 4};
+// Liste des frames d'animation du personnage
+const u8 g_PlayerFramesMove[]   = {1, 2, 3, 4};
+const u8 g_PlayerFramesAction[] = {5, 6, 7, 8, 9, 10, 9, 11};
+const u8 g_PlayerFramesFall[]   = {1, 2, 3, 4};
 
 //=============================================================================
 // FONCTIONS
 //=============================================================================
 
 //-----------------------------------------------------------------------------
+// Chargement des données graphique en mémoire vidéo (VRAM)
+void loadData()
+{
+	// Chargement du tileset du décor en VRAM
+	VDP_WriteVRAM_16K(g_Tiles_Patterns, g_ScreenPatternLow, sizeof(g_Tiles_Patterns));
+	VDP_WriteVRAM_16K(g_Tiles_Colors, g_ScreenColorLow, sizeof(g_Tiles_Colors));
 
+	// Initialisation de la font de caractère
+	Print_SetMode(PRINT_MODE_TEXT);
+	Print_SetFontEx(8, 8, 1, 1, ' ', '_', g_Tiles_Patterns + 192);
+	Print_Initialize();
+	g_PrintData.PatternOffset = 192;
+
+	// Chargement des formes des sprites
+	VDP_WriteVRAM_16K(g_SprtPlayer, g_SpritePatternLow, sizeof(g_SprtPlayer));
+	VDP_WriteVRAM_16K(g_SprtElevator, g_SpritePatternLow + 4 * 4 * 12 * 8, sizeof(g_SprtElevator));
+
+	// Creation des 4 sprites du personnage (leur position et leur pattern seront mis-à-jour à chaque frame dans la boucle principale)
+	VDP_SetSpriteSM1(SPT_PLAYER_HAIR, 0, 0, 0, COLOR_DARK_YELLOW);
+	VDP_SetSpriteSM1(SPT_PLAYER_SKIN, 0, 0, 4, COLOR_WHITE);
+	VDP_SetSpriteSM1(SPT_PLAYER_CHAIR, 0, 0, 8, COLOR_DARK_RED);
+	VDP_SetSpriteSM1(SPT_PLAYER_OUTLINE, 0, 0, 12, COLOR_BLACK);
+}
+
+//-----------------------------------------------------------------------------
 // Récupère la tuile à la position indiquée
 u8 getTile(u8 x, u8 y)
 {
@@ -132,17 +174,21 @@ u8 getTile(u8 x, u8 y)
 	return tile;
 }
 
+//-----------------------------------------------------------------------------
 // Point d'entrée du programme principal
 bool checkCollision(u8 x, u8 y)
 {
 	return getTile(x, y) >= 128;
 }
 
+//-----------------------------------------------------------------------------
+//
 bool checkRails(u8 x, u8 y)
 {
-	return getTile(x, y) == RAILS_TILE_NUM; // N° de la tuile des rails
+	return getTile(x, y) == TILE_RAILS; // N° de la tuile des rails
 }
 
+//-----------------------------------------------------------------------------
 // Allume ou éteint la lumière
 void activateLight(bool bActivate)
 {
@@ -162,56 +208,11 @@ void activateLight(bool bActivate)
 }
 
 //-----------------------------------------------------------------------------
-
-// initialise le personnage
-
-void initPlayer()
-{
-	g_Player.X = 100;
-	g_Player.Y = 103;
-	g_Player.VelocityY = 0;
-}
-
-void initElevator(u8 num, u8 x, u8 y)
-{
-	g_Elevator[num].X = x;
-	g_Elevator[num].Y = y;
-	g_Elevator[num].VelocityY = 1;
-	g_Elevator[num].State = ELEVATOR_STATE_MOVE;
-	g_Elevator[num].Timer = 0;
-
-	VDP_SetSpriteSM1(SPT_ELEVATOR + num, x, y, 4 * 4 * 12, COLOR_WHITE);
-}
-
-void updateElevator(u8 num)
-{
-	// si monte
-	if (g_Elevator[num].VelocityY < 0)
-	{
-		if (!checkRails(g_Elevator[num].X, g_Elevator[num].Y - 1))
-		{
-
-			g_Elevator[num].VelocityY = 1;
-			g_Elevator[num].State = ELEVATOR_STATE_STAND;
-		}
-	}
-	else
-	{
-		if (!checkRails(g_Elevator[num].X, g_Elevator[num].Y + 1))
-		{
-			g_Elevator[num].VelocityY = -1;
-			g_Elevator[num].State = ELEVATOR_STATE_STAND;
-		}
-	}
-
-	g_Elevator[num].Y += g_Elevator[num].VelocityY;
-	VDP_SetSpritePosition(SPT_ELEVATOR + num, g_Elevator[num].X, g_Elevator[num].Y - 9);
-}
 // Afficher une pièce
 void displayLevel(u8 levelIdx)
 {
 	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
-	g_ElevatorCount = 0;			// Initialisation du nombre d'élévateurs
+	g_ElevatorCount = 0; // Initialisation du nombre d'élévateurs
 
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
@@ -222,7 +223,7 @@ void displayLevel(u8 levelIdx)
 	{
 		// Copie une ligne de donnée en VRAM
 		VDP_WriteVRAM_16K(g_Rooms[levelIdx].Layout + g_Rooms[levelIdx].Width * i,
-											g_ScreenLayoutLow + 32 * (i + g_Rooms[levelIdx].Y) + (g_Rooms[levelIdx].X), g_Rooms[levelIdx].Width);
+			g_ScreenLayoutLow + 32 * (i + g_Rooms[levelIdx].Y) + (g_Rooms[levelIdx].X), g_Rooms[levelIdx].Width);
 
 		for (u8 j = 0; j < g_Rooms[levelIdx].Width; ++j)
 		{
@@ -230,16 +231,14 @@ void displayLevel(u8 levelIdx)
 			if (tile == 63) // Detection de la position initiale du joueur
 			{
 				// Positionnement du joueur centré sur la tuile trouvée
-				g_Player.X = (g_Rooms[levelIdx].X + j) * 8 - 4;
-				g_Player.Y = (g_Rooms[levelIdx].Y + i) * 8 - 9;
+				initPlayer((g_Rooms[levelIdx].X + j) * 8 - 4, (g_Rooms[levelIdx].Y + i) * 8 - 9);
 			}
-			if ((tile == RAILS_TILE_NUM) && (g_ElevatorCount < MAX_ELEVATOR)) // Detection des rails pour placer les élévateurs
+			if ((tile == TILE_RAILS) && (g_ElevatorCount < MAX_ELEVATOR)) // Detection des rails pour placer les élévateurs
 			{
-				if (g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * i + j - 1] != RAILS_TILE_NUM)
+				if (g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * i + j - 1] != TILE_RAILS)
 				{
-					if (g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * (i - 1) + j] != RAILS_TILE_NUM)
+					if (g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * (i - 1) + j] != TILE_RAILS)
 					{
-
 						initElevator(g_ElevatorCount, (g_Rooms[levelIdx].X + j) * 8, (g_Rooms[levelIdx].Y + i) * 8);
 						g_ElevatorCount++;
 					}
@@ -268,22 +267,212 @@ bool interact(u8 x, u8 y)
 	switch (tile)
 	{
 	// Telephone
-	case 73:
+	case TILE_PHONE:
 		Print_DrawTextAt(g_Rooms[g_CurrRoomIdx].X - 1, g_Rooms[g_CurrRoomIdx].Y + g_Rooms[g_CurrRoomIdx].Height + 2, "DRIIIING !!");
 		return TRUE;
+
 	// Light ON/OFF
-	case 74:
-	case 76:
+	case TILE_LIGHT1:
+	case TILE_LIGHT2:
 		activateLight(!g_CurrentLightOn);
 		return TRUE;
+
 	// Open door
-	case 12:
-	case 13:
+	case TILE_DOOR1:
+	case TILE_DOOR2:
 		displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
 		// TODO Animer porte qui s'ouvre et personnage qui passe
 		return FALSE;
 	}
 	return FALSE;
+}
+
+//=============================================================================
+// Update actors
+//=============================================================================
+
+//-----------------------------------------------------------------------------
+// Initialise un élévateur
+void initElevator(u8 num, u8 x, u8 y)
+{
+	struct ElevatorDefinition* elevator = &g_Elevator[num];
+
+	elevator->X = x;
+	elevator->Y = y;
+	elevator->VelocityY = 1;
+	elevator->State = ELEVATOR_STATE_MOVE;
+	elevator->Timer = 0;
+
+	VDP_SetSpriteSM1(SPT_ELEVATOR + num, x, y, 4 * 4 * 12, COLOR_WHITE);
+}
+
+//-----------------------------------------------------------------------------
+// Mise à jour d'un élévateur
+void updateElevator(u8 num)
+{
+	// if (!g_CurrentLightOn) // Ignorer la mise à jour quand la lumière est éteinte
+	// 	return;
+
+	struct ElevatorDefinition* elevator = &g_Elevator[num];
+	if (elevator->VelocityY < 0) // Si l'élévateur monte
+	{
+		if (!checkRails(elevator->X, elevator->Y - 1))
+		{
+
+			elevator->VelocityY = 1;
+			elevator->State = ELEVATOR_STATE_STAND;
+		}
+	}
+	else // Si l'élévateur descent
+	{
+		if (!checkRails(elevator->X, elevator->Y + 1))
+		{
+			elevator->VelocityY = -1;
+			elevator->State = ELEVATOR_STATE_STAND;
+		}
+	}
+
+	// Mise à jour de la position d'un élévateur
+	elevator->Y += elevator->VelocityY;
+	VDP_SetSpritePosition(SPT_ELEVATOR + num, elevator->X, elevator->Y - 9);
+}
+
+//-----------------------------------------------------------------------------
+// Initialise le personnage
+void initPlayer(u8 x, u8 y)
+{
+	g_Player.X = x;
+	g_Player.Y = y;
+	g_Player.VelocityY = 0;
+	g_Player.State = PLAYER_STATE_IDLE;
+	g_Player.InAir = TRUE;
+}
+
+//-----------------------------------------------------------------------------
+// Mise à jour du personnage
+void updatePlayer()
+{
+	if (g_Player.State == PLAYER_STATE_ACTION)
+	{
+		if (g_FrameCounter == 2 * 8)
+		{
+			// Interaction au milieu du personnage
+			if (interact(g_Player.X + 12, g_Player.Y + 4))
+			{
+				g_Player.State = PLAYER_STATE_IDLE;
+			}
+			else
+			{
+				// TODO mettre animation haussement épaule
+				g_Player.State = PLAYER_STATE_IDLE;
+			}
+		}
+	}
+	else
+	{
+		u8 xTemp = g_Player.X; // Sauvegarde de l'ancienne position du joueur
+		u8 yTemp = g_Player.Y;
+
+		// Test des boutons de déplacement gauche/droite
+		g_Player.State = PLAYER_STATE_IDLE;
+		if (Keyboard_IsKeyPressed(KEY_LEFT))
+		{
+			xTemp--;
+			g_Player.State = PLAYER_STATE_MOVE;
+		}
+		if (Keyboard_IsKeyPressed(KEY_RIGHT))
+		{
+			xTemp++;
+			g_Player.State = PLAYER_STATE_MOVE;
+		}
+
+		// Test du bouton d'interaction
+		if (Keyboard_IsKeyPressed(KEY_SPACE))
+		{
+			g_FrameCounter = 0;
+			g_Player.State = PLAYER_STATE_ACTION;
+		}
+
+		// Test du bouton d'interaction
+		if (Keyboard_IsKeyPressed(KEY_UP) && !g_Player.InAir)
+		{
+
+			g_Player.InAir = TRUE;
+			g_Player.VelocityY = 0;
+			g_Player.Y -= 32;
+		}
+		else
+		{
+			g_Player.InAir = FALSE;
+		}
+
+		// Test des collisions horizontales aux 4 coins du personnage
+		bool bCollide = FALSE;
+		bool bFalling = TRUE;
+
+		if (checkCollision(xTemp, yTemp))
+			bCollide = TRUE;
+		if (checkCollision(xTemp + 15, yTemp))
+			bCollide = TRUE;
+		if (checkCollision(xTemp + 15, yTemp + 15))
+			bCollide = TRUE;
+		if (checkCollision(xTemp, yTemp + 15))
+			bCollide = TRUE;
+
+		if (checkCollision(xTemp + 8, yTemp + 17))
+			bFalling = FALSE;
+
+		if (!bCollide) // Application du déplacement si aucune collision n'est détectée
+		{
+			g_Player.X = xTemp;
+
+			// VDP_SetColor(COLOR_BLACK);
+		}
+		else
+		{
+			g_Player.VelocityY = 0;
+			// VDP_SetColor(COLOR_DARK_RED);
+		}
+
+		if (bFalling)
+		{
+			if (g_Player.VelocityY < 8)
+				g_Player.VelocityY++;
+
+			g_Player.Y = yTemp + g_Player.VelocityY;
+			g_Player.State = PLAYER_STATE_FALL;
+		}
+		else
+		{
+			g_Player.VelocityY = 0;
+			g_Player.Y &= 0b11111000;
+			// g_Player.Y--;
+		}
+	}
+
+	// Calcul de la frame d'animation à jouer en fonction de l'état du joueur
+	u8 baseNumPattern = 0;
+	switch (g_Player.State)
+	{
+	case PLAYER_STATE_IDLE:
+		baseNumPattern = 0;
+		break;
+	case PLAYER_STATE_MOVE:
+		baseNumPattern = g_PlayerFramesMove[g_FrameCounter / 4 % 4] * 16;
+		break;
+	case PLAYER_STATE_ACTION:
+		baseNumPattern = g_PlayerFramesAction[g_FrameCounter / 2 % 8] * 16;
+		break;
+	case PLAYER_STATE_FALL:
+		baseNumPattern = g_PlayerFramesFall[g_FrameCounter / 4 % 4] * 16;
+		break;
+	}
+
+	// Mise à jour de la position et du pattern des sprites du joueur (1 par couleur)
+	VDP_SetSprite(SPT_PLAYER_HAIR,    g_Player.X, g_Player.Y - 9, baseNumPattern);
+	VDP_SetSprite(SPT_PLAYER_SKIN,    g_Player.X, g_Player.Y - 1, baseNumPattern + 4);
+	VDP_SetSprite(SPT_PLAYER_CHAIR,   g_Player.X, g_Player.Y + 7, baseNumPattern + 8);
+	VDP_SetSprite(SPT_PLAYER_OUTLINE, g_Player.X, g_Player.Y - 1, baseNumPattern + 12);
 }
 
 //=============================================================================
@@ -296,172 +485,32 @@ void main()
 {
 	// Initialisation de l'affichage
 	VDP_SetMode(VDP_MODE_SCREEN1); // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
-	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16);
+	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16); // Sprite de taille 16x16
 	VDP_SetColor(COLOR_BLACK); // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();
 
-	// Chargement du tileset du décor en VRAM
-	VDP_WriteVRAM_16K(g_Tiles_Patterns, g_ScreenPatternLow, sizeof(g_Tiles_Patterns));
-	VDP_WriteVRAM_16K(g_Tiles_Colors, g_ScreenColorLow, sizeof(g_Tiles_Colors));
-
-	// Initialisation de la font de caractère
-	Print_SetMode(PRINT_MODE_TEXT);
-	Print_SetFontEx(8, 8, 1, 1, ' ', '_', g_Tiles_Patterns + 192);
-	Print_Initialize();
-	g_PrintData.PatternOffset = 192;
-
-	// Chargement des formes des sprites
-	VDP_WriteVRAM_16K(g_SprtPlayer, g_SpritePatternLow, sizeof(g_SprtPlayer));
-	VDP_WriteVRAM_16K(g_SprtElevator, g_SpritePatternLow + 4 * 4 * 12 * 8, sizeof(g_SprtElevator));
-
-	// Creation des 4 sprites du personnage (leur position et leur pattern seront mis-à-jour à chaque frame dans la boucle principale)
-	VDP_SetSpriteSM1(SPT_PLAYER_HAIR, 0, 0, 0, COLOR_DARK_YELLOW);
-	VDP_SetSpriteSM1(SPT_PLAYER_SKIN, 0, 0, 4, COLOR_WHITE);
-	VDP_SetSpriteSM1(SPT_PLAYER_CHAIR, 0, 0, 8, COLOR_DARK_RED);
-	VDP_SetSpriteSM1(SPT_PLAYER_OUTLINE, 0, 0, 12, COLOR_BLACK);
-	initPlayer();
+	// Chargement des données graphique en mémoire vidéo (VRAM)
+	loadData();
+	
+	// Initialise le joueur
+	initPlayer(100, 103);
 
 	// Affichage de la pièce n°0 (la première)
 	displayLevel(0);
 
-	u8 count = 0;
-	bool alreadyJumping = FALSE;
 	while (1) // Pour un jeu en cartouche (ROM) on a pas besoin de gérer la sortie de la boucle principale
 	{
 		// Attente de la synchronisation avec le processeur graphique (à 50 ou 60 Hz)
 		Halt();
 
-		count++;
+		// Mise à jour du personnage
+		updatePlayer(); 
 
-		if (g_PlayerState == PLAYER_STATE_ACTION)
-		{
-			if (count == 2 * 8)
-			{
-				// Interaction au milieu du personnage
-				if (interact(g_Player.X + 12, g_Player.Y + 4))
-				{
-					g_PlayerState = PLAYER_STATE_IDLE;
-				}
-				else
-				{
-					// TODO mettre animation haussement épaule
-					g_PlayerState = PLAYER_STATE_IDLE;
-				}
-			}
-		}
-		else
-		{
-			u8 xTemp = g_Player.X; // Sauvegarde de l'ancienne position du joueur
-			u8 yTemp = g_Player.Y;
-
-			// Test des boutons de déplacement gauche/droite
-			g_PlayerState = PLAYER_STATE_IDLE;
-			if (Keyboard_IsKeyPressed(KEY_LEFT))
-			{
-				xTemp--;
-				g_PlayerState = PLAYER_STATE_MOVE;
-			}
-			if (Keyboard_IsKeyPressed(KEY_RIGHT))
-			{
-				xTemp++;
-				g_PlayerState = PLAYER_STATE_MOVE;
-			}
-
-			// Test du bouton d'interaction
-			if (Keyboard_IsKeyPressed(KEY_SPACE))
-			{
-				count = 0;
-				g_PlayerState = PLAYER_STATE_ACTION;
-			}
-
-			// Test du bouton d'interaction
-			if (Keyboard_IsKeyPressed(KEY_UP) && !alreadyJumping)
-			{
-
-				alreadyJumping = TRUE;
-				g_Player.VelocityY = 0;
-				g_Player.Y -= 32;
-			}
-			else
-			{
-				alreadyJumping = FALSE;
-			}
-
-			// Test des collisions horizontales aux 4 coins du personnage
-			bool bCollide = FALSE;
-			bool bFalling = TRUE;
-
-			if (checkCollision(xTemp, yTemp))
-				bCollide = TRUE;
-			if (checkCollision(xTemp + 15, yTemp))
-				bCollide = TRUE;
-			if (checkCollision(xTemp + 15, yTemp + 15))
-				bCollide = TRUE;
-			if (checkCollision(xTemp, yTemp + 15))
-				bCollide = TRUE;
-
-			if (checkCollision(xTemp + 8, yTemp + 17))
-				bFalling = FALSE;
-
-			if (!bCollide) // Application du déplacement si aucune collision n'est détectée
-			{
-				g_Player.X = xTemp;
-
-				// VDP_SetColor(COLOR_BLACK);
-			}
-			else
-			{
-				g_Player.VelocityY = 0;
-				// VDP_SetColor(COLOR_DARK_RED);
-			}
-
-			if (bFalling)
-			{
-				if (g_Player.VelocityY < 8)
-					g_Player.VelocityY++;
-
-				g_Player.Y = yTemp + g_Player.VelocityY;
-				g_PlayerState = PLAYER_STATE_FALL;
-			}
-			else
-			{
-				g_Player.VelocityY = 0;
-				g_Player.Y &= 0b11111000;
-				// g_Player.Y--;
-			}
-		}
-
-		// Calcul de la frame d'animation à jouer
-		u8 baseNumPattern = 0;
-		switch (g_PlayerState)
-		{
-		case PLAYER_STATE_IDLE:
-			baseNumPattern = 0;
-			break;
-		case PLAYER_STATE_MOVE:
-			baseNumPattern = g_NumPlayerFramesMove[count / 4 % 4] * 16;
-			break;
-		case PLAYER_STATE_ACTION:
-			baseNumPattern = g_NumPlayerFramesAction[count / 2 % 8] * 16;
-			break;
-		case PLAYER_STATE_FALL:
-			baseNumPattern = g_NumPlayerFramesFall[count / 4 % 4] * 16;
-			break;
-		}
-
-		// Mise à jour de la position et du pattern des sprites du joueur (1 par couleur)
-		VDP_SetSprite(SPT_PLAYER_HAIR, g_Player.X, g_Player.Y - 8 - 1, baseNumPattern);
-		VDP_SetSprite(SPT_PLAYER_SKIN, g_Player.X, g_Player.Y - 1, baseNumPattern + 4);
-		VDP_SetSprite(SPT_PLAYER_CHAIR, g_Player.X, g_Player.Y + 8 - 1, baseNumPattern + 8);
-		VDP_SetSprite(SPT_PLAYER_OUTLINE, g_Player.X, g_Player.Y - 1, baseNumPattern + 12);
+		// Mise à jour des élévateurs
 		if (g_FrameCounter % 4 == 0)
-		{
-			for (u8 i = 0; i < g_ElevatorCount; i++)
-			{
-
+			for (u8 i = 0; i < g_ElevatorCount; ++i)
 				updateElevator(i);
-			}
-		}
+
 		g_FrameCounter++;
 	}
 }

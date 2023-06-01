@@ -36,10 +36,8 @@
   "C_Cpp_Runner.useAddressSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
   "files.associations": {
-    "*.ejs": "html",
-    "sprt_elevator.h": "c",
-    "*.asm": "c"
-  },
+	"*.asm": "asz80"
+},
 "editor.insertSpaces": false,
 "editor.detectIndentation": false
 }

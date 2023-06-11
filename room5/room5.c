@@ -67,14 +67,21 @@ enum ElevatorState
 // Configuration
 #define MAX_ELEVATOR 8
 #define ELEVATOR_STAND 20
+#define EMPTY_ITEM 0
+#define INVENTORY_SIZE 4
 
 // Numéros de tuile
+#define TILE_START_POS 63
 #define TILE_RAILS 39
 #define TILE_PHONE 73
 #define TILE_LIGHT1 74
 #define TILE_LIGHT2 76
 #define TILE_DOOR1 12
 #define TILE_DOOR2 13
+#define TILE_FUSEBOX 82
+#define TILE_FUSEBOX_ON 75
+
+#define TILE_ITEM_FUSE 83
 
 // Numéro de sprite
 #define SPT_PLAYER_HAIR 0
@@ -97,6 +104,7 @@ void updatePlayer();
 u8 g_CurrRoomIdx;
 // Définie si la lumière est allumée ou non
 bool g_CurrentLightOn;
+bool g_CurrentElectricityOn;
 // Paramètres du joueur
 struct PlayerDefinition g_Player;
 
@@ -105,6 +113,8 @@ struct ElevatorDefinition g_Elevator[MAX_ELEVATOR];
 u8 g_ElevatorCount = 0;
 
 u8 g_FrameCounter = 0;
+
+u8 g_Inventory[INVENTORY_SIZE];
 
 //=============================================================================
 // DONNEES CONSTANTES (stockées dans le ROM)
@@ -167,12 +177,64 @@ void loadData()
 	VDP_SetSpriteSM1(SPT_PLAYER_OUTLINE, 0, 0, 12, COLOR_BLACK);
 }
 
+// Inventory
+void initInventory()
+{
+	for (u8 i = 0; i < INVENTORY_SIZE; i++)
+	{
+		g_Inventory[i] = EMPTY_ITEM;
+	}
+}
+
+bool addItemToInventory(u8 item)
+{
+	for (u8 i = 0; i < INVENTORY_SIZE; i++)
+	{
+		if (g_Inventory[i] == EMPTY_ITEM)
+		{
+			g_Inventory[i] = item;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+bool hasItem(u8 item)
+{
+	for (u8 i = 0; i < INVENTORY_SIZE; i++)
+	{
+		if (g_Inventory[i] == item)
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+bool removeItemFromInventory(u8 item)
+{
+	for (u8 i = 0; i < INVENTORY_SIZE; i++)
+	{
+		if (g_Inventory[i] == item)
+		{
+			g_Inventory[i] = EMPTY_ITEM;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 //-----------------------------------------------------------------------------
 // Récupère la tuile à la position indiquée
 u8 getTile(u8 x, u8 y)
 {
 	u8 tile = VDP_Peek_16K(g_ScreenLayoutLow + (y / 8) * 32 + (x / 8));
 	return tile;
+}
+
+void setTile(u8 x, u8 y, u8 tile)
+{
+	VDP_Poke_16K(tile, g_ScreenLayoutLow + (y / 8) * 32 + (x / 8));
 }
 
 //-----------------------------------------------------------------------------
@@ -193,6 +255,8 @@ bool checkRails(u8 x, u8 y)
 // Allume ou éteint la lumière
 void activateLight(bool bActivate)
 {
+	if (!g_CurrentElectricityOn && bActivate) // si il n'y a pas de courant, on ne peut pas allumer la lumière
+		return;
 	g_CurrentLightOn = bActivate; // Enregistrement de l’état de la lumière
 
 	// Change la couleur des tuiles du décor
@@ -209,11 +273,14 @@ void activateLight(bool bActivate)
 }
 
 //-----------------------------------------------------------------------------
+
 // Afficher une pièce
 void displayLevel(u8 levelIdx)
 {
+	initInventory();					// Pas possible de changer de pièce avec un objet dans les mains
 	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
 	g_ElevatorCount = 0;			// Initialisation du nombre d'élévateurs
+	g_CurrentElectricityOn = TRUE;
 
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
@@ -229,10 +296,14 @@ void displayLevel(u8 levelIdx)
 		for (u8 j = 0; j < g_Rooms[levelIdx].Width; ++j)
 		{
 			u8 tile = g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * i + j];
-			if (tile == 63) // Detection de la position initiale du joueur
+			if (tile == TILE_START_POS) // Detection de la position initiale du joueur
 			{
 				// Positionnement du joueur centré sur la tuile trouvée
 				initPlayer((g_Rooms[levelIdx].X + j) * 8 - 4, (g_Rooms[levelIdx].Y + i) * 8 - 9);
+			}
+			else if (tile == TILE_FUSEBOX)
+			{
+				g_CurrentElectricityOn = FALSE;
 			}
 			if ((tile == TILE_RAILS) && (g_ElevatorCount < MAX_ELEVATOR)) // Detection des rails pour placer les élévateurs
 			{
@@ -261,6 +332,7 @@ void displayLevel(u8 levelIdx)
 }
 
 //-----------------------------------------------------------------------------
+
 // Interagit à une position donnée
 bool interact(u8 x, u8 y)
 {
@@ -277,7 +349,19 @@ bool interact(u8 x, u8 y)
 	case TILE_LIGHT2:
 		activateLight(!g_CurrentLightOn);
 		return TRUE;
-
+	case TILE_ITEM_FUSE:
+		addItemToInventory(TILE_ITEM_FUSE);
+		setTile(x, y, 0);
+		return TRUE;
+	case TILE_FUSEBOX:
+		if (hasItem(TILE_ITEM_FUSE))
+		{
+			removeItemFromInventory(TILE_ITEM_FUSE);
+			g_CurrentElectricityOn = TRUE;
+			setTile(x, y, TILE_FUSEBOX_ON);
+			return TRUE;
+		}
+		return FALSE;
 	// Open door
 	case TILE_DOOR1:
 	case TILE_DOOR2:
@@ -372,6 +456,10 @@ void updatePlayer()
 		{
 			// Interaction au milieu du personnage
 			if (interact(g_Player.X + 12, g_Player.Y + 4))
+			{
+				g_Player.State = PLAYER_STATE_IDLE;
+			}
+			else if (interact(g_Player.X + 12, g_Player.Y + 12))
 			{
 				g_Player.State = PLAYER_STATE_IDLE;
 			}

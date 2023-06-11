@@ -95,6 +95,7 @@ void initElevator(u8 num, u8 x, u8 y);
 void updateElevator(u8 num);
 void initPlayer(u8 x, u8 y);
 void updatePlayer();
+void setTile(u8 x, u8 y, u8 tile);
 
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
@@ -193,9 +194,11 @@ bool addItemToInventory(u8 item)
 		if (g_Inventory[i] == EMPTY_ITEM)
 		{
 			g_Inventory[i] = item;
+			setTile(8 + i * 16, 192 - 8, item);
 			return TRUE;
 		}
 	}
+
 	return FALSE;
 }
 
@@ -218,6 +221,7 @@ bool removeItemFromInventory(u8 item)
 		if (g_Inventory[i] == item)
 		{
 			g_Inventory[i] = EMPTY_ITEM;
+			setTile(8 + i * 16, 192 - 8, 0);
 			return TRUE;
 		}
 	}

@@ -31,11 +31,11 @@ struct RoomDefinition
 // Structure des paramètres du joueur
 struct PlayerDefinition
 {
-	u8 X; // Coordonnée X
-	u8 Y; // Coordonnée Y
+	u8 X;					// Coordonnée X
+	u8 Y;					// Coordonnée Y
 	i8 VelocityY; // Vélocité vertical
-	u8 State; // État du personnage
-	bool InAir; // Est-ce que le personnage est en train de sauter
+	u8 State;			// État du personnage
+	bool InAir;		// Est-ce que le personnage est en train de sauter
 };
 
 // Structure des paramètres de l'élévateur
@@ -66,6 +66,7 @@ enum ElevatorState
 
 // Configuration
 #define MAX_ELEVATOR 8
+#define ELEVATOR_STAND 20
 
 // Numéros de tuile
 #define TILE_RAILS 39
@@ -126,16 +127,16 @@ u8 g_FrameCounter = 0;
 
 // Liste des pièces et de leur caracteristiques
 const struct RoomDefinition g_Rooms[] = {
-	{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "Room 1",  1},
-	{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 2},
-	{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 2",  3},
-	{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 66", 0},
+		{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "Room 1", 1},
+		{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 2},
+		{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 2", 3},
+		{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 66", 0},
 };
 
 // Liste des frames d'animation du personnage
-const u8 g_PlayerFramesMove[]   = {1, 2, 3, 4};
+const u8 g_PlayerFramesMove[] = {1, 2, 3, 4};
 const u8 g_PlayerFramesAction[] = {5, 6, 7, 8, 9, 10, 9, 11};
-const u8 g_PlayerFramesFall[]   = {1, 2, 3, 4};
+const u8 g_PlayerFramesFall[] = {1, 2, 3, 4};
 
 //=============================================================================
 // FONCTIONS
@@ -212,7 +213,7 @@ void activateLight(bool bActivate)
 void displayLevel(u8 levelIdx)
 {
 	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
-	g_ElevatorCount = 0; // Initialisation du nombre d'élévateurs
+	g_ElevatorCount = 0;			// Initialisation du nombre d'élévateurs
 
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
@@ -223,7 +224,7 @@ void displayLevel(u8 levelIdx)
 	{
 		// Copie une ligne de donnée en VRAM
 		VDP_WriteVRAM_16K(g_Rooms[levelIdx].Layout + g_Rooms[levelIdx].Width * i,
-			g_ScreenLayoutLow + 32 * (i + g_Rooms[levelIdx].Y) + (g_Rooms[levelIdx].X), g_Rooms[levelIdx].Width);
+											g_ScreenLayoutLow + 32 * (i + g_Rooms[levelIdx].Y) + (g_Rooms[levelIdx].X), g_Rooms[levelIdx].Width);
 
 		for (u8 j = 0; j < g_Rooms[levelIdx].Width; ++j)
 		{
@@ -295,7 +296,7 @@ bool interact(u8 x, u8 y)
 // Initialise un élévateur
 void initElevator(u8 num, u8 x, u8 y)
 {
-	struct ElevatorDefinition* elevator = &g_Elevator[num];
+	struct ElevatorDefinition *elevator = &g_Elevator[num];
 
 	elevator->X = x;
 	elevator->Y = y;
@@ -310,17 +311,27 @@ void initElevator(u8 num, u8 x, u8 y)
 // Mise à jour d'un élévateur
 void updateElevator(u8 num)
 {
-	// if (!g_CurrentLightOn) // Ignorer la mise à jour quand la lumière est éteinte
-	// 	return;
 
-	struct ElevatorDefinition* elevator = &g_Elevator[num];
+	if (!g_CurrentLightOn) // Ignorer la mise à jour quand la lumière est éteinte
+		return;
+
+	struct ElevatorDefinition *elevator = &g_Elevator[num];
+
+	if (elevator->Timer > 0)
+	{
+		elevator->Timer--;
+		return;
+	}
+
 	if (elevator->VelocityY < 0) // Si l'élévateur monte
 	{
 		if (!checkRails(elevator->X, elevator->Y - 1))
 		{
 
 			elevator->VelocityY = 1;
+			elevator->Timer = ELEVATOR_STAND;
 			elevator->State = ELEVATOR_STATE_STAND;
+			return;
 		}
 	}
 	else // Si l'élévateur descent
@@ -328,12 +339,15 @@ void updateElevator(u8 num)
 		if (!checkRails(elevator->X, elevator->Y + 1))
 		{
 			elevator->VelocityY = -1;
+			elevator->Timer = ELEVATOR_STAND;
 			elevator->State = ELEVATOR_STATE_STAND;
+			return;
 		}
 	}
 
 	// Mise à jour de la position d'un élévateur
 	elevator->Y += elevator->VelocityY;
+
 	VDP_SetSpritePosition(SPT_ELEVATOR + num, elevator->X, elevator->Y - 9);
 }
 
@@ -434,7 +448,29 @@ void updatePlayer()
 			// VDP_SetColor(COLOR_DARK_RED);
 		}
 
-		if (bFalling)
+		bool onElevator = FALSE;
+		if (checkRails(g_Player.X + 8, g_Player.Y + 16) || checkRails(g_Player.X + 8, g_Player.Y + 8))
+		{
+
+			for (u8 i = 0; i < g_ElevatorCount; ++i)
+			{
+				if ((g_Player.X < g_Elevator[i].X - 16) || (g_Player.X > g_Elevator[i].X + 16))
+					continue;
+
+				if ((g_Player.Y + 17 > g_Elevator[i].Y) && (g_Player.Y + 17 < g_Elevator[i].Y + 8))
+				{
+					g_Player.Y = g_Elevator[i].Y - 16;
+					bFalling = FALSE;
+					onElevator = TRUE;
+				}
+			}
+		}
+
+		if (onElevator)
+		{
+			g_Player.VelocityY = 0;
+		}
+		else if (bFalling)
 		{
 			if (g_Player.VelocityY < 8)
 				g_Player.VelocityY++;
@@ -469,9 +505,9 @@ void updatePlayer()
 	}
 
 	// Mise à jour de la position et du pattern des sprites du joueur (1 par couleur)
-	VDP_SetSprite(SPT_PLAYER_HAIR,    g_Player.X, g_Player.Y - 9, baseNumPattern);
-	VDP_SetSprite(SPT_PLAYER_SKIN,    g_Player.X, g_Player.Y - 1, baseNumPattern + 4);
-	VDP_SetSprite(SPT_PLAYER_CHAIR,   g_Player.X, g_Player.Y + 7, baseNumPattern + 8);
+	VDP_SetSprite(SPT_PLAYER_HAIR, g_Player.X, g_Player.Y - 9, baseNumPattern);
+	VDP_SetSprite(SPT_PLAYER_SKIN, g_Player.X, g_Player.Y - 1, baseNumPattern + 4);
+	VDP_SetSprite(SPT_PLAYER_CHAIR, g_Player.X, g_Player.Y + 7, baseNumPattern + 8);
 	VDP_SetSprite(SPT_PLAYER_OUTLINE, g_Player.X, g_Player.Y - 1, baseNumPattern + 12);
 }
 
@@ -484,32 +520,32 @@ void updatePlayer()
 void main()
 {
 	// Initialisation de l'affichage
-	VDP_SetMode(VDP_MODE_SCREEN1); // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
+	VDP_SetMode(VDP_MODE_SCREEN1);				 // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16); // Sprite de taille 16x16
-	VDP_SetColor(COLOR_BLACK); // Couleur de la bordure et de la couleur 0
+	VDP_SetColor(COLOR_BLACK);						 // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();
 
 	// Chargement des données graphique en mémoire vidéo (VRAM)
 	loadData();
-	
+
 	// Initialise le joueur
 	initPlayer(100, 103);
 
 	// Affichage de la pièce n°0 (la première)
-	displayLevel(0);
+	displayLevel(2);
 
 	while (1) // Pour un jeu en cartouche (ROM) on a pas besoin de gérer la sortie de la boucle principale
 	{
 		// Attente de la synchronisation avec le processeur graphique (à 50 ou 60 Hz)
 		Halt();
 
-		// Mise à jour du personnage
-		updatePlayer(); 
-
 		// Mise à jour des élévateurs
 		if (g_FrameCounter % 4 == 0)
 			for (u8 i = 0; i < g_ElevatorCount; ++i)
 				updateElevator(i);
+
+		// Mise à jour du personnage
+		updatePlayer();
 
 		g_FrameCounter++;
 	}

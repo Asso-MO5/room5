@@ -118,6 +118,7 @@ u8 g_Inventory[INVENTORY_SIZE];
 #include "data/level/level004.h"
 #include "data/level/level005.h"
 #include "data/level/level006.h"
+#include "data/level/level007.h"
 
 // Données des sprites de l'elevateur
 #include "data/sprt_elevator.h"
@@ -129,7 +130,8 @@ const struct RoomDefinition g_Rooms[] = {
 	{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 73", 3},
 	{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 24", 4},
 	{(32 - LEVEL005_WIDTH) / 2, (24 - LEVEL005_HEIGHT) / 2, LEVEL005_WIDTH, LEVEL005_HEIGHT, g_Level005, "Room 35", 5},
-	{(32 - LEVEL006_WIDTH) / 2, (24 - LEVEL006_HEIGHT) / 2, LEVEL006_WIDTH, LEVEL006_HEIGHT, g_Level006, "Room 66", 0},
+	{(32 - LEVEL006_WIDTH) / 2, (24 - LEVEL006_HEIGHT) / 2, LEVEL006_WIDTH, LEVEL006_HEIGHT, g_Level006, "Room 66", 6},
+	{(32 - LEVEL007_WIDTH) / 2, (24 - LEVEL007_HEIGHT) / 2, LEVEL007_WIDTH, LEVEL007_HEIGHT, g_Level007, "Room 57", 0},
 };
 
 // Liste des frames d'animation du personnage

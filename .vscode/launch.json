@@ -1,24 +1,16 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "C/C++ Runner: Debug Session",
-      "type": "cppdbg",
-      "request": "launch",
-      "args": [],
-      "stopAtEntry": false,
-      "externalConsole": true,
-      "cwd": "c:/Users/socia/Documents/www/MO5/room5",
-      "program": "c:/Users/socia/Documents/www/MO5/room5/build/Debug/outDebug",
-      "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
-    }
-  ]
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "emulicious-debugger",
+			"request": "launch",
+			"name": "Launch in Emulicious",
+			"program": "${workspaceFolder}/room5/emul/rom/Room5.rom",
+			"port": 58870,
+			"stopOnEntry": true
+		}
+	]
 }

@@ -64,32 +64,6 @@ enum ElevatorState
 	ELEVATOR_STATE_STAND,
 };
 
-// Configuration
-#define MAX_ELEVATOR 8
-#define ELEVATOR_STAND 20
-#define EMPTY_ITEM 0
-#define INVENTORY_SIZE 4
-
-// Numéros de tuile
-#define TILE_START_POS 63
-#define TILE_RAILS 39
-#define TILE_PHONE 73
-#define TILE_LIGHT1 74
-#define TILE_LIGHT2 76
-#define TILE_DOOR1 12
-#define TILE_DOOR2 13
-#define TILE_FUSEBOX 82
-#define TILE_FUSEBOX_ON 75
-
-#define TILE_ITEM_FUSE 83
-
-// Numéro de sprite
-#define SPT_PLAYER_HAIR 0
-#define SPT_PLAYER_SKIN 1
-#define SPT_PLAYER_CHAIR 2
-#define SPT_PLAYER_OUTLINE 16
-#define SPT_ELEVATOR 3
-
 // Function prototypes
 void initElevator(u8 num, u8 x, u8 y);
 void updateElevator(u8 num);
@@ -142,16 +116,20 @@ u8 g_Inventory[INVENTORY_SIZE];
 #include "data/level/level002.h"
 #include "data/level/level003.h"
 #include "data/level/level004.h"
+#include "data/level/level005.h"
+#include "data/level/level006.h"
 
 // Données des sprites de l'elevateur
 #include "data/sprt_elevator.h"
 
 // Liste des pièces et de leur caracteristiques
 const struct RoomDefinition g_Rooms[] = {
-		{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "Room 1", 1},
-		{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 2},
-		{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 2", 3},
-		{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 66", 0},
+	{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "Room 1", 1},
+	{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 2},
+	{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 73", 3},
+	{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 24", 4},
+	{(32 - LEVEL005_WIDTH) / 2, (24 - LEVEL005_HEIGHT) / 2, LEVEL005_WIDTH, LEVEL005_HEIGHT, g_Level005, "Room 35", 5},
+	{(32 - LEVEL006_WIDTH) / 2, (24 - LEVEL006_HEIGHT) / 2, LEVEL006_WIDTH, LEVEL006_HEIGHT, g_Level006, "Room 66", 0},
 };
 
 // Liste des frames d'animation du personnage
@@ -244,13 +222,12 @@ void initElevator(u8 num, u8 x, u8 y)
 // Mise à jour d'un élévateur
 void updateElevator(u8 num)
 {
-
 	if (!g_CurrentLightOn) // Ignorer la mise à jour quand la lumière est éteinte
 		return;
 
 	struct ElevatorDefinition *elevator = &g_Elevator[num];
 
-	if (elevator->Timer > 0)
+	if (elevator->Timer > 0) // Attendre que le timer d'attente tombe à 0
 	{
 		elevator->Timer--;
 		return;
@@ -315,6 +292,19 @@ void updatePlayer()
 			}
 		}
 	}
+	else if (Keyboard_IsKeyPressed(KEY_CTRL)) // Déplacement de debug (sans collision ni gravité)
+	{
+		if (Keyboard_IsKeyPressed(KEY_LEFT))
+			g_Player.X--;
+		else if (Keyboard_IsKeyPressed(KEY_RIGHT))
+			g_Player.X++;
+		if (Keyboard_IsKeyPressed(KEY_UP))
+			g_Player.Y--;
+		else if (Keyboard_IsKeyPressed(KEY_DOWN))
+			g_Player.Y++;
+
+		g_Player.VelocityY = 0;
+	}
 	else
 	{
 		u8 xTemp = g_Player.X; // Sauvegarde de l'ancienne position du joueur
@@ -322,12 +312,14 @@ void updatePlayer()
 
 		// Test des boutons de déplacement gauche/droite
 		g_Player.State = PLAYER_STATE_IDLE;
+
+		// Test des déplacements gauche/droite
 		if (Keyboard_IsKeyPressed(KEY_LEFT))
 		{
 			xTemp--;
 			g_Player.State = PLAYER_STATE_MOVE;
 		}
-		if (Keyboard_IsKeyPressed(KEY_RIGHT))
+		else if (Keyboard_IsKeyPressed(KEY_RIGHT))
 		{
 			xTemp++;
 			g_Player.State = PLAYER_STATE_MOVE;
@@ -340,23 +332,11 @@ void updatePlayer()
 			g_Player.State = PLAYER_STATE_ACTION;
 		}
 
-		// Test du bouton d'interaction
-		if (Keyboard_IsKeyPressed(KEY_UP) && !g_Player.InAir)
-		{
-
-			g_Player.InAir = TRUE;
-			g_Player.VelocityY = 0;
-			g_Player.Y -= 32;
-		}
-		else
-		{
-			g_Player.InAir = FALSE;
-		}
-
 		// Test des collisions horizontales aux 4 coins du personnage
 		bool bCollide = FALSE;
 		bool bFalling = TRUE;
 
+		// Test de collision
 		if (checkCollision(xTemp, yTemp))
 			bCollide = TRUE;
 		if (checkCollision(xTemp + 15, yTemp))
@@ -512,7 +492,7 @@ bool removeItemFromInventory(u8 item)
 // Allume ou éteint la lumière
 void activateLight(bool bActivate)
 {
-	if (!g_CurrentElectricityOn && bActivate) // si il n'y a pas de courant, on ne peut pas allumer la lumière
+	if (!g_CurrentElectricityOn && bActivate) // Si il n'y a pas de courant, on ne peut pas allumer la lumière
 		return;
 	g_CurrentLightOn = bActivate; // Enregistrement de l’état de la lumière
 
@@ -527,6 +507,10 @@ void activateLight(bool bActivate)
 	VDP_SetSpriteColorSM1(SPT_PLAYER_HAIR, g_CurrentLightOn ? COLOR_LIGHT_YELLOW : COLOR_LIGHT_BLUE);
 	VDP_SetSpriteColorSM1(SPT_PLAYER_SKIN, g_CurrentLightOn ? COLOR_WHITE : COLOR_CYAN);
 	VDP_SetSpriteColorSM1(SPT_PLAYER_CHAIR, g_CurrentLightOn ? COLOR_MEDIUM_RED : COLOR_DARK_BLUE);
+
+	// Change la couleur des élévateurs
+	for (u8 i = 0; i < g_ElevatorCount; ++i)
+		VDP_SetSpriteColorSM1(SPT_ELEVATOR + i, g_CurrentLightOn ? COLOR_WHITE : COLOR_CYAN);
 }
 
 //-----------------------------------------------------------------------------
@@ -594,18 +578,18 @@ bool interact(u8 x, u8 y)
 	u8 tile = getTile(x, y);
 	switch (tile)
 	{
-	// Telephone
+	// Téléphone
 	case TILE_PHONE:
 		Print_DrawTextAt(g_Rooms[g_CurrRoomIdx].X - 1, g_Rooms[g_CurrRoomIdx].Y + g_Rooms[g_CurrRoomIdx].Height + 2, "DRIIIING !!");
 		return TRUE;
 
-	// Lumière allumee/eteinte
+	// Lumière allumée/éteinte
 	case TILE_LIGHT1:
 	case TILE_LIGHT2:
 		activateLight(!g_CurrentLightOn);
 		return TRUE;
 
-	// Fusible et boit à fusible
+	// Fusible et boite à fusible
 	case TILE_ITEM_FUSE:
 		if(addItemToInventory(TILE_ITEM_FUSE))
 		{
@@ -623,7 +607,7 @@ bool interact(u8 x, u8 y)
 		}
 		return FALSE;
 
-	// Port de sortie
+	// Porte de sortie
 	case TILE_DOOR1:
 	case TILE_DOOR2:
 		displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);

@@ -9,7 +9,7 @@ if not exist %Dest% md %Dest%
 
 :: Export background tiles
 echo -- Export background tiles data...
-%MSXtk%\MSXimg.exe assets\tileset.png -out %Dest%/bg_tileset.h -mode gm1 --gm2unique :: -name g_Tiles -pos 0 0 -size 128 128
+%MSXtk%\MSXimg.exe assets\tileset.png -out %Dest%/bg_tileset.h -mode gm1 --tilesUnique -name g_Tiles -pos 0 0 -size 128 128
 
 :: Export player sprite
 echo -- Export player sprite data...

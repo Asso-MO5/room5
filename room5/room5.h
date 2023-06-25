@@ -21,7 +21,7 @@
 #define TILE_DOOR1		12
 #define TILE_DOOR2		13
 #define TILE_FUSEBOX	84
-#define TILE_FUSEBOX_ON 35
+#define TILE_FUSEBOX_ON 34
 
 #define TILE_ITEM_FUSE	99
 

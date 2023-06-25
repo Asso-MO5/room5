@@ -119,6 +119,7 @@ u8 g_Inventory[INVENTORY_SIZE];
 #include "data/level/level005.h"
 #include "data/level/level006.h"
 #include "data/level/level007.h"
+#include "data/level/level008.h"
 
 // Données des sprites de l'elevateur
 #include "data/sprt_elevator.h"
@@ -131,7 +132,8 @@ const struct RoomDefinition g_Rooms[] = {
 	{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 24", 4},
 	{(32 - LEVEL005_WIDTH) / 2, (24 - LEVEL005_HEIGHT) / 2, LEVEL005_WIDTH, LEVEL005_HEIGHT, g_Level005, "Room 35", 5},
 	{(32 - LEVEL006_WIDTH) / 2, (24 - LEVEL006_HEIGHT) / 2, LEVEL006_WIDTH, LEVEL006_HEIGHT, g_Level006, "Room 66", 6},
-	{(32 - LEVEL007_WIDTH) / 2, (24 - LEVEL007_HEIGHT) / 2, LEVEL007_WIDTH, LEVEL007_HEIGHT, g_Level007, "Room 57", 0},
+	{(32 - LEVEL007_WIDTH) / 2, (24 - LEVEL007_HEIGHT) / 2, LEVEL007_WIDTH, LEVEL007_HEIGHT, g_Level007, "Room 57", 7},
+	{(32 - LEVEL008_WIDTH) / 2, (24 - LEVEL008_HEIGHT) / 2, LEVEL008_WIDTH, LEVEL008_HEIGHT, g_Level008, "Room 108", 0},
 };
 
 // Liste des frames d'animation du personnage
@@ -296,6 +298,12 @@ void updatePlayer()
 	}
 	else if (Keyboard_IsKeyPressed(KEY_CTRL)) // Déplacement de debug (sans collision ni gravité)
 	{
+		if (Keyboard_IsKeyPressed(KEY_SPACE))
+		{
+			displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
+			while(Keyboard_IsKeyPressed(KEY_SPACE)) {}
+		}
+
 		if (Keyboard_IsKeyPressed(KEY_LEFT))
 			g_Player.X--;
 		else if (Keyboard_IsKeyPressed(KEY_RIGHT))

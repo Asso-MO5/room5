@@ -48,6 +48,25 @@ struct ElevatorDefinition
 	u8 Timer;
 };
 
+// Structure d'un objet visible sous condition
+struct VisibleObject
+{
+	u8 X;
+	u8 Y;
+	u8 Tile;
+	u8 ItemCondition;
+};
+
+// Conditions de visibilité d'un objet
+enum ItemCondition
+{
+	ITEM_COND_LIGHT_ON,
+	ITEM_COND_LIGHT_OFF,
+	ITEM_COND_ELECTRICITY_ON,
+	ITEM_COND_ELECTRICITY_OFF,
+	ITEM_COND_DISABLED,
+};
+
 // Etats du joueur
 enum PlayerState
 {
@@ -101,6 +120,10 @@ u8 g_FrameCounter = 0;
 
 u8 g_Inventory[INVENTORY_SIZE];
 
+u8 g_VisibleObjectCount = 0;
+
+struct VisibleObject g_VisibleObjects[MAX_VISIBLE_OBJECTS];
+
 //=============================================================================
 // DONNEES CONSTANTES (stockées dans le ROM)
 //=============================================================================
@@ -126,14 +149,14 @@ u8 g_Inventory[INVENTORY_SIZE];
 
 // Liste des pièces et de leur caracteristiques
 const struct RoomDefinition g_Rooms[] = {
-	{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "Room 1", 1},
-	{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 2},
-	{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 73", 3},
-	{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 24", 4},
-	{(32 - LEVEL005_WIDTH) / 2, (24 - LEVEL005_HEIGHT) / 2, LEVEL005_WIDTH, LEVEL005_HEIGHT, g_Level005, "Room 35", 5},
-	{(32 - LEVEL006_WIDTH) / 2, (24 - LEVEL006_HEIGHT) / 2, LEVEL006_WIDTH, LEVEL006_HEIGHT, g_Level006, "Room 66", 6},
-	{(32 - LEVEL007_WIDTH) / 2, (24 - LEVEL007_HEIGHT) / 2, LEVEL007_WIDTH, LEVEL007_HEIGHT, g_Level007, "Room 57", 7},
-	{(32 - LEVEL008_WIDTH) / 2, (24 - LEVEL008_HEIGHT) / 2, LEVEL008_WIDTH, LEVEL008_HEIGHT, g_Level008, "Room 108", 0},
+		{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "Room 1", 1},
+		{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 2},
+		{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 73", 3},
+		{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 24", 4},
+		{(32 - LEVEL005_WIDTH) / 2, (24 - LEVEL005_HEIGHT) / 2, LEVEL005_WIDTH, LEVEL005_HEIGHT, g_Level005, "Room 35", 5},
+		{(32 - LEVEL006_WIDTH) / 2, (24 - LEVEL006_HEIGHT) / 2, LEVEL006_WIDTH, LEVEL006_HEIGHT, g_Level006, "Room 66", 6},
+		{(32 - LEVEL007_WIDTH) / 2, (24 - LEVEL007_HEIGHT) / 2, LEVEL007_WIDTH, LEVEL007_HEIGHT, g_Level007, "Room 57", 7},
+		{(32 - LEVEL008_WIDTH) / 2, (24 - LEVEL008_HEIGHT) / 2, LEVEL008_WIDTH, LEVEL008_HEIGHT, g_Level008, "Room 108", 0},
 };
 
 // Liste des frames d'animation du personnage
@@ -190,6 +213,13 @@ void setTile(u8 x, u8 y, u8 tile)
 }
 
 //-----------------------------------------------------------------------------
+// remplace la tuile à la position indiquée par une tuile vide avec les coordonnées de la tuile
+void setTileByTileCoord(u8 x, u8 y, u8 tile)
+{
+	VDP_Poke_16K(tile, g_ScreenLayoutLow + y * 32 + x);
+}
+
+//-----------------------------------------------------------------------------
 // Test la collision à la position indiquée
 bool checkCollision(u8 x, u8 y)
 {
@@ -226,7 +256,7 @@ void initElevator(u8 num, u8 x, u8 y)
 // Mise à jour d'un élévateur
 void updateElevator(u8 num)
 {
-	if (!g_CurrentLightOn) // Ignorer la mise à jour quand la lumière est éteinte
+	if (!g_CurrentElectricityOn) // Ignorer la mise à jour quand il n'y a pas d'électricité
 		return;
 
 	struct ElevatorDefinition *elevator = &g_Elevator[num];
@@ -301,7 +331,9 @@ void updatePlayer()
 		if (Keyboard_IsKeyPressed(KEY_SPACE))
 		{
 			displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
-			while(Keyboard_IsKeyPressed(KEY_SPACE)) {}
+			while (Keyboard_IsKeyPressed(KEY_SPACE))
+			{
+			}
 		}
 
 		if (Keyboard_IsKeyPressed(KEY_LEFT))
@@ -521,6 +553,40 @@ void activateLight(bool bActivate)
 	// Change la couleur des élévateurs
 	for (u8 i = 0; i < g_ElevatorCount; ++i)
 		VDP_SetSpriteColorSM1(SPT_ELEVATOR + i, g_CurrentLightOn ? COLOR_WHITE : COLOR_CYAN);
+
+	for (u8 i = 0; i < g_VisibleObjectCount; ++i)
+	{
+		struct VisibleObject *pObj = &g_VisibleObjects[i];
+		u8 x = pObj->X;
+		u8 y = pObj->Y;
+		if (pObj->ItemCondition == ITEM_COND_LIGHT_ON)
+		{
+			setTileByTileCoord(x, y, bActivate ? pObj->Tile : EMPTY_ITEM);
+		}
+		if (pObj->ItemCondition == ITEM_COND_LIGHT_OFF)
+		{
+			setTileByTileCoord(x, y, bActivate ? EMPTY_ITEM : pObj->Tile);
+		}
+	}
+}
+
+void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
+{
+
+	if (g_VisibleObjectCount >= MAX_VISIBLE_OBJECTS)
+		return;
+
+	u8 targetItem = g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * (i + 1) + j];
+	struct VisibleObject *pObj = &g_VisibleObjects[g_VisibleObjectCount];
+	pObj->X = (g_Rooms[levelIdx].X + j);
+	pObj->Y = (g_Rooms[levelIdx].Y + (i + 1));
+	pObj->ItemCondition = condition;
+	pObj->Tile = targetItem;
+	g_VisibleObjectCount++;
+
+	u8 x = g_Rooms[levelIdx].X + j;
+	u8 y = g_Rooms[levelIdx].Y + i;
+	setTileByTileCoord(x, y, TILE_EMPTY);
 }
 
 //-----------------------------------------------------------------------------
@@ -531,6 +597,8 @@ void displayLevel(u8 levelIdx)
 	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
 	g_ElevatorCount = 0;			// Initialisation du nombre d'élévateurs
 	g_CurrentElectricityOn = TRUE;
+	g_VisibleObjectCount = 0;
+	bool fuseboxOnIsEnabled = FALSE;
 
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
@@ -549,11 +617,29 @@ void displayLevel(u8 levelIdx)
 			if (tile == TILE_START_POS) // Detection de la position initiale du joueur
 			{
 				// Positionnement du joueur centré sur la tuile trouvée
-				initPlayer((g_Rooms[levelIdx].X + j) * 8 - 4, (g_Rooms[levelIdx].Y + i) * 8 - 9);
+				u8 x = g_Rooms[levelIdx].X + j;
+				u8 y = g_Rooms[levelIdx].Y + i;
+
+				initPlayer(x * 8 - 4, y * 8 - 9);
+				setTileByTileCoord(x, y, TILE_EMPTY); // Effacement de la tuile de départ
 			}
+
+			else if (tile == TILE_SPE_LIGHT_ON)
+			{
+				addConditionalItem(levelIdx, i, j, ITEM_COND_LIGHT_ON);
+			}
+			else if (tile == TILE_SPE_LIGHT_OFF)
+			{
+				addConditionalItem(levelIdx, i, j, ITEM_COND_LIGHT_OFF);
+			}
+
 			else if (tile == TILE_FUSEBOX)
 			{
 				g_CurrentElectricityOn = FALSE;
+			}
+			else if (tile == TILE_FUSEBOX_ON)
+			{
+				fuseboxOnIsEnabled = TRUE;
 			}
 			if ((tile == TILE_RAILS) && (g_ElevatorCount < MAX_ELEVATOR)) // Detection des rails pour placer les élévateurs
 			{
@@ -569,6 +655,10 @@ void displayLevel(u8 levelIdx)
 		}
 	}
 
+	if (fuseboxOnIsEnabled)
+	{
+		g_CurrentElectricityOn = TRUE;
+	}
 	// Initialisation de la couleur des tuiles
 	activateLight(FALSE);
 
@@ -586,6 +676,24 @@ void displayLevel(u8 levelIdx)
 bool interact(u8 x, u8 y)
 {
 	u8 tile = getTile(x, y);
+
+	// objet que l'on peut ajouter à l'inventaire
+	if ((tile & 0b11110000) == 0b01100000)
+	{
+		if (addItemToInventory(tile))
+		{
+			setTile(x, y, 0);
+			for (u8 i = 0; i < g_VisibleObjectCount; ++i)
+			{
+				if ((g_VisibleObjects[i].X == x / 8) && (g_VisibleObjects[i].Y == y / 8))
+				{
+					g_VisibleObjects[i].ItemCondition = ITEM_COND_DISABLED;
+				}
+			}
+			return TRUE;
+		}
+	}
+
 	switch (tile)
 	{
 	// Téléphone
@@ -595,18 +703,27 @@ bool interact(u8 x, u8 y)
 
 	// Lumière allumée/éteinte
 	case TILE_LIGHT1:
-	case TILE_LIGHT2:
 		activateLight(!g_CurrentLightOn);
 		return TRUE;
-
-	// Fusible et boite à fusible
-	case TILE_ITEM_FUSE:
-		if(addItemToInventory(TILE_ITEM_FUSE))
+	case TILE_LIGHT2:
+		if (getTile(x - 8, y + 8) == TILE_CABLE)
 		{
-			setTile(x, y, 0);
+			activateLight(!g_CurrentLightOn);
 			return TRUE;
 		}
 		return FALSE;
+
+		// Scotch pour réparer les fils
+	case TILE_BROKE_CABLE:
+		if (hasItemInInventory(TILE_ITEM_TAPE))
+		{
+			removeItemFromInventory(TILE_ITEM_TAPE);
+			setTile(x, y, TILE_CABLE);
+			return TRUE;
+		}
+		return FALSE;
+
+	// Fusible et boite à fusible
 	case TILE_FUSEBOX:
 		if (hasItemInInventory(TILE_ITEM_FUSE))
 		{
@@ -617,6 +734,30 @@ bool interact(u8 x, u8 y)
 		}
 		return FALSE;
 
+	case TILE_FUSEBOX_ON:
+		if (addItemToInventory(TILE_ITEM_FUSE))
+		{
+			g_CurrentElectricityOn = FALSE;
+			setTile(x, y, TILE_FUSEBOX);
+			return TRUE;
+		}
+		return FALSE;
+
+	case TILE_LOCK_DOOR1:
+	case TILE_LOCK_DOOR2:
+
+		if (hasItemInInventory(TILE_ITEM_KEY_DOOR))
+		{
+			removeItemFromInventory(TILE_ITEM_KEY_DOOR);
+			u8 tileX = x;
+			if (tile == TILE_LOCK_DOOR2)
+				tileX -= 8;
+
+			setTile(tileX, y, TILE_DOOR1);
+			setTile(tileX + 8, y, TILE_DOOR2);
+			return TRUE;
+		}
+		return FALSE;
 	// Porte de sortie
 	case TILE_DOOR1:
 	case TILE_DOOR2:
@@ -648,7 +789,7 @@ void main()
 	initPlayer(100, 103);
 
 	// Affichage de la pièce n°0 (la première)
-	displayLevel(2);
+	displayLevel(0);
 
 	while (1) // Pour un jeu en cartouche (ROM) on a pas besoin de gérer la sortie de la boucle principale
 	{

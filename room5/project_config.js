@@ -22,16 +22,16 @@
 //*****************************************************************************
 
 //-- Project name (string). Will be use for output filename
-ProjName = 'room5';
+ProjName = 'room5'
 
 //-- List of project modules to build (array). If empty, ProjName will be added
-ProjModules = [ProjName];
+ProjModules = [ProjName]
 
 //-- Project segments base name (string). ProjName will be used if not defined
 // ProjSegments = "";
 
 //-- List of library modules to build (array)
-LibModules = ['system', 'bios', 'vdp', 'print', 'input', 'memory'];
+LibModules = ['system', 'bios', 'vdp', 'print', 'input', 'memory']
 
 //-- Additional sources to be compiled and linked with the project (array)
 // AddSources = [];
@@ -44,7 +44,7 @@ LibModules = ['system', 'bios', 'vdp', 'print', 'input', 'memory'];
 //   - 2P       MSX 2+
 //   - TR       MSX turbo R
 //   - 3        MSX 3 (reserved)
-Machine = '1';
+Machine = '1'
 
 //-- Target program format (string)
 //   - BIN              .bin    BASIC binary program (8000h~)
@@ -64,7 +64,7 @@ Machine = '1';
 //   - ROM_KONAMI_SCC   .rom    128KB ROM using Konami SCC mapper (8KB segments)
 //   - DOS1             .com    MSX-DOS 1 program (0100h~) No direct acces to Main-ROM
 //   - DOS2             .com    MSX-DOS 2 program (0100h~) No direct acces to Main-ROM
-Target = 'ROM_32K';
+Target = 'ROM_32K'
 
 //-- ROM mapper size (from 64 to 4096). Must be a multiple of 8 or 16 depending on the mapper type
 // ROMSize = 0;
@@ -104,13 +104,13 @@ Target = 'ROM_32K';
 //*******************************************************************************
 
 //-- Add application signature to binary data (boolean)
-AppSignature = true;
+AppSignature = true
 
 //-- Application company (*). Can be 2 character string or 16-bits integer (0~65535)
-AppCompany = 'MO';
+AppCompany = 'MO'
 
 //-- Application ID. Can be 2 character string or 16-bits integer (0~65535)
-AppID = 'R5';
+AppID = 'R5'
 
 //-- Application extra data (array). Comma-separated bytes starting with data size
 // AppExtra = [];
@@ -120,13 +120,13 @@ AppID = 'R5';
 //*******************************************************************************
 
 //-- Force to generate MSXgl static library even if 'msxgl.lib' already exist (boolean)
-BuildLibrary = true;
+BuildLibrary = false
 
 //-- Prepare program for debug (boolean)
-Debug = true;
+Debug = true
 
 //-- Move debug symbols to deployement folder (boolean)
-DebugSymbols = true;
+DebugSymbols = true
 
 //-- Assembler code optimizer (string)
 //   - None
@@ -157,7 +157,7 @@ DebugSymbols = true;
 //*****************************************************************************
 
 //-- Activate verbose mode and get more build information (boolean)
-Verbose = true;
+Verbose = true
 
 //-- Output build information to the standard console (boolean)
 // LogStdout = true;

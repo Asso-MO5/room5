@@ -14,14 +14,14 @@
 
 // Numéros de tuile
 #define TILE_START_POS	127
-#define TILE_RAILS		30
+#define TILE_RAILS		28
 #define TILE_PHONE		80
 #define TILE_LIGHT1		81
 #define TILE_LIGHT2		82
 #define TILE_DOOR1		12
 #define TILE_DOOR2		13
 #define TILE_FUSEBOX	84
-#define TILE_FUSEBOX_ON 34
+#define TILE_FUSEBOX_ON 32
 
 #define TILE_ITEM_FUSE	99
 

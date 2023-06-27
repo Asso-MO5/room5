@@ -1,6 +1,6 @@
 # Projet MSX
 
-Vous pouvez suivre l'avancé de ce projet sur la chaîne [Twitch](https://twtich.tv/mo5assoretro) de l'association [MO5.COM](https://mo5.com).
+Vous pouvez suivre l'avancé de ce projet sur la chaîne [Twitch](https://twitch.tv/mo5assoretro) de l'association [MO5.COM](https://mo5.com).
 
 <center>
 

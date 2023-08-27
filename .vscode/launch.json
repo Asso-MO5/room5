@@ -1,32 +1,19 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "emulicious-debugger",
-      "request": "launch",
-      "name": "Launch in Emulicious",
-      "program": "${workspaceFolder}/room5/emul/rom/Room5.rom",
-      "port": 58870,
-      "stopOnEntry": true
-    },
-    {
-      "name": "C/C++ Runner: Debug Session",
-      "type": "cppdbg",
-      "request": "launch",
-      "args": [],
-      "stopAtEntry": false,
-      "externalConsole": true,
-      "cwd": "c:/Users/socia/Documents/www/MO5/room5",
-      "program": "c:/Users/socia/Documents/www/MO5/room5/build/Debug/outDebug",
-      "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
-    }
-  ]
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "emulicious-debugger",
+			"request": "attach",
+			"name": "Attach to Emulicious",
+			"port": 58870
+		},
+		{
+			"type": "emulicious-debugger",
+			"request": "launch",
+			"name": "Launch in Emulicious",
+			"program": "${workspaceFolder}/room5/emul/rom/Room5.rom",
+			"port": 58870,
+			"stopOnEntry": true
+		}
+	]
 }

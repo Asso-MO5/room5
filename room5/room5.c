@@ -353,31 +353,37 @@ void initPlayer(u8 x, u8 y)
 bool isMoveRight()
 {
 	if (Keyboard_IsKeyPressed(KEY_RIGHT))
-	{
 		return TRUE;
-	}
+	if ((Joystick_Read(JOY_PORT_1) & JOY_INPUT_DIR_RIGHT) == 0)
+		return TRUE;
+	if ((Joystick_Read(JOY_PORT_2) & JOY_INPUT_DIR_RIGHT) == 0)
+		return TRUE;
 
-	return Joystick_GetDirection(JOY_PORT_1) == JOY_INPUT_DIR_RIGHT;
+	return FALSE;
 }
 
 bool isMoveLeft()
 {
 	if (Keyboard_IsKeyPressed(KEY_LEFT))
-	{
 		return TRUE;
-	}
+	if ((Joystick_Read(JOY_PORT_1) & JOY_INPUT_DIR_LEFT) == 0)
+		return TRUE;
+	if ((Joystick_Read(JOY_PORT_2) & JOY_INPUT_DIR_LEFT) == 0)
+		return TRUE;
 
-	return Joystick_GetDirection(JOY_PORT_1) == JOY_INPUT_DIR_LEFT;
+	return FALSE;
 }
 
 bool isInteract()
 {
 	if (Keyboard_IsKeyPressed(KEY_SPACE))
-	{
 		return TRUE;
-	}
-
-	return Joystick_IsButtonPushed(JOY_PORT_1, JOY_INPUT_TRIGGER_A);
+	if ((Joystick_Read(JOY_PORT_1) & JOY_INPUT_TRIGGER_A) == 0)
+		return TRUE;
+	if ((Joystick_Read(JOY_PORT_2) & JOY_INPUT_TRIGGER_A) == 0)
+		return TRUE;
+	
+	return FALSE;
 }
 
 //-----------------------------------------------------------------------------

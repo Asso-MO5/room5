@@ -1,21 +1,19 @@
-/**
-*
-* @description à ajouter dans les script ASEPRITE : https://community.aseprite.org/t/aseprite-scripts-collection/3599
-* Ce script permet d'exporter les données des niveaux dans des fichiers .h, qui se trouvent dans le dossier data/level
-**/
+-------------------------------------------------------------------------------
+--
+-- @description à ajouter dans les script ASEPRITE : https://community.aseprite.org/t/aseprite-scripts-collection/3599
+-- Ce script permet d'exporter les données des niveaux dans des fichiers .h, qui se trouvent dans le dossier data/level
+--
+-------------------------------------------------------------------------------
 
 -- Setup ----------------------------------------------------------------------
-
 local worldWidth = 4
 local worldHeight = 8
 local levelMaxWidth = 32
 local levelMaxHeight = 24
-local outputDir = "F:/www/MO5/room5/room5/data/level" -- <-- CHANGER LE CHEMIN, ICI C'EST POUR MON PC
+local outputDir = "F:/www/MO5/room5/room5/data/level" -- CHANGER LE CHEMIN, ICI C'EST POUR MON PC
 local doLog = true
 
-
 -- Initialize -----------------------------------------------------------------
-
 if doLog then print("Export - Start") end
 
 local spr = app.activeSprite

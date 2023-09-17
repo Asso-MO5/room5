@@ -57,6 +57,14 @@ struct VisibleObject
 	u8 ItemCondition;
 };
 
+// Structure d'un element visible si l'électricité est allumée
+struct ActiveObject
+{
+	u8 X;
+	u8 Y;
+	u8 Tile;
+};
+
 // Conditions de visibilité d'un objet
 enum ItemCondition
 {
@@ -122,7 +130,11 @@ u8 g_Inventory[INVENTORY_SIZE];
 
 u8 g_VisibleObjectCount = 0;
 
+u8 g_ElectricWallCount = 0;
+
 struct VisibleObject g_VisibleObjects[MAX_VISIBLE_OBJECTS];
+
+struct ActiveObject g_ElectricWalls[MAX_ELECTRIC_WALL];
 
 //=============================================================================
 // DONNEES CONSTANTES (stockées dans le ROM)
@@ -174,10 +186,10 @@ struct VisibleObject g_VisibleObjects[MAX_VISIBLE_OBJECTS];
 // Liste des pièces et de leur caracteristiques
 const struct RoomDefinition g_Rooms[] = {
 		//{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "Room 1", 1},
-		{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 2},
-		{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 1", 3},
-		{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 24", 4},
-		{(32 - LEVEL005_WIDTH) / 2, (24 - LEVEL005_HEIGHT) / 2, LEVEL005_WIDTH, LEVEL005_HEIGHT, g_Level005, "Room 35", 5},
+		{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 42", 1},
+		{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 1", 2},
+		{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 24", 3},
+		{(32 - LEVEL005_WIDTH) / 2, (24 - LEVEL005_HEIGHT) / 2, LEVEL005_WIDTH, LEVEL005_HEIGHT, g_Level005, "Room 35", 4},
 		{(32 - LEVEL006_WIDTH) / 2, (24 - LEVEL006_HEIGHT) / 2, LEVEL006_WIDTH, LEVEL006_HEIGHT, g_Level006, "Room 66", 6},
 		{(32 - LEVEL007_WIDTH) / 2, (24 - LEVEL007_HEIGHT) / 2, LEVEL007_WIDTH, LEVEL007_HEIGHT, g_Level007, "Room 57", 7},
 		{(32 - LEVEL008_WIDTH) / 2, (24 - LEVEL008_HEIGHT) / 2, LEVEL008_WIDTH, LEVEL008_HEIGHT, g_Level008, "Room 6", 8},
@@ -333,6 +345,38 @@ void initPlayer(u8 x, u8 y)
 	g_Player.InAir = TRUE;
 }
 
+// Contrôle du personnage
+
+bool isMoveRight()
+{
+	if (Keyboard_IsKeyPressed(KEY_RIGHT))
+	{
+		return TRUE;
+	}
+
+	return Joystick_GetDirection(JOY_PORT_1) == JOY_INPUT_DIR_RIGHT;
+}
+
+bool isMoveLeft()
+{
+	if (Keyboard_IsKeyPressed(KEY_LEFT))
+	{
+		return TRUE;
+	}
+
+	return Joystick_GetDirection(JOY_PORT_1) == JOY_INPUT_DIR_LEFT;
+}
+
+bool isInteract()
+{
+	if (Keyboard_IsKeyPressed(KEY_SPACE))
+	{
+		return TRUE;
+	}
+
+	return Joystick_IsButtonPushed(JOY_PORT_1, JOY_INPUT_TRIGGER_A);
+}
+
 //-----------------------------------------------------------------------------
 // Mise à jour du personnage
 void updatePlayer()
@@ -383,19 +427,19 @@ void updatePlayer()
 		g_Player.State = PLAYER_STATE_IDLE;
 
 		// Test des déplacements gauche/droite
-		if (Keyboard_IsKeyPressed(KEY_LEFT))
+		if (isMoveLeft())
 		{
 			xTemp--;
 			g_Player.State = PLAYER_STATE_MOVE;
 		}
-		else if (Keyboard_IsKeyPressed(KEY_RIGHT))
+		else if (isMoveRight())
 		{
 			xTemp++;
 			g_Player.State = PLAYER_STATE_MOVE;
 		}
 
 		// Test du bouton d'interaction
-		if (Keyboard_IsKeyPressed(KEY_SPACE))
+		if (isInteract())
 		{
 			g_FrameCounter = 0;
 			g_Player.State = PLAYER_STATE_ACTION;
@@ -597,6 +641,20 @@ void activateLight(bool bActivate)
 	}
 }
 
+void activateElectricity(bool bActivate)
+{
+
+	g_CurrentElectricityOn = bActivate; // Enregistrement de l’état de la lumière
+
+	for (u8 i = 0; i < g_ElectricWallCount; ++i)
+	{
+		struct ActiveObject *pObj = &g_ElectricWalls[i];
+		u8 x = pObj->X;
+		u8 y = pObj->Y;
+		setTileByTileCoord(x, y, bActivate ? pObj->Tile : EMPTY_ITEM);
+	}
+}
+
 void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
 {
 
@@ -616,6 +674,19 @@ void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
 	setTileByTileCoord(x, y, TILE_EMPTY);
 }
 
+void addElectricWall(u8 levelIdx, u8 i, u8 j)
+{
+
+	if (g_ElectricWallCount >= MAX_ELECTRIC_WALL)
+		return;
+
+	struct ActiveObject *pObj = &g_ElectricWalls[g_ElectricWallCount];
+	pObj->X = (g_Rooms[levelIdx].X + j);
+	pObj->Y = (g_Rooms[levelIdx].Y + i);
+	pObj->Tile = TILE_ELECTRIC_WALL;
+	g_ElectricWallCount++;
+}
+
 //-----------------------------------------------------------------------------
 // Afficher une pièce
 void displayLevel(u8 levelIdx)
@@ -623,9 +694,11 @@ void displayLevel(u8 levelIdx)
 	initInventory();					// Pas possible de changer de pièce avec un objet dans les mains
 	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
 	g_ElevatorCount = 0;			// Initialisation du nombre d'élévateurs
-	g_CurrentElectricityOn = TRUE;
+	activateElectricity(TRUE);
 	g_VisibleObjectCount = 0;
+	g_ElectricWallCount = 0;
 	bool fuseboxOnIsEnabled = FALSE;
+	u8 fuseBoxCount = 0;
 
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
@@ -662,11 +735,17 @@ void displayLevel(u8 levelIdx)
 
 			else if (tile == TILE_FUSEBOX)
 			{
-				g_CurrentElectricityOn = FALSE;
+				activateElectricity(FALSE);
+				fuseBoxCount++;
 			}
 			else if (tile == TILE_FUSEBOX_ON)
 			{
 				fuseboxOnIsEnabled = TRUE;
+				fuseBoxCount++;
+			}
+			else if (tile == TILE_ELECTRIC_WALL)
+			{
+				addElectricWall(levelIdx, i, j);
 			}
 			if ((tile == TILE_RAILS) && (g_ElevatorCount < MAX_ELEVATOR)) // Detection des rails pour placer les élévateurs
 			{
@@ -682,10 +761,8 @@ void displayLevel(u8 levelIdx)
 		}
 	}
 
-	if (fuseboxOnIsEnabled)
-	{
-		g_CurrentElectricityOn = TRUE;
-	}
+	activateElectricity(fuseboxOnIsEnabled || fuseBoxCount == 0);
+
 	// Initialisation de la couleur des tuiles
 	activateLight(FALSE);
 
@@ -755,7 +832,8 @@ bool interact(u8 x, u8 y)
 		if (hasItemInInventory(TILE_ITEM_FUSE))
 		{
 			removeItemFromInventory(TILE_ITEM_FUSE);
-			g_CurrentElectricityOn = TRUE;
+			activateElectricity(TRUE);
+
 			setTile(x, y, TILE_FUSEBOX_ON);
 			return TRUE;
 		}
@@ -764,7 +842,7 @@ bool interact(u8 x, u8 y)
 	case TILE_FUSEBOX_ON:
 		if (addItemToInventory(TILE_ITEM_FUSE))
 		{
-			g_CurrentElectricityOn = FALSE;
+			activateElectricity(FALSE);
 			setTile(x, y, TILE_FUSEBOX);
 			return TRUE;
 		}

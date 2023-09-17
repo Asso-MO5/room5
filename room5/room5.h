@@ -12,6 +12,7 @@
 #define EMPTY_ITEM 0
 #define INVENTORY_SIZE 4
 #define MAX_VISIBLE_OBJECTS 16
+#define MAX_ELECTRIC_WALL 16
 
 // Numéros de tuile
 #define TILE_EMPTY 0
@@ -27,6 +28,7 @@
 #define TILE_BROKE_CABLE 83
 #define TILE_FUSEBOX 84
 #define TILE_FUSEBOX_ON 85
+#define TILE_ELECTRIC_WALL 142
 
 #define TILE_ITEM_KEY_ONE 96
 #define TILE_ITEM_KEY_DOOR 97

@@ -6,6 +6,10 @@
 //  Program template
 // ─────────────────────────────────────────────────────────────────────────────
 
+//-----------------------------------------------------------------------------
+// Définitions
+//-----------------------------------------------------------------------------
+
 // Configuration
 #define MAX_ELEVATOR 8
 #define ELEVATOR_STAND 20
@@ -47,3 +51,78 @@
 #define SPT_PLAYER_CHAIR 2
 #define SPT_PLAYER_OUTLINE 16
 #define SPT_ELEVATOR 3
+
+//-----------------------------------------------------------------------------
+// Enumérations
+//-----------------------------------------------------------------------------
+
+// Conditions de visibilité d'un objet
+enum ItemCondition
+{
+	ITEM_COND_LIGHT_ON,
+	ITEM_COND_LIGHT_OFF,
+	ITEM_COND_ELECTRICITY_ON,
+	ITEM_COND_ELECTRICITY_OFF,
+	ITEM_COND_DISABLED,
+};
+
+// Etats du joueur
+enum PlayerState
+{
+	PLAYER_STATE_IDLE,
+	PLAYER_STATE_MOVE,
+	PLAYER_STATE_ACTION,
+	PLAYER_STATE_FALL,
+};
+
+// Etats des élévateurs
+enum ElevatorState
+{
+	ELEVATOR_STATE_MOVE,
+	ELEVATOR_STATE_STAND,
+};
+
+//-----------------------------------------------------------------------------
+// Structures de donnée
+//-----------------------------------------------------------------------------
+
+// Structure de description d'une pièce
+struct RoomDefinition
+{
+	u8 X;
+	u8 Y;
+	u8 Width;
+	u8 Height;
+	const u8 *Layout;
+	const c8 *Name;
+	u8 NextLvlIdx;
+};
+
+// Structure des paramètres du joueur
+struct PlayerDefinition
+{
+	u8 X;					// Coordonnée X
+	u8 Y;					// Coordonnée Y
+	i8 VelocityY; // Vélocité vertical
+	u8 State;			// État du personnage
+	bool InAir;		// Est-ce que le personnage est en train de sauter
+};
+
+// Structure des paramètres de l'élévateur
+struct ElevatorDefinition
+{
+	u8 X;
+	u8 Y;
+	i8 VelocityY;
+	u8 State;
+	u8 Timer;
+};
+
+// Structure d'un objet visible sous condition
+struct VisibleObject
+{
+	u8 X;
+	u8 Y;
+	u8 Tile;
+	u8 ItemCondition;
+};

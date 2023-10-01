@@ -17,6 +17,8 @@
 #define INVENTORY_SIZE 4
 #define MAX_VISIBLE_OBJECTS 16
 #define MAX_ELECTRIC_WALL 16
+#define RESET_DURATION 50
+#define MAX_SWITCH_TIMER 127
 
 // Numéros de tuile
 #define TILE_EMPTY 0
@@ -33,6 +35,10 @@
 #define TILE_FUSEBOX 84
 #define TILE_FUSEBOX_ON 85
 #define TILE_ELECTRIC_WALL 142
+#define TILE_NIGHT_LIGHT 44
+
+// Interrupteur Minuteur
+#define TILE_SWITCH_TIMER 90
 
 #define TILE_ITEM_KEY_ONE 96
 #define TILE_ITEM_KEY_DOOR 97
@@ -81,7 +87,6 @@ enum ElevatorState
 	ELEVATOR_STATE_MOVE,
 	ELEVATOR_STATE_STAND,
 };
-
 
 //-----------------------------------------------------------------------------
 // Structures de donnée
@@ -134,4 +139,11 @@ struct ActiveObject
 	u8 X;
 	u8 Y;
 	u8 Tile;
+};
+
+struct SwitchTimer
+{
+	u8 X;
+	u8 Y;
+	u8 Timer;
 };

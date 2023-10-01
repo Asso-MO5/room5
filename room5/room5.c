@@ -47,24 +47,30 @@ u8 g_CurrRoomIdx;
 // Définie si la lumière est active ou non
 bool g_CurrentLightOn;
 
-// Définie si l'electricité est active ou non
+// Définie si l'électricité est active ou non
 bool g_CurrentElectricityOn;
 
 // Paramètres du joueur
 struct PlayerDefinition g_Player;
 u8 g_Inventory[INVENTORY_SIZE]; // Contenu de l'inventaire
 
-// Variables pour la gestion des assensceurs automatiques
+// Variables pour la gestion des ascenseurs automatiques
 u8 g_ElevatorCount = 0;
 struct ElevatorDefinition g_Elevator[MAX_ELEVATOR];
 
-// Variables pour la gestion des objets visibiles sous conditions (uniquement le jour ou la nuit par ex.)
+// Variables pour la gestion des objets visibles sous conditions (uniquement le jour ou la nuit par ex.)
 u8 g_VisibleObjectCount = 0;
 struct VisibleObject g_VisibleObjects[MAX_VISIBLE_OBJECTS];
 
-// Variables pour la gestion des murs éléctriques (disparaissent quand plus d'éléctricité)
+// Variables pour la gestion des murs électriques (disparaissent quand plus d'électricité)
 u8 g_ElectricWallCount = 0;
 struct ActiveObject g_ElectricWalls[MAX_ELECTRIC_WALL];
+
+// Compte de RESET
+u8 g_ResetCount = 0;
+
+// Switch minuteur
+struct SwitchTimer g_SwitchTimer;
 
 //=============================================================================
 // DONNEES CONSTANTES (stockées dans le ROM)
@@ -316,6 +322,18 @@ bool isInteract()
 	return FALSE;
 }
 
+bool isCancel()
+{
+	if (Keyboard_IsKeyPressed(KEY_ESC))
+		return TRUE;
+	if ((Joystick_Read(JOY_PORT_1) & JOY_INPUT_TRIGGER_B) == 0)
+		return TRUE;
+	if ((Joystick_Read(JOY_PORT_2) & JOY_INPUT_TRIGGER_B) == 0)
+		return TRUE;
+
+	return FALSE;
+}
+
 //-----------------------------------------------------------------------------
 // Mise à jour du personnage
 void updatePlayer()
@@ -359,6 +377,7 @@ void updatePlayer()
 	}
 	else
 	{
+
 		u8 xTemp = g_Player.X; // Sauvegarde de l'ancienne position du joueur
 		u8 yTemp = g_Player.Y;
 
@@ -382,6 +401,21 @@ void updatePlayer()
 		{
 			g_FrameCounter = 0;
 			g_Player.State = PLAYER_STATE_ACTION;
+		}
+
+		if (isCancel())
+		{
+			g_ResetCount++;
+			if (g_ResetCount > RESET_DURATION)
+			{
+				g_ResetCount = 0;
+				displayLevel(g_CurrRoomIdx);
+				return;
+			}
+		}
+		else
+		{
+			g_ResetCount = 0;
 		}
 
 		// Test des collisions horizontales aux 4 coins du personnage
@@ -542,27 +576,25 @@ bool removeItemFromInventory(u8 item)
 
 //-----------------------------------------------------------------------------
 // Allume ou éteint la lumière
-void activateLight(bool bActivate)
+
+void lightRoom(bool bActivate)
 {
-	if (!g_CurrentElectricityOn && bActivate) // Si il n'y a pas de courant, on ne peut pas allumer la lumière
-		return;
-	g_CurrentLightOn = bActivate; // Enregistrement de l’état de la lumière
 
 	// Change la couleur des tuiles du décor
-	u8 firstCol = g_CurrentLightOn ? 0xA1 : 0x41;
-	u8 secondCol = g_CurrentLightOn ? 0xB1 : 0x51;
-	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow, 8);
+	u8 firstCol = bActivate ? 0xA1 : 0x41;
+	u8 secondCol = bActivate ? 0xB1 : 0x51;
+	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow, 7);
 	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow + (64 / 8), 8);
 	VDP_FillVRAM_16K(secondCol, g_ScreenColorLow + (128 / 8), 8);
 
 	// Change la couleur du personnage
-	VDP_SetSpriteColorSM1(SPT_PLAYER_HAIR, g_CurrentLightOn ? COLOR_LIGHT_YELLOW : COLOR_LIGHT_BLUE);
-	VDP_SetSpriteColorSM1(SPT_PLAYER_SKIN, g_CurrentLightOn ? COLOR_WHITE : COLOR_CYAN);
-	VDP_SetSpriteColorSM1(SPT_PLAYER_CHAIR, g_CurrentLightOn ? COLOR_MEDIUM_RED : COLOR_DARK_BLUE);
+	VDP_SetSpriteColorSM1(SPT_PLAYER_HAIR, bActivate ? COLOR_LIGHT_YELLOW : COLOR_LIGHT_BLUE);
+	VDP_SetSpriteColorSM1(SPT_PLAYER_SKIN, bActivate ? COLOR_WHITE : COLOR_CYAN);
+	VDP_SetSpriteColorSM1(SPT_PLAYER_CHAIR, bActivate ? COLOR_MEDIUM_RED : COLOR_DARK_BLUE);
 
 	// Change la couleur des élévateurs
 	for (u8 i = 0; i < g_ElevatorCount; ++i)
-		VDP_SetSpriteColorSM1(SPT_ELEVATOR + i, g_CurrentLightOn ? COLOR_WHITE : COLOR_CYAN);
+		VDP_SetSpriteColorSM1(SPT_ELEVATOR + i, bActivate ? COLOR_WHITE : COLOR_CYAN);
 
 	for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 	{
@@ -580,10 +612,19 @@ void activateLight(bool bActivate)
 	}
 }
 
+void activateLight(bool bActivate)
+{
+	g_CurrentLightOn = bActivate; // Enregistrement de l’état de la lumière
+	VDP_Poke_16K(bActivate ? COLOR_LIGHT_RED << 4 : COLOR_CYAN << 4, g_ScreenColorLow + 7);
+	if (g_CurrentElectricityOn)
+		lightRoom(bActivate);
+}
+
 void activateElectricity(bool bActivate)
 {
 
 	g_CurrentElectricityOn = bActivate; // Enregistrement de l’état de la lumière
+	lightRoom(g_CurrentLightOn && bActivate);
 
 	for (u8 i = 0; i < g_ElectricWallCount; ++i)
 	{
@@ -591,6 +632,20 @@ void activateElectricity(bool bActivate)
 		u8 x = pObj->X;
 		u8 y = pObj->Y;
 		setTileByTileCoord(x, y, bActivate ? pObj->Tile : EMPTY_ITEM);
+	}
+}
+
+void updateSwitchTimer()
+{
+	if (g_SwitchTimer.Timer > 0)
+	{
+		g_SwitchTimer.Timer--;
+
+		setTile(g_SwitchTimer.X, g_SwitchTimer.Y, TILE_SWITCH_TIMER + 3 - g_SwitchTimer.Timer / 32);
+		if (g_SwitchTimer.Timer == 0)
+		{
+			activateElectricity(FALSE);
+		}
 	}
 }
 
@@ -638,6 +693,7 @@ void displayLevel(u8 levelIdx)
 	g_ElectricWallCount = 0;
 	bool fuseboxOnIsEnabled = FALSE;
 	u8 fuseBoxCount = 0;
+	g_SwitchTimer.Timer = 0;
 
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
@@ -768,6 +824,8 @@ bool interact(u8 x, u8 y)
 
 	// Fusible et boite à fusible
 	case TILE_FUSEBOX:
+		if (g_SwitchTimer.Timer > 0)
+			return FALSE;
 		if (hasItemInInventory(TILE_ITEM_FUSE))
 		{
 			removeItemFromInventory(TILE_ITEM_FUSE);
@@ -808,6 +866,20 @@ bool interact(u8 x, u8 y)
 		displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
 		// TODO Animer porte qui s'ouvre et personnage qui passe
 		return FALSE;
+	case TILE_SWITCH_TIMER:
+	case TILE_SWITCH_TIMER + 1:
+	case TILE_SWITCH_TIMER + 2:
+	case TILE_SWITCH_TIMER + 3:
+		if (g_CurrentElectricityOn && g_SwitchTimer.Timer == 0)
+		{
+			return FALSE;
+		}
+
+		g_SwitchTimer.X = x;
+		g_SwitchTimer.Y = y;
+		g_SwitchTimer.Timer = MAX_SWITCH_TIMER;
+		activateElectricity(TRUE);
+		return TRUE;
 	}
 	return FALSE;
 }
@@ -821,9 +893,9 @@ bool interact(u8 x, u8 y)
 void main()
 {
 	// Initialisation de l'affichage
-	VDP_SetMode(VDP_MODE_SCREEN1);         // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
+	VDP_SetMode(VDP_MODE_SCREEN1);				 // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16); // Sprite de taille 16x16
-	VDP_SetColor(COLOR_BLACK);             // Couleur de la bordure et de la couleur 0
+	VDP_SetColor(COLOR_BLACK);						 // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();
 
 	// Chargement des données graphique en mémoire vidéo (VRAM)
@@ -842,9 +914,12 @@ void main()
 
 		// Mise à jour des élévateurs
 		if (g_FrameCounter % 4 == 0)
+		{
 			for (u8 i = 0; i < g_ElevatorCount; ++i)
 				updateElevator(i);
 
+			updateSwitchTimer();
+		}
 		// Mise à jour du personnage
 		Keyboard_Update();
 		updatePlayer();

@@ -17,81 +17,6 @@
 // DEFINITIONS
 //=============================================================================
 
-// Structure de description d'une pièce
-struct RoomDefinition
-{
-	u8 X;
-	u8 Y;
-	u8 Width;
-	u8 Height;
-	const u8 *Layout;
-	const c8 *Name;
-	u8 NextLvlIdx;
-};
-
-// Structure des paramètres du joueur
-struct PlayerDefinition
-{
-	u8 X;					// Coordonnée X
-	u8 Y;					// Coordonnée Y
-	i8 VelocityY; // Vélocité vertical
-	u8 State;			// État du personnage
-	bool InAir;		// Est-ce que le personnage est en train de sauter
-};
-
-// Structure des paramètres de l'élévateur
-struct ElevatorDefinition
-{
-	u8 X;
-	u8 Y;
-	i8 VelocityY;
-	u8 State;
-	u8 Timer;
-};
-
-// Structure d'un objet visible sous condition
-struct VisibleObject
-{
-	u8 X;
-	u8 Y;
-	u8 Tile;
-	u8 ItemCondition;
-};
-
-// Structure d'un element visible si l'électricité est allumée
-struct ActiveObject
-{
-	u8 X;
-	u8 Y;
-	u8 Tile;
-};
-
-// Conditions de visibilité d'un objet
-enum ItemCondition
-{
-	ITEM_COND_LIGHT_ON,
-	ITEM_COND_LIGHT_OFF,
-	ITEM_COND_ELECTRICITY_ON,
-	ITEM_COND_ELECTRICITY_OFF,
-	ITEM_COND_DISABLED,
-};
-
-// Etats du joueur
-enum PlayerState
-{
-	PLAYER_STATE_IDLE,
-	PLAYER_STATE_MOVE,
-	PLAYER_STATE_ACTION,
-	PLAYER_STATE_FALL,
-};
-
-// Etats des élévateurs
-enum ElevatorState
-{
-	ELEVATOR_STATE_MOVE,
-	ELEVATOR_STATE_STAND,
-};
-
 // Function prototypes
 void initElevator(u8 num, u8 x, u8 y);
 void updateElevator(u8 num);
@@ -113,28 +38,32 @@ bool interact(u8 x, u8 y);
 // VARIABLES GLOBALES (alloué en RAM)
 //=============================================================================
 
-// Index de la pièce courante
-u8 g_CurrRoomIdx;
-// Définie si la lumière est allumée ou non
-bool g_CurrentLightOn;
-bool g_CurrentElectricityOn;
-// Paramètres du joueur
-struct PlayerDefinition g_Player;
-
-struct ElevatorDefinition g_Elevator[MAX_ELEVATOR];
-
-u8 g_ElevatorCount = 0;
-
+// Compteur de frame pour les animations (incrémenté à chaque boucle principale ; 50/60 Hz)
 u8 g_FrameCounter = 0;
 
-u8 g_Inventory[INVENTORY_SIZE];
+// Index de la pièce courante
+u8 g_CurrRoomIdx;
 
+// Définie si la lumière est active ou non
+bool g_CurrentLightOn;
+
+// Définie si l'electricité est active ou non
+bool g_CurrentElectricityOn;
+
+// Paramètres du joueur
+struct PlayerDefinition g_Player;
+u8 g_Inventory[INVENTORY_SIZE]; // Contenu de l'inventaire
+
+// Variables pour la gestion des assensceurs automatiques
+u8 g_ElevatorCount = 0;
+struct ElevatorDefinition g_Elevator[MAX_ELEVATOR];
+
+// Variables pour la gestion des objets visibiles sous conditions (uniquement le jour ou la nuit par ex.)
 u8 g_VisibleObjectCount = 0;
-
-u8 g_ElectricWallCount = 0;
-
 struct VisibleObject g_VisibleObjects[MAX_VISIBLE_OBJECTS];
 
+// Variables pour la gestion des murs éléctriques (disparaissent quand plus d'éléctricité)
+u8 g_ElectricWallCount = 0;
 struct ActiveObject g_ElectricWalls[MAX_ELECTRIC_WALL];
 
 //=============================================================================
@@ -892,9 +821,9 @@ bool interact(u8 x, u8 y)
 void main()
 {
 	// Initialisation de l'affichage
-	VDP_SetMode(VDP_MODE_SCREEN1);				 // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
+	VDP_SetMode(VDP_MODE_SCREEN1);         // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16); // Sprite de taille 16x16
-	VDP_SetColor(COLOR_BLACK);						 // Couleur de la bordure et de la couleur 0
+	VDP_SetColor(COLOR_BLACK);             // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();
 
 	// Chargement des données graphique en mémoire vidéo (VRAM)
@@ -917,6 +846,7 @@ void main()
 				updateElevator(i);
 
 		// Mise à jour du personnage
+		Keyboard_Update();
 		updatePlayer();
 
 		g_FrameCounter++;

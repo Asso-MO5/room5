@@ -82,6 +82,7 @@ enum ElevatorState
 	ELEVATOR_STATE_STAND,
 };
 
+
 //-----------------------------------------------------------------------------
 // Structures de donnée
 //-----------------------------------------------------------------------------
@@ -125,4 +126,12 @@ struct VisibleObject
 	u8 Y;
 	u8 Tile;
 	u8 ItemCondition;
+};
+
+// Structure d'un element visible si l'électricité est allumée
+struct ActiveObject
+{
+	u8 X;
+	u8 Y;
+	u8 Tile;
 };

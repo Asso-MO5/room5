@@ -135,7 +135,7 @@
 #define INPUT_USE_ISR_PROTECTION	TRUE	// Disable interruptions while access PSG registers (needed if you use BIOS or access PSG in your own ISR)
 #define INPUT_JOY_UPDATE			TRUE	// Add function to update all joystick states at once
 // Key update handler
-#define INPUT_KB_UPDATE				FALSE	// Add function to update all keyboard rows at once
+#define INPUT_KB_UPDATE				TRUE	// Add function to update all keyboard rows at once
 #define INPUT_KB_UPDATE_MIN			0		// First row to update
 #define INPUT_KB_UPDATE_MAX			8		// Last row to update (10 for numerical-pad, 8 otherwise)
 

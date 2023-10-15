@@ -30,12 +30,16 @@
 #define TILE_LOCK_DOOR2 13
 #define TILE_DOOR1 70
 #define TILE_DOOR2 71
+#define TILE_DOOR_NUMBER_ONE 1
+#define TILE_DOOR_NUMBER_TWO 3
+#define TILE_DOOR_NUMBER_THREE 5
 #define TILE_CABLE 29
 #define TILE_BROKE_CABLE 83
 #define TILE_FUSEBOX 84
 #define TILE_FUSEBOX_ON 85
 #define TILE_ELECTRIC_WALL 142
 #define TILE_NIGHT_LIGHT 44
+#define TILE_ALPHABET_ONE 209
 
 // Interrupteur Minuteur
 #define TILE_SWITCH_TIMER 90
@@ -50,6 +54,9 @@
 #define TILE_START_POS 127
 #define TILE_SPE_LIGHT_OFF 125
 #define TILE_SPE_LIGHT_ON 126
+#define TILE_SPE_THEME_HOSPITAL 122
+#define TILE_SPE_THEME_ALIEN 123
+#define TILE_SPE_THEME_MATRIX 124
 
 // Numéro de sprite
 #define SPT_PLAYER_HAIR 0
@@ -86,6 +93,15 @@ enum ElevatorState
 {
 	ELEVATOR_STATE_MOVE,
 	ELEVATOR_STATE_STAND,
+};
+
+// direction de l'histoire
+
+enum StoryDirection
+{
+	THEME_HOSPITAL = 0,
+	THEME_ALIEN,
+	THEME_MATRIX, // follow the white rabbit
 };
 
 //-----------------------------------------------------------------------------

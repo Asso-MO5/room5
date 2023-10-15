@@ -18,21 +18,21 @@
 //=============================================================================
 
 // Function prototypes
-void initElevator(u8 num, u8 x, u8 y);
-void updateElevator(u8 num);
+u8 getTile(u8 x, u8 y);
+void setTile(u8 x, u8 y, u8 tile);
 void initPlayer(u8 x, u8 y);
 void updatePlayer();
 void initInventory();
-bool addItemToInventory(u8 item);
-bool hasItemInInventory(u8 item);
-bool removeItemFromInventory(u8 item);
-u8 getTile(u8 x, u8 y);
-void setTile(u8 x, u8 y, u8 tile);
-bool checkCollision(u8 x, u8 y);
-bool checkRails(u8 x, u8 y);
+void initElevator(u8 num, u8 x, u8 y);
+void updateElevator(u8 num);
 void activateLight(bool bActivate);
 void displayLevel(u8 levelIdx);
 bool interact(u8 x, u8 y);
+bool checkRails(u8 x, u8 y);
+bool checkCollision(u8 x, u8 y);
+bool addItemToInventory(u8 item);
+bool hasItemInInventory(u8 item);
+bool removeItemFromInventory(u8 item);
 
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
@@ -71,6 +71,10 @@ u8 g_ResetCount = 0;
 
 // Switch minuteur
 struct SwitchTimer g_SwitchTimer;
+
+// connexion des portes aux thèmes du jeu
+u8 g_DoorTheme[3];
+u8 g_DoorThemeCount[3];
 
 //=============================================================================
 // DONNEES CONSTANTES (stockées dans le ROM)
@@ -185,6 +189,12 @@ void loadData()
 u8 getTile(u8 x, u8 y)
 {
 	u8 tile = VDP_Peek_16K(g_ScreenLayoutLow + (y / 8) * 32 + (x / 8));
+	return tile;
+}
+
+u8 getTileByTileCoord(u8 x, u8 y)
+{
+	u8 tile = VDP_Peek_16K(g_ScreenLayoutLow + y * 32 + x);
 	return tile;
 }
 
@@ -575,6 +585,68 @@ bool removeItemFromInventory(u8 item)
 	return FALSE;
 }
 
+// ----------------------------------------------------------------------------
+
+void activateDoor(u8 tile, u8 x, u8 y)
+{
+
+	if (tile == TILE_DOOR2)
+	{
+		x -= 8;
+	}
+
+	y -= 16;
+	u8 roomNumber = getTile(x, y);
+	u8 doorIndex = 255;
+
+	// Print_SetPosition(0, 23);
+	// Print_DrawFormat("Room: %d, %d, %d,%d", tile, x, y, roomNumber);
+	switch (roomNumber)
+	{
+	case TILE_DOOR_NUMBER_ONE:
+		doorIndex = 0;
+		break;
+
+	case TILE_DOOR_NUMBER_TWO:
+		doorIndex = 1;
+		break;
+	case TILE_DOOR_NUMBER_THREE:
+		doorIndex = 2;
+		break;
+	}
+
+	if (doorIndex < 255)
+	{
+		// Nous sommes dans une room avec téléphone.
+		// On incrément le compte de doorTheme
+		g_DoorThemeCount[doorIndex]++;
+	}
+
+	displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
+}
+
+// .............................................................................
+void activatePhone()
+{
+	VDP_FillVRAM_16K(COLOR_WHITE << 4, g_ScreenColorLow + 192 / 8, 8);
+
+	for (u8 y = 0; y < 24; ++y)
+	{
+		for (u8 x = 0; x < 32; ++x)
+		{
+			u8 tile = getTileByTileCoord(x, y);
+			if (tile == TILE_LOCK_DOOR1)
+			{
+				setTileByTileCoord(x, y, TILE_DOOR1);
+			}
+			if (tile == TILE_LOCK_DOOR2)
+			{
+				setTileByTileCoord(x, y, TILE_DOOR2);
+			}
+		}
+	}
+}
+
 //.............................................................................
 // Gameplay
 //.............................................................................
@@ -703,6 +775,9 @@ void displayLevel(u8 levelIdx)
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 
+	// Masquage des textes par défaut
+	VDP_FillVRAM_16K(0, g_ScreenColorLow + 192 / 8, 8);
+
 	// Dessin de la pièce ligne par ligne
 	// I = ligne, J = colonne
 	for (u8 i = 0; i < g_Rooms[levelIdx].Height; ++i)
@@ -714,14 +789,37 @@ void displayLevel(u8 levelIdx)
 		for (u8 j = 0; j < g_Rooms[levelIdx].Width; ++j)
 		{
 			u8 tile = g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * i + j];
+			// Positionnement du joueur centré sur la tuile trouvée
+			u8 x = g_Rooms[levelIdx].X + j;
+			u8 y = g_Rooms[levelIdx].Y + i;
+
 			if (tile == TILE_START_POS) // Detection de la position initiale du joueur
 			{
-				// Positionnement du joueur centré sur la tuile trouvée
-				u8 x = g_Rooms[levelIdx].X + j;
-				u8 y = g_Rooms[levelIdx].Y + i;
-
 				initPlayer(x * 8 - 4, y * 8 - 9);
 				setTileByTileCoord(x, y, TILE_EMPTY); // Effacement de la tuile de départ
+			}
+			else if (tile == TILE_SPE_THEME_HOSPITAL)
+			{
+				u8 targetItem = g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * (i + 1) + j];
+				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
+				g_DoorTheme[indexDoor] = THEME_HOSPITAL;
+				setTileByTileCoord(x, y, TILE_EMPTY);
+			}
+
+			else if (tile == TILE_SPE_THEME_ALIEN)
+			{
+				u8 targetItem = g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * (i + 1) + j];
+				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
+				g_DoorTheme[indexDoor] = THEME_ALIEN;
+				setTileByTileCoord(x, y, TILE_EMPTY);
+			}
+
+			else if (tile == TILE_SPE_THEME_MATRIX)
+			{
+				u8 targetItem = g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * (i + 1) + j];
+				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
+				g_DoorTheme[indexDoor] = THEME_MATRIX;
+				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
 
 			else if (tile == TILE_SPE_LIGHT_ON)
@@ -771,8 +869,9 @@ void displayLevel(u8 levelIdx)
 		VDP_HideSprite(SPT_ELEVATOR + i);
 	}
 
-	// Affichage du nom de la pièce
-	Print_DrawTextAt(g_Rooms[levelIdx].X - 1, 0, g_Rooms[levelIdx].Name);
+	// Debug : affichage du tableau des thèmes
+	//	Print_SetPosition(g_Rooms[levelIdx].X - 1, 0);
+	//	Print_DrawFormat(" %i, %i, %i ", g_DoorThemeCount[0], g_DoorThemeCount[1], g_DoorThemeCount[2]);
 }
 
 //-----------------------------------------------------------------------------
@@ -802,7 +901,7 @@ bool interact(u8 x, u8 y)
 	{
 	// Téléphone
 	case TILE_PHONE:
-		Print_DrawTextAt(g_Rooms[g_CurrRoomIdx].X - 1, g_Rooms[g_CurrRoomIdx].Y + g_Rooms[g_CurrRoomIdx].Height + 2, "DRIIIING !!");
+		activatePhone();
 		return TRUE;
 
 	// Lumière allumée/éteinte
@@ -868,7 +967,9 @@ bool interact(u8 x, u8 y)
 	// Porte de sortie
 	case TILE_DOOR1:
 	case TILE_DOOR2:
-		displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
+		// Récuperer la tuile qui est 2 haut dessus
+
+		activateDoor(tile, x, y);
 		// TODO Animer porte qui s'ouvre et personnage qui passe
 		return FALSE;
 	case TILE_SWITCH_TIMER:
@@ -897,6 +998,7 @@ bool interact(u8 x, u8 y)
 // Point d'entrée du programme principal
 void main()
 {
+
 	// Initialisation de l'affichage
 	VDP_SetMode(VDP_MODE_SCREEN1);				 // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16); // Sprite de taille 16x16
@@ -905,6 +1007,10 @@ void main()
 
 	// Chargement des données graphique en mémoire vidéo (VRAM)
 	loadData();
+
+	g_DoorThemeCount[0] = 0;
+	g_DoorThemeCount[1] = 0;
+	g_DoorThemeCount[2] = 0;
 
 	// Initialise le joueur
 	initPlayer(100, 103);

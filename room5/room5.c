@@ -805,7 +805,7 @@ void activateLight(bool bActivate)
 }
 
 //-----------------------------------------------------------------------------
-// Active ou d"sactive l'élétricité
+// Active ou désactive l'électricité
 void activateElectricity(bool bActivate)
 {
 

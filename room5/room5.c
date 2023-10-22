@@ -67,6 +67,10 @@ struct VisibleObject g_VisibleObjects[MAX_VISIBLE_OBJECTS];
 u8 g_ElectricWallCount = 0;
 struct ActiveObject g_ElectricWalls[MAX_ELECTRIC_WALL];
 
+// Variables pour la gestion des murs non électriques (disparaissent quand il y a de l'électricité)
+u8 g_NotElectricWallCount = 0;
+struct ActiveObject g_NotElectricWalls[MAX_NOT_ELECTRIC_WALL];
+
 // Compte de RESET
 u8 g_ResetCount = 0;
 
@@ -126,38 +130,38 @@ u8 g_DoorThemeCount[3];
 
 // Liste des pièces et de leur caracteristiques
 const struct RoomDefinition g_Rooms[] = {
-	//{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "", 1},
-	{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "", 1 },
-	{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "", 2},
-	{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "", 3},
-	{(32 - LEVEL005_WIDTH) / 2, (24 - LEVEL005_HEIGHT) / 2, LEVEL005_WIDTH, LEVEL005_HEIGHT, g_Level005, "", 4},
-	{(32 - LEVEL006_WIDTH) / 2, (24 - LEVEL006_HEIGHT) / 2, LEVEL006_WIDTH, LEVEL006_HEIGHT, g_Level006, "", 5},
-	{(32 - LEVEL007_WIDTH) / 2, (24 - LEVEL007_HEIGHT) / 2, LEVEL007_WIDTH, LEVEL007_HEIGHT, g_Level007, "", 6},
-	{(32 - LEVEL008_WIDTH) / 2, (24 - LEVEL008_HEIGHT) / 2, LEVEL008_WIDTH, LEVEL008_HEIGHT, g_Level008, "", 7},
-	{(32 - LEVEL009_WIDTH) / 2, (24 - LEVEL009_HEIGHT) / 2, LEVEL009_WIDTH, LEVEL009_HEIGHT, g_Level009, "", 8},
-	{(32 - LEVEL010_WIDTH) / 2, (24 - LEVEL010_HEIGHT) / 2, LEVEL010_WIDTH, LEVEL010_HEIGHT, g_Level010, "", 9},
-	{(32 - LEVEL011_WIDTH) / 2, (24 - LEVEL011_HEIGHT) / 2, LEVEL011_WIDTH, LEVEL011_HEIGHT, g_Level011, "", 10},
-	{(32 - LEVEL012_WIDTH) / 2, (24 - LEVEL012_HEIGHT) / 2, LEVEL012_WIDTH, LEVEL012_HEIGHT, g_Level012, "", 11},
-	{(32 - LEVEL013_WIDTH) / 2, (24 - LEVEL013_HEIGHT) / 2, LEVEL013_WIDTH, LEVEL013_HEIGHT, g_Level013, "", 12},
-	{(32 - LEVEL014_WIDTH) / 2, (24 - LEVEL014_HEIGHT) / 2, LEVEL014_WIDTH, LEVEL014_HEIGHT, g_Level014, "", 13},
-	{(32 - LEVEL015_WIDTH) / 2, (24 - LEVEL015_HEIGHT) / 2, LEVEL015_WIDTH, LEVEL015_HEIGHT, g_Level015, "", 14},
-	{(32 - LEVEL016_WIDTH) / 2, (24 - LEVEL016_HEIGHT) / 2, LEVEL016_WIDTH, LEVEL016_HEIGHT, g_Level016, "", 15},
-	{(32 - LEVEL017_WIDTH) / 2, (24 - LEVEL017_HEIGHT) / 2, LEVEL017_WIDTH, LEVEL017_HEIGHT, g_Level017, "", 16},
-	{(32 - LEVEL018_WIDTH) / 2, (24 - LEVEL018_HEIGHT) / 2, LEVEL018_WIDTH, LEVEL018_HEIGHT, g_Level018, "", 17},
-	{(32 - LEVEL019_WIDTH) / 2, (24 - LEVEL019_HEIGHT) / 2, LEVEL019_WIDTH, LEVEL019_HEIGHT, g_Level019, "", 18},
-	{(32 - LEVEL020_WIDTH) / 2, (24 - LEVEL020_HEIGHT) / 2, LEVEL020_WIDTH, LEVEL020_HEIGHT, g_Level020, "", 19},
-	{(32 - LEVEL021_WIDTH) / 2, (24 - LEVEL021_HEIGHT) / 2, LEVEL021_WIDTH, LEVEL021_HEIGHT, g_Level008, "", 20},
-	{(32 - LEVEL022_WIDTH) / 2, (24 - LEVEL022_HEIGHT) / 2, LEVEL022_WIDTH, LEVEL022_HEIGHT, g_Level009, "", 21},
-	{(32 - LEVEL023_WIDTH) / 2, (24 - LEVEL023_HEIGHT) / 2, LEVEL023_WIDTH, LEVEL023_HEIGHT, g_Level010, "", 22},
-	{(32 - LEVEL024_WIDTH) / 2, (24 - LEVEL024_HEIGHT) / 2, LEVEL024_WIDTH, LEVEL024_HEIGHT, g_Level011, "", 23},
-	{(32 - LEVEL025_WIDTH) / 2, (24 - LEVEL025_HEIGHT) / 2, LEVEL025_WIDTH, LEVEL025_HEIGHT, g_Level012, "", 24},
-	{(32 - LEVEL026_WIDTH) / 2, (24 - LEVEL026_HEIGHT) / 2, LEVEL026_WIDTH, LEVEL026_HEIGHT, g_Level013, "", 25},
-	{(32 - LEVEL027_WIDTH) / 2, (24 - LEVEL027_HEIGHT) / 2, LEVEL027_WIDTH, LEVEL027_HEIGHT, g_Level014, "", 26},
-	{(32 - LEVEL028_WIDTH) / 2, (24 - LEVEL028_HEIGHT) / 2, LEVEL028_WIDTH, LEVEL028_HEIGHT, g_Level015, "", 27},
-	{(32 - LEVEL029_WIDTH) / 2, (24 - LEVEL029_HEIGHT) / 2, LEVEL029_WIDTH, LEVEL029_HEIGHT, g_Level016, "", 28},
-	{(32 - LEVEL030_WIDTH) / 2, (24 - LEVEL030_HEIGHT) / 2, LEVEL030_WIDTH, LEVEL030_HEIGHT, g_Level017, "", 29},
-	{(32 - LEVEL031_WIDTH) / 2, (24 - LEVEL031_HEIGHT) / 2, LEVEL031_WIDTH, LEVEL031_HEIGHT, g_Level018, "", 30},
-	{(32 - LEVEL032_WIDTH) / 2, (24 - LEVEL032_HEIGHT) / 2, LEVEL032_WIDTH, LEVEL032_HEIGHT, g_Level019, "", 0},
+		//{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "", 1},
+		{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "", 1},
+		{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "", 2},
+		{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "", 3},
+		{(32 - LEVEL005_WIDTH) / 2, (24 - LEVEL005_HEIGHT) / 2, LEVEL005_WIDTH, LEVEL005_HEIGHT, g_Level005, "", 4},
+		{(32 - LEVEL006_WIDTH) / 2, (24 - LEVEL006_HEIGHT) / 2, LEVEL006_WIDTH, LEVEL006_HEIGHT, g_Level006, "", 5},
+		{(32 - LEVEL007_WIDTH) / 2, (24 - LEVEL007_HEIGHT) / 2, LEVEL007_WIDTH, LEVEL007_HEIGHT, g_Level007, "", 6},
+		{(32 - LEVEL008_WIDTH) / 2, (24 - LEVEL008_HEIGHT) / 2, LEVEL008_WIDTH, LEVEL008_HEIGHT, g_Level008, "", 7},
+		{(32 - LEVEL009_WIDTH) / 2, (24 - LEVEL009_HEIGHT) / 2, LEVEL009_WIDTH, LEVEL009_HEIGHT, g_Level009, "", 8},
+		{(32 - LEVEL010_WIDTH) / 2, (24 - LEVEL010_HEIGHT) / 2, LEVEL010_WIDTH, LEVEL010_HEIGHT, g_Level010, "", 9},
+		{(32 - LEVEL011_WIDTH) / 2, (24 - LEVEL011_HEIGHT) / 2, LEVEL011_WIDTH, LEVEL011_HEIGHT, g_Level011, "", 10},
+		{(32 - LEVEL012_WIDTH) / 2, (24 - LEVEL012_HEIGHT) / 2, LEVEL012_WIDTH, LEVEL012_HEIGHT, g_Level012, "", 11},
+		{(32 - LEVEL013_WIDTH) / 2, (24 - LEVEL013_HEIGHT) / 2, LEVEL013_WIDTH, LEVEL013_HEIGHT, g_Level013, "", 12},
+		{(32 - LEVEL014_WIDTH) / 2, (24 - LEVEL014_HEIGHT) / 2, LEVEL014_WIDTH, LEVEL014_HEIGHT, g_Level014, "", 13},
+		{(32 - LEVEL015_WIDTH) / 2, (24 - LEVEL015_HEIGHT) / 2, LEVEL015_WIDTH, LEVEL015_HEIGHT, g_Level015, "", 14},
+		{(32 - LEVEL016_WIDTH) / 2, (24 - LEVEL016_HEIGHT) / 2, LEVEL016_WIDTH, LEVEL016_HEIGHT, g_Level016, "", 15},
+		{(32 - LEVEL017_WIDTH) / 2, (24 - LEVEL017_HEIGHT) / 2, LEVEL017_WIDTH, LEVEL017_HEIGHT, g_Level017, "", 16},
+		{(32 - LEVEL018_WIDTH) / 2, (24 - LEVEL018_HEIGHT) / 2, LEVEL018_WIDTH, LEVEL018_HEIGHT, g_Level018, "", 17},
+		{(32 - LEVEL019_WIDTH) / 2, (24 - LEVEL019_HEIGHT) / 2, LEVEL019_WIDTH, LEVEL019_HEIGHT, g_Level019, "", 18},
+		{(32 - LEVEL020_WIDTH) / 2, (24 - LEVEL020_HEIGHT) / 2, LEVEL020_WIDTH, LEVEL020_HEIGHT, g_Level020, "", 19},
+		{(32 - LEVEL021_WIDTH) / 2, (24 - LEVEL021_HEIGHT) / 2, LEVEL021_WIDTH, LEVEL021_HEIGHT, g_Level008, "", 20},
+		{(32 - LEVEL022_WIDTH) / 2, (24 - LEVEL022_HEIGHT) / 2, LEVEL022_WIDTH, LEVEL022_HEIGHT, g_Level009, "", 21},
+		{(32 - LEVEL023_WIDTH) / 2, (24 - LEVEL023_HEIGHT) / 2, LEVEL023_WIDTH, LEVEL023_HEIGHT, g_Level010, "", 22},
+		{(32 - LEVEL024_WIDTH) / 2, (24 - LEVEL024_HEIGHT) / 2, LEVEL024_WIDTH, LEVEL024_HEIGHT, g_Level011, "", 23},
+		{(32 - LEVEL025_WIDTH) / 2, (24 - LEVEL025_HEIGHT) / 2, LEVEL025_WIDTH, LEVEL025_HEIGHT, g_Level012, "", 24},
+		{(32 - LEVEL026_WIDTH) / 2, (24 - LEVEL026_HEIGHT) / 2, LEVEL026_WIDTH, LEVEL026_HEIGHT, g_Level013, "", 25},
+		{(32 - LEVEL027_WIDTH) / 2, (24 - LEVEL027_HEIGHT) / 2, LEVEL027_WIDTH, LEVEL027_HEIGHT, g_Level014, "", 26},
+		{(32 - LEVEL028_WIDTH) / 2, (24 - LEVEL028_HEIGHT) / 2, LEVEL028_WIDTH, LEVEL028_HEIGHT, g_Level015, "", 27},
+		{(32 - LEVEL029_WIDTH) / 2, (24 - LEVEL029_HEIGHT) / 2, LEVEL029_WIDTH, LEVEL029_HEIGHT, g_Level016, "", 28},
+		{(32 - LEVEL030_WIDTH) / 2, (24 - LEVEL030_HEIGHT) / 2, LEVEL030_WIDTH, LEVEL030_HEIGHT, g_Level017, "", 29},
+		{(32 - LEVEL031_WIDTH) / 2, (24 - LEVEL031_HEIGHT) / 2, LEVEL031_WIDTH, LEVEL031_HEIGHT, g_Level018, "", 30},
+		{(32 - LEVEL032_WIDTH) / 2, (24 - LEVEL032_HEIGHT) / 2, LEVEL032_WIDTH, LEVEL032_HEIGHT, g_Level019, "", 0},
 };
 
 // Liste des frames d'animation du personnage
@@ -244,7 +248,7 @@ bool checkRails(u8 x, u8 y)
 
 //.............................................................................
 //
-//  GESTION DES CONTRÔLEURS (clavier et joysticks) 
+//  GESTION DES CONTRÔLEURS (clavier et joysticks)
 //
 //.............................................................................
 
@@ -577,7 +581,7 @@ void initElevator(u8 num, u8 x, u8 y)
 	elevator->State = ELEVATOR_STATE_MOVE;
 	elevator->Timer = 0;
 
-	VDP_SetSpriteSM1(SPT_ELEVATOR + num, x, y, 4 * 4 * 12, COLOR_WHITE);
+	VDP_SetSpriteSM1(SPT_ELEVATOR + num, x, y - 9, 4 * 4 * 12, COLOR_WHITE);
 }
 
 //-----------------------------------------------------------------------------
@@ -767,6 +771,14 @@ void activateElectricity(bool bActivate)
 		u8 y = pObj->Y;
 		setTileByTileCoord(x, y, bActivate ? pObj->Tile : EMPTY_ITEM);
 	}
+
+	for (u8 i = 0; i < g_NotElectricWallCount; ++i)
+	{
+		struct ActiveObject *pObj = &g_NotElectricWalls[i];
+		u8 x = pObj->X;
+		u8 y = pObj->Y;
+		setTileByTileCoord(x, y, !bActivate ? pObj->Tile : EMPTY_ITEM);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -791,7 +803,7 @@ void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
 }
 
 //-----------------------------------------------------------------------------
-// Ajout d'un mur electrique
+// Ajout d'un mur électrique
 void addElectricWall(u8 levelIdx, u8 i, u8 j)
 {
 
@@ -803,6 +815,20 @@ void addElectricWall(u8 levelIdx, u8 i, u8 j)
 	pObj->Y = (g_Rooms[levelIdx].Y + i);
 	pObj->Tile = TILE_ELECTRIC_WALL;
 	g_ElectricWallCount++;
+}
+
+// Ajout d'un mur non électrique
+void addNotElectricWall(u8 levelIdx, u8 i, u8 j)
+{
+
+	if (g_NotElectricWallCount >= MAX_NOT_ELECTRIC_WALL)
+		return;
+
+	struct ActiveObject *pObj = &g_NotElectricWalls[g_NotElectricWallCount];
+	pObj->X = (g_Rooms[levelIdx].X + j);
+	pObj->Y = (g_Rooms[levelIdx].Y + i);
+	pObj->Tile = TILE_NOT_ELECTRIC_WALL;
+	g_NotElectricWallCount++;
 }
 
 //.............................................................................
@@ -821,6 +847,7 @@ void displayLevel(u8 levelIdx)
 	activateElectricity(TRUE);
 	g_VisibleObjectCount = 0;
 	g_ElectricWallCount = 0;
+	g_NotElectricWallCount = 0;
 	bool fuseboxOnIsEnabled = FALSE;
 	u8 fuseBoxCount = 0;
 	g_SwitchTimer.Timer = 0;
@@ -897,6 +924,10 @@ void displayLevel(u8 levelIdx)
 			else if (tile == TILE_ELECTRIC_WALL)
 			{
 				addElectricWall(levelIdx, i, j);
+			}
+			else if (tile == TILE_NOT_ELECTRIC_WALL)
+			{
+				addNotElectricWall(levelIdx, i, j);
 			}
 			if ((tile == TILE_RAILS) && (g_ElevatorCount < MAX_ELEVATOR)) // Detection des rails pour placer les élévateurs
 			{

@@ -33,6 +33,7 @@ bool checkCollision(u8 x, u8 y);
 bool addItemToInventory(u8 item);
 bool hasItemInInventory(u8 item);
 bool removeItemFromInventory(u8 item);
+void activateElectricity(bool bActivate);
 
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
@@ -72,7 +73,7 @@ u8 g_ResetCount = 0;
 // Switch minuteur
 struct SwitchTimer g_SwitchTimer;
 
-// connexion des portes aux thèmes du jeu
+// Connexion des portes aux thèmes du jeu
 u8 g_DoorTheme[3];
 u8 g_DoorThemeCount[3];
 
@@ -125,26 +126,39 @@ u8 g_DoorThemeCount[3];
 
 // Liste des pièces et de leur caracteristiques
 const struct RoomDefinition g_Rooms[] = {
-		//{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "", 1},
-		{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "Room 1", 1},
-		{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "Room 11", 2},
-		{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "Room 15", 3},
-		{(32 - LEVEL005_WIDTH) / 2, (24 - LEVEL005_HEIGHT) / 2, LEVEL005_WIDTH, LEVEL005_HEIGHT, g_Level005, "Room 18", 4},
-		{(32 - LEVEL006_WIDTH) / 2, (24 - LEVEL006_HEIGHT) / 2, LEVEL006_WIDTH, LEVEL006_HEIGHT, g_Level006, "Room 14", 5},
-		{(32 - LEVEL007_WIDTH) / 2, (24 - LEVEL007_HEIGHT) / 2, LEVEL007_WIDTH, LEVEL007_HEIGHT, g_Level007, "Room 10", 6},
-		{(32 - LEVEL008_WIDTH) / 2, (24 - LEVEL008_HEIGHT) / 2, LEVEL008_WIDTH, LEVEL008_HEIGHT, g_Level008, "Room 2", 7},
-		{(32 - LEVEL009_WIDTH) / 2, (24 - LEVEL009_HEIGHT) / 2, LEVEL009_WIDTH, LEVEL009_HEIGHT, g_Level009, "Room 22", 8},
-		{(32 - LEVEL010_WIDTH) / 2, (24 - LEVEL010_HEIGHT) / 2, LEVEL010_WIDTH, LEVEL010_HEIGHT, g_Level010, "Room 28", 9},
-		{(32 - LEVEL011_WIDTH) / 2, (24 - LEVEL011_HEIGHT) / 2, LEVEL011_WIDTH, LEVEL011_HEIGHT, g_Level011, "Room 20", 10},
-		{(32 - LEVEL012_WIDTH) / 2, (24 - LEVEL012_HEIGHT) / 2, LEVEL012_WIDTH, LEVEL012_HEIGHT, g_Level012, "Room 3", 11},
-		{(32 - LEVEL013_WIDTH) / 2, (24 - LEVEL013_HEIGHT) / 2, LEVEL013_WIDTH, LEVEL013_HEIGHT, g_Level013, "Room 33", 12},
-		{(32 - LEVEL014_WIDTH) / 2, (24 - LEVEL014_HEIGHT) / 2, LEVEL014_WIDTH, LEVEL014_HEIGHT, g_Level014, "Room 31", 13},
-		{(32 - LEVEL015_WIDTH) / 2, (24 - LEVEL015_HEIGHT) / 2, LEVEL015_WIDTH, LEVEL015_HEIGHT, g_Level015, "Room 30", 14},
-		{(32 - LEVEL016_WIDTH) / 2, (24 - LEVEL016_HEIGHT) / 2, LEVEL016_WIDTH, LEVEL016_HEIGHT, g_Level016, "Room 4", 15},
-		{(32 - LEVEL017_WIDTH) / 2, (24 - LEVEL017_HEIGHT) / 2, LEVEL017_WIDTH, LEVEL017_HEIGHT, g_Level017, "Room 44", 16},
-		{(32 - LEVEL018_WIDTH) / 2, (24 - LEVEL018_HEIGHT) / 2, LEVEL018_WIDTH, LEVEL018_HEIGHT, g_Level018, "Room 41", 17},
-		{(32 - LEVEL019_WIDTH) / 2, (24 - LEVEL019_HEIGHT) / 2, LEVEL019_WIDTH, LEVEL019_HEIGHT, g_Level019, "Room 40", 18},
-		{(32 - LEVEL020_WIDTH) / 2, (24 - LEVEL020_HEIGHT) / 2, LEVEL020_WIDTH, LEVEL020_HEIGHT, g_Level020, "Room 6", 0}};
+	//{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "", 1},
+	{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "", 1 },
+	{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "", 2},
+	{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "", 3},
+	{(32 - LEVEL005_WIDTH) / 2, (24 - LEVEL005_HEIGHT) / 2, LEVEL005_WIDTH, LEVEL005_HEIGHT, g_Level005, "", 4},
+	{(32 - LEVEL006_WIDTH) / 2, (24 - LEVEL006_HEIGHT) / 2, LEVEL006_WIDTH, LEVEL006_HEIGHT, g_Level006, "", 5},
+	{(32 - LEVEL007_WIDTH) / 2, (24 - LEVEL007_HEIGHT) / 2, LEVEL007_WIDTH, LEVEL007_HEIGHT, g_Level007, "", 6},
+	{(32 - LEVEL008_WIDTH) / 2, (24 - LEVEL008_HEIGHT) / 2, LEVEL008_WIDTH, LEVEL008_HEIGHT, g_Level008, "", 7},
+	{(32 - LEVEL009_WIDTH) / 2, (24 - LEVEL009_HEIGHT) / 2, LEVEL009_WIDTH, LEVEL009_HEIGHT, g_Level009, "", 8},
+	{(32 - LEVEL010_WIDTH) / 2, (24 - LEVEL010_HEIGHT) / 2, LEVEL010_WIDTH, LEVEL010_HEIGHT, g_Level010, "", 9},
+	{(32 - LEVEL011_WIDTH) / 2, (24 - LEVEL011_HEIGHT) / 2, LEVEL011_WIDTH, LEVEL011_HEIGHT, g_Level011, "", 10},
+	{(32 - LEVEL012_WIDTH) / 2, (24 - LEVEL012_HEIGHT) / 2, LEVEL012_WIDTH, LEVEL012_HEIGHT, g_Level012, "", 11},
+	{(32 - LEVEL013_WIDTH) / 2, (24 - LEVEL013_HEIGHT) / 2, LEVEL013_WIDTH, LEVEL013_HEIGHT, g_Level013, "", 12},
+	{(32 - LEVEL014_WIDTH) / 2, (24 - LEVEL014_HEIGHT) / 2, LEVEL014_WIDTH, LEVEL014_HEIGHT, g_Level014, "", 13},
+	{(32 - LEVEL015_WIDTH) / 2, (24 - LEVEL015_HEIGHT) / 2, LEVEL015_WIDTH, LEVEL015_HEIGHT, g_Level015, "", 14},
+	{(32 - LEVEL016_WIDTH) / 2, (24 - LEVEL016_HEIGHT) / 2, LEVEL016_WIDTH, LEVEL016_HEIGHT, g_Level016, "", 15},
+	{(32 - LEVEL017_WIDTH) / 2, (24 - LEVEL017_HEIGHT) / 2, LEVEL017_WIDTH, LEVEL017_HEIGHT, g_Level017, "", 16},
+	{(32 - LEVEL018_WIDTH) / 2, (24 - LEVEL018_HEIGHT) / 2, LEVEL018_WIDTH, LEVEL018_HEIGHT, g_Level018, "", 17},
+	{(32 - LEVEL019_WIDTH) / 2, (24 - LEVEL019_HEIGHT) / 2, LEVEL019_WIDTH, LEVEL019_HEIGHT, g_Level019, "", 18},
+	{(32 - LEVEL020_WIDTH) / 2, (24 - LEVEL020_HEIGHT) / 2, LEVEL020_WIDTH, LEVEL020_HEIGHT, g_Level020, "", 19},
+	{(32 - LEVEL021_WIDTH) / 2, (24 - LEVEL021_HEIGHT) / 2, LEVEL021_WIDTH, LEVEL021_HEIGHT, g_Level008, "", 20},
+	{(32 - LEVEL022_WIDTH) / 2, (24 - LEVEL022_HEIGHT) / 2, LEVEL022_WIDTH, LEVEL022_HEIGHT, g_Level009, "", 21},
+	{(32 - LEVEL023_WIDTH) / 2, (24 - LEVEL023_HEIGHT) / 2, LEVEL023_WIDTH, LEVEL023_HEIGHT, g_Level010, "", 22},
+	{(32 - LEVEL024_WIDTH) / 2, (24 - LEVEL024_HEIGHT) / 2, LEVEL024_WIDTH, LEVEL024_HEIGHT, g_Level011, "", 23},
+	{(32 - LEVEL025_WIDTH) / 2, (24 - LEVEL025_HEIGHT) / 2, LEVEL025_WIDTH, LEVEL025_HEIGHT, g_Level012, "", 24},
+	{(32 - LEVEL026_WIDTH) / 2, (24 - LEVEL026_HEIGHT) / 2, LEVEL026_WIDTH, LEVEL026_HEIGHT, g_Level013, "", 25},
+	{(32 - LEVEL027_WIDTH) / 2, (24 - LEVEL027_HEIGHT) / 2, LEVEL027_WIDTH, LEVEL027_HEIGHT, g_Level014, "", 26},
+	{(32 - LEVEL028_WIDTH) / 2, (24 - LEVEL028_HEIGHT) / 2, LEVEL028_WIDTH, LEVEL028_HEIGHT, g_Level015, "", 27},
+	{(32 - LEVEL029_WIDTH) / 2, (24 - LEVEL029_HEIGHT) / 2, LEVEL029_WIDTH, LEVEL029_HEIGHT, g_Level016, "", 28},
+	{(32 - LEVEL030_WIDTH) / 2, (24 - LEVEL030_HEIGHT) / 2, LEVEL030_WIDTH, LEVEL030_HEIGHT, g_Level017, "", 29},
+	{(32 - LEVEL031_WIDTH) / 2, (24 - LEVEL031_HEIGHT) / 2, LEVEL031_WIDTH, LEVEL031_HEIGHT, g_Level018, "", 30},
+	{(32 - LEVEL032_WIDTH) / 2, (24 - LEVEL032_HEIGHT) / 2, LEVEL032_WIDTH, LEVEL032_HEIGHT, g_Level019, "", 0},
+};
 
 // Liste des frames d'animation du personnage
 const u8 g_PlayerFramesMove[] = {1, 2, 3, 4};
@@ -181,7 +195,9 @@ void loadData()
 }
 
 //.............................................................................
-// Gestion des tuiles
+//
+//  GESTION DES TUILES
+//
 //.............................................................................
 
 //-----------------------------------------------------------------------------
@@ -227,80 +243,13 @@ bool checkRails(u8 x, u8 y)
 }
 
 //.............................................................................
-// Gestion des acteurs
+//
+//  GESTION DES CONTRÔLEURS (clavier et joysticks) 
+//
 //.............................................................................
 
 //-----------------------------------------------------------------------------
-// Initialise un élévateur
-void initElevator(u8 num, u8 x, u8 y)
-{
-	struct ElevatorDefinition *elevator = &g_Elevator[num];
-
-	elevator->X = x;
-	elevator->Y = y;
-	elevator->VelocityY = 1;
-	elevator->State = ELEVATOR_STATE_MOVE;
-	elevator->Timer = 0;
-
-	VDP_SetSpriteSM1(SPT_ELEVATOR + num, x, y, 4 * 4 * 12, COLOR_WHITE);
-}
-
-//-----------------------------------------------------------------------------
-// Mise à jour d'un élévateur
-void updateElevator(u8 num)
-{
-	if (!g_CurrentElectricityOn) // Ignorer la mise à jour quand il n'y a pas d'électricité
-		return;
-
-	struct ElevatorDefinition *elevator = &g_Elevator[num];
-
-	if (elevator->Timer > 0) // Attendre que le timer d'attente tombe à 0
-	{
-		elevator->Timer--;
-		return;
-	}
-
-	if (elevator->VelocityY < 0) // Si l'élévateur monte
-	{
-		if (!checkRails(elevator->X, elevator->Y - 1))
-		{
-
-			elevator->VelocityY = 1;
-			elevator->Timer = ELEVATOR_STAND;
-			elevator->State = ELEVATOR_STATE_STAND;
-			return;
-		}
-	}
-	else // Si l'élévateur descent
-	{
-		if (!checkRails(elevator->X, elevator->Y + 1))
-		{
-			elevator->VelocityY = -1;
-			elevator->Timer = ELEVATOR_STAND;
-			elevator->State = ELEVATOR_STATE_STAND;
-			return;
-		}
-	}
-
-	// Mise à jour de la position d'un élévateur
-	elevator->Y += elevator->VelocityY;
-
-	VDP_SetSpritePosition(SPT_ELEVATOR + num, elevator->X, elevator->Y - 9);
-}
-
-//-----------------------------------------------------------------------------
-// Initialise le personnage
-void initPlayer(u8 x, u8 y)
-{
-	g_Player.X = x;
-	g_Player.Y = y;
-	g_Player.VelocityY = 0;
-	g_Player.State = PLAYER_STATE_IDLE;
-	g_Player.InAir = TRUE;
-}
-
-// Contrôle du personnage
-
+// Test de la direction 'droite' sur n'importe quel contrôleur
 bool isMoveRight()
 {
 	if (Keyboard_IsKeyPressed(KEY_RIGHT))
@@ -313,6 +262,8 @@ bool isMoveRight()
 	return FALSE;
 }
 
+//-----------------------------------------------------------------------------
+// Test de la direction 'gauche' sur n'importe quel contrôleur
 bool isMoveLeft()
 {
 	if (Keyboard_IsKeyPressed(KEY_LEFT))
@@ -325,6 +276,8 @@ bool isMoveLeft()
 	return FALSE;
 }
 
+//-----------------------------------------------------------------------------
+// Test de l'action 'interact' sur n'importe quel contrôleur
 bool isInteract()
 {
 	if (Keyboard_IsKeyPressed(KEY_SPACE))
@@ -337,6 +290,8 @@ bool isInteract()
 	return FALSE;
 }
 
+//-----------------------------------------------------------------------------
+// Test de l'action 'cancel' sur n'importe quel contrôleur
 bool isCancel()
 {
 	if (Keyboard_IsKeyPressed(KEY_ESC))
@@ -347,6 +302,23 @@ bool isCancel()
 		return TRUE;
 
 	return FALSE;
+}
+
+//.............................................................................
+//
+//  GESTION DU JOUEUR
+//
+//.............................................................................
+
+//-----------------------------------------------------------------------------
+// Initialise le personnage
+void initPlayer(u8 x, u8 y)
+{
+	g_Player.X = x;
+	g_Player.Y = y;
+	g_Player.VelocityY = 0;
+	g_Player.State = PLAYER_STATE_IDLE;
+	g_Player.InAir = TRUE;
 }
 
 //-----------------------------------------------------------------------------
@@ -526,7 +498,9 @@ void updatePlayer()
 }
 
 //.............................................................................
-// Inventaire
+//
+//  GESTION DE L'INVENTAIRE
+//
 //.............................................................................
 
 //-----------------------------------------------------------------------------
@@ -585,17 +559,100 @@ bool removeItemFromInventory(u8 item)
 	return FALSE;
 }
 
-// ----------------------------------------------------------------------------
+//.............................................................................
+//
+//  GESTION DES ACTEURS DU DÉCOR
+//
+//.............................................................................
 
-void activateDoor(u8 tile, u8 x, u8 y)
+//-----------------------------------------------------------------------------
+// Initialise un élévateur
+void initElevator(u8 num, u8 x, u8 y)
 {
+	struct ElevatorDefinition *elevator = &g_Elevator[num];
 
-	if (tile == TILE_DOOR2)
+	elevator->X = x;
+	elevator->Y = y;
+	elevator->VelocityY = 1;
+	elevator->State = ELEVATOR_STATE_MOVE;
+	elevator->Timer = 0;
+
+	VDP_SetSpriteSM1(SPT_ELEVATOR + num, x, y, 4 * 4 * 12, COLOR_WHITE);
+}
+
+//-----------------------------------------------------------------------------
+// Mise à jour d'un élévateur
+void updateElevator(u8 num)
+{
+	if (!g_CurrentElectricityOn) // Ignorer la mise à jour quand il n'y a pas d'électricité
+		return;
+
+	struct ElevatorDefinition *elevator = &g_Elevator[num];
+
+	if (elevator->Timer > 0) // Attendre que le timer d'attente tombe à 0
 	{
-		x -= 8;
+		elevator->Timer--;
+		return;
 	}
 
+	if (elevator->VelocityY < 0) // Si l'élévateur monte
+	{
+		if (!checkRails(elevator->X, elevator->Y - 1))
+		{
+
+			elevator->VelocityY = 1;
+			elevator->Timer = ELEVATOR_STAND;
+			elevator->State = ELEVATOR_STATE_STAND;
+			return;
+		}
+	}
+	else // Si l'élévateur descent
+	{
+		if (!checkRails(elevator->X, elevator->Y + 1))
+		{
+			elevator->VelocityY = -1;
+			elevator->Timer = ELEVATOR_STAND;
+			elevator->State = ELEVATOR_STATE_STAND;
+			return;
+		}
+	}
+
+	// Mise à jour de la position d'un élévateur
+	elevator->Y += elevator->VelocityY;
+
+	VDP_SetSpritePosition(SPT_ELEVATOR + num, elevator->X, elevator->Y - 9);
+}
+
+//-----------------------------------------------------------------------------
+// Mise à jour des boutons d'éléctricité temporaire
+void updateSwitchTimer()
+{
+	if (g_SwitchTimer.Timer > 0)
+	{
+		g_SwitchTimer.Timer--;
+
+		setTile(g_SwitchTimer.X, g_SwitchTimer.Y, TILE_SWITCH_TIMER + 3 - g_SwitchTimer.Timer / 32);
+		if (g_SwitchTimer.Timer == 0)
+		{
+			activateElectricity(FALSE);
+		}
+	}
+}
+
+//.............................................................................
+//
+//  INTERACTION GAMEPLAY
+//
+//.............................................................................
+
+//-----------------------------------------------------------------------------
+// Ouvrir une porte
+void activateDoor(u8 tile, u8 x, u8 y)
+{
+	if (tile == TILE_DOOR2)
+		x -= 8;
 	y -= 16;
+
 	u8 roomNumber = getTile(x, y);
 	u8 doorIndex = 255;
 
@@ -625,7 +682,8 @@ void activateDoor(u8 tile, u8 x, u8 y)
 	displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
 }
 
-// .............................................................................
+//-----------------------------------------------------------------------------
+// Répondre au téléphone
 void activatePhone()
 {
 	VDP_FillVRAM_16K(COLOR_WHITE << 4, g_ScreenColorLow + 192 / 8, 8);
@@ -647,13 +705,8 @@ void activatePhone()
 	}
 }
 
-//.............................................................................
-// Gameplay
-//.............................................................................
-
 //-----------------------------------------------------------------------------
-// Allume ou éteint la lumière
-
+// Application des effets en fonction de l'état de la lumière
 void lightRoom(bool bActivate)
 {
 
@@ -689,6 +742,8 @@ void lightRoom(bool bActivate)
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Allume ou éteint la lumière
 void activateLight(bool bActivate)
 {
 	g_CurrentLightOn = bActivate; // Enregistrement de l’état de la lumière
@@ -697,6 +752,8 @@ void activateLight(bool bActivate)
 		lightRoom(bActivate);
 }
 
+//-----------------------------------------------------------------------------
+// Active ou d"sactive l'élétricité
 void activateElectricity(bool bActivate)
 {
 
@@ -712,20 +769,8 @@ void activateElectricity(bool bActivate)
 	}
 }
 
-void updateSwitchTimer()
-{
-	if (g_SwitchTimer.Timer > 0)
-	{
-		g_SwitchTimer.Timer--;
-
-		setTile(g_SwitchTimer.X, g_SwitchTimer.Y, TILE_SWITCH_TIMER + 3 - g_SwitchTimer.Timer / 32);
-		if (g_SwitchTimer.Timer == 0)
-		{
-			activateElectricity(FALSE);
-		}
-	}
-}
-
+//-----------------------------------------------------------------------------
+// Ajout d'un objet conditionnel
 void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
 {
 
@@ -745,6 +790,8 @@ void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
 	setTileByTileCoord(x, y, TILE_EMPTY);
 }
 
+//-----------------------------------------------------------------------------
+// Ajout d'un mur electrique
 void addElectricWall(u8 levelIdx, u8 i, u8 j)
 {
 
@@ -757,6 +804,12 @@ void addElectricWall(u8 levelIdx, u8 i, u8 j)
 	pObj->Tile = TILE_ELECTRIC_WALL;
 	g_ElectricWallCount++;
 }
+
+//.............................................................................
+//
+//  AFFICHAGE
+//
+//.............................................................................
 
 //-----------------------------------------------------------------------------
 // Afficher une pièce
@@ -874,6 +927,12 @@ void displayLevel(u8 levelIdx)
 	//	Print_DrawFormat(" %i, %i, %i ", g_DoorThemeCount[0], g_DoorThemeCount[1], g_DoorThemeCount[2]);
 }
 
+//.............................................................................
+//
+//  INTERACTIONS
+//
+//.............................................................................
+
 //-----------------------------------------------------------------------------
 // Interagit à une position donnée
 bool interact(u8 x, u8 y)
@@ -990,9 +1049,11 @@ bool interact(u8 x, u8 y)
 	return FALSE;
 }
 
-//=============================================================================
+//.............................................................................
+//
 // BOUCLE PRINCIPALE
-//=============================================================================
+//
+//.............................................................................
 
 //-----------------------------------------------------------------------------
 // Point d'entrée du programme principal

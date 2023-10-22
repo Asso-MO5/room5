@@ -939,7 +939,7 @@ void displayLevel(u8 levelIdx)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 
 	// Masquage des textes par défaut
-	//	VDP_FillVRAM_16K(0, g_ScreenColorLow + 192 / 8, 8);
+	VDP_FillVRAM_16K(0, g_ScreenColorLow + 192 / 8, 8);
 
 	// Dessin de la pièce ligne par ligne
 	// I = ligne, J = colonne

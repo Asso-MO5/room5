@@ -45,6 +45,10 @@
 #define TILE_NIGHT_LIGHT 44
 #define TILE_ALPHABET_ONE 209
 #define TILE_MANUAL_ELEVATOR 184
+// placard en anglais
+#define TILE_CUPBOARD 67
+#define TILE_CUPBOARD_OPEN 30
+#define TILE_CLOSET 73 // placard en français
 
 // Interrupteur Minuteur
 #define TILE_SWITCH_TIMER 90
@@ -66,6 +70,8 @@
 #define TILE_SPE_THEME_HOSPITAL 122
 #define TILE_SPE_THEME_ALIEN 123
 #define TILE_SPE_THEME_MATRIX 124
+#define TILE_SPE_CUPBOARD 112
+#define TILE_SPE_CUPBOARD_LIGHT 113
 
 // Numéro de sprite
 #define SPT_PLAYER_HAIR 0
@@ -86,6 +92,8 @@ enum ItemCondition
 	ITEM_COND_ELECTRICITY_ON,
 	ITEM_COND_ELECTRICITY_OFF,
 	ITEM_COND_DISABLED,
+	ITEM_COND_CUPBOARD,
+	ITEM_COND_CUPBOARD_LIGHT,
 };
 
 // Etats du joueur

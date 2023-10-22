@@ -829,6 +829,40 @@ void activateElectricity(bool bActivate)
 	}
 }
 
+// Ouvre les placard
+
+void activateCupboard(u8 x, u8 y)
+{
+	u8 gX = x / 8;
+	u8 gY = y / 8;
+	setTileByTileCoord(gX, gY, TILE_CUPBOARD_OPEN);
+	setTileByTileCoord(gX + 2, gY, TILE_CUPBOARD_OPEN + 1);
+
+	u8 tile = TILE_EMPTY;
+
+	for (u8 i = 0; i < g_VisibleObjectCount; ++i)
+	{
+		struct VisibleObject *pObj = &g_VisibleObjects[i];
+		if ((pObj->X == gX + 1) && (pObj->Y == gY) && (pObj->ItemCondition == ITEM_COND_CUPBOARD))
+		{
+			tile = pObj->Tile;
+			break;
+		}
+
+		if ((pObj->X == gX + 1) && (pObj->Y == gY) && (pObj->ItemCondition == ITEM_COND_CUPBOARD_LIGHT))
+		{
+
+			if (g_CurrentLightOn)
+				tile = pObj->Tile;
+
+			pObj->ItemCondition = ITEM_COND_LIGHT_ON;
+			break;
+		}
+	}
+
+	setTileByTileCoord(gX + 1, gY, tile);
+}
+
 //-----------------------------------------------------------------------------
 // Ajout d'un objet conditionnel
 void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
@@ -905,7 +939,7 @@ void displayLevel(u8 levelIdx)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 
 	// Masquage des textes par défaut
-	VDP_FillVRAM_16K(0, g_ScreenColorLow + 192 / 8, 8);
+	//	VDP_FillVRAM_16K(0, g_ScreenColorLow + 192 / 8, 8);
 
 	// Dessin de la pièce ligne par ligne
 	// I = ligne, J = colonne
@@ -980,8 +1014,27 @@ void displayLevel(u8 levelIdx)
 			}
 			else if (tile == TILE_MANUAL_ELEVATOR)
 			{
-				addManualElevator(g_ManualElevatorCount, (g_Rooms[levelIdx].X + j), (g_Rooms[levelIdx].Y + i));
+				addManualElevator(g_ManualElevatorCount, x, y);
 				g_ManualElevatorCount++;
+			}
+			else if (tile == TILE_SPE_CUPBOARD)
+			{
+				addConditionalItem(levelIdx, i, j, ITEM_COND_CUPBOARD);
+			}
+			else if (tile == TILE_SPE_CUPBOARD_LIGHT)
+			{
+				addConditionalItem(levelIdx, i, j, ITEM_COND_CUPBOARD_LIGHT);
+			}
+			// Ici on reconstruit les placards
+			else if (tile == TILE_CUPBOARD)
+			{
+				setTileByTileCoord(x + 1, y, TILE_CUPBOARD + 1);
+				setTileByTileCoord(x + 1, y - 1, 25); // 25 Pour le haut du placard
+			}
+			else if (tile == TILE_CLOSET)
+			{
+				setTileByTileCoord(x + 1, y, TILE_CLOSET + 1);
+				setTileByTileCoord(x + 1, y - 1, 38); // 38 Pour le haut de l'armoire
 			}
 			if ((tile == TILE_RAILS) && (g_ElevatorCount < MAX_ELEVATOR)) // Detection des rails pour placer les élévateurs
 			{
@@ -989,7 +1042,7 @@ void displayLevel(u8 levelIdx)
 				{
 					if (g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * (i - 1) + j] != TILE_RAILS)
 					{
-						initElevator(g_ElevatorCount, (g_Rooms[levelIdx].X + j) * 8, (g_Rooms[levelIdx].Y + i) * 8);
+						initElevator(g_ElevatorCount, x * 8, y * 8);
 						g_ElevatorCount++;
 					}
 				}
@@ -1124,6 +1177,18 @@ bool interact(u8 x, u8 y)
 		activateDoor(tile, x, y);
 		// TODO Animer porte qui s'ouvre et personnage qui passe
 		return FALSE;
+
+	// Placard
+	case TILE_CUPBOARD:
+		activateCupboard(x, y);
+		return TRUE;
+	case TILE_CUPBOARD + 1:
+		activateCupboard(x - 8, y);
+		return TRUE;
+	case TILE_CUPBOARD + 2:
+		activateCupboard(x - 16, y);
+		return TRUE;
+
 	case TILE_SWITCH_TIMER:
 	case TILE_SWITCH_TIMER + 1:
 	case TILE_SWITCH_TIMER + 2:
@@ -1141,7 +1206,6 @@ bool interact(u8 x, u8 y)
 	}
 	return FALSE;
 }
-
 //.............................................................................
 //
 // BOUCLE PRINCIPALE
@@ -1170,7 +1234,7 @@ void main()
 	initPlayer(100, 103);
 
 	// Affichage de la pièce n°0 (la première)
-	displayLevel(12);
+	displayLevel(0);
 
 	while (1) // Pour un jeu en cartouche (ROM) on a pas besoin de gérer la sortie de la boucle principale
 	{

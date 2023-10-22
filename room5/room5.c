@@ -59,6 +59,10 @@ u8 g_Inventory[INVENTORY_SIZE]; // Contenu de l'inventaire
 u8 g_ElevatorCount = 0;
 struct ElevatorDefinition g_Elevator[MAX_ELEVATOR];
 
+// Variables pour la gestion des ascenseurs manuels
+u8 g_ManualElevatorCount = 0;
+struct ActiveObject g_ManualElevator[MAX_MANUAL_ELEVATOR];
+
 // Variables pour la gestion des objets visibles sous conditions (uniquement le jour ou la nuit par ex.)
 u8 g_VisibleObjectCount = 0;
 struct VisibleObject g_VisibleObjects[MAX_VISIBLE_OBJECTS];
@@ -244,6 +248,11 @@ bool checkCollision(u8 x, u8 y)
 bool checkRails(u8 x, u8 y)
 {
 	return getTile(x, y) == TILE_RAILS; // N° de la tuile des rails
+}
+
+bool checkManualRails(u8 x, u8 y)
+{
+	return getTileByTileCoord(x, y) == TILE_MANUAL_RAILS; // N° de la tuile des rails
 }
 
 //.............................................................................
@@ -627,6 +636,44 @@ void updateElevator(u8 num)
 	VDP_SetSpritePosition(SPT_ELEVATOR + num, elevator->X, elevator->Y - 9);
 }
 
+// Elévateurs manuel
+
+void addManualElevator(u8 num, u8 x, u8 y)
+{
+	struct ActiveObject *elevator = &g_ManualElevator[num];
+
+	elevator->X = x;
+	elevator->Y = y;
+	elevator->Tile = TILE_MANUAL_ELEVATOR;
+}
+
+void moveManualElevator(u8 num, u8 direction)
+{
+	struct ActiveObject *elevator = &g_ManualElevator[num];
+
+	if (direction == ELEVATOR_DIRECTION_UP)
+	{
+		if (checkManualRails(elevator->X, elevator->Y - 1))
+		{
+			setTileByTileCoord(elevator->X, elevator->Y, TILE_MANUAL_RAILS);
+			setTileByTileCoord(elevator->X + 1, elevator->Y, TILE_MANUAL_RAILS);
+			elevator->Y--;
+			setTileByTileCoord(elevator->X, elevator->Y, TILE_MANUAL_ELEVATOR);
+			setTileByTileCoord(elevator->X + 1, elevator->Y, TILE_MANUAL_ELEVATOR + 1);
+		}
+	}
+	else
+	{
+		if (checkManualRails(elevator->X, elevator->Y + 1))
+		{
+			setTileByTileCoord(elevator->X, elevator->Y, TILE_MANUAL_RAILS);
+			setTileByTileCoord(elevator->X + 1, elevator->Y, TILE_MANUAL_RAILS);
+			elevator->Y++;
+			setTileByTileCoord(elevator->X, elevator->Y, TILE_MANUAL_ELEVATOR);
+			setTileByTileCoord(elevator->X + 1, elevator->Y, TILE_MANUAL_ELEVATOR + 1);
+		}
+	}
+}
 //-----------------------------------------------------------------------------
 // Mise à jour des boutons d'éléctricité temporaire
 void updateSwitchTimer()
@@ -719,7 +766,8 @@ void lightRoom(bool bActivate)
 	u8 secondCol = bActivate ? 0xB1 : 0x51;
 	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow, 7);
 	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow + (64 / 8), 8);
-	VDP_FillVRAM_16K(secondCol, g_ScreenColorLow + (128 / 8), 8);
+	VDP_FillVRAM_16K(secondCol, g_ScreenColorLow + (128 / 8), 7);
+	VDP_FillVRAM_16K(bActivate ? 0xf1 : 0x71, g_ScreenColorLow + (184 / 8), 1);
 
 	// Change la couleur du personnage
 	VDP_SetSpriteColorSM1(SPT_PLAYER_HAIR, bActivate ? COLOR_LIGHT_YELLOW : COLOR_LIGHT_BLUE);
@@ -844,6 +892,7 @@ void displayLevel(u8 levelIdx)
 	initInventory();					// Pas possible de changer de pièce avec un objet dans les mains
 	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
 	g_ElevatorCount = 0;			// Initialisation du nombre d'élévateurs
+	g_ManualElevatorCount = 0;
 	activateElectricity(TRUE);
 	g_VisibleObjectCount = 0;
 	g_ElectricWallCount = 0;
@@ -928,6 +977,11 @@ void displayLevel(u8 levelIdx)
 			else if (tile == TILE_NOT_ELECTRIC_WALL)
 			{
 				addNotElectricWall(levelIdx, i, j);
+			}
+			else if (tile == TILE_MANUAL_ELEVATOR)
+			{
+				addManualElevator(g_ManualElevatorCount, (g_Rooms[levelIdx].X + j), (g_Rooms[levelIdx].Y + i));
+				g_ManualElevatorCount++;
 			}
 			if ((tile == TILE_RAILS) && (g_ElevatorCount < MAX_ELEVATOR)) // Detection des rails pour placer les élévateurs
 			{
@@ -1039,6 +1093,14 @@ bool interact(u8 x, u8 y)
 		}
 		return FALSE;
 
+	case TILE_ELEVATOR_UP:
+	case TILE_ELEVATOR_DOWN:
+		if (!g_CurrentElectricityOn)
+			return FALSE;
+		for (u8 i = 0; i < g_ManualElevatorCount; ++i)
+			moveManualElevator(i, tile == TILE_ELEVATOR_UP ? ELEVATOR_DIRECTION_UP : ELEVATOR_DIRECTION_DOWN);
+		return TRUE;
+
 	case TILE_LOCK_DOOR1:
 	case TILE_LOCK_DOOR2:
 
@@ -1057,7 +1119,7 @@ bool interact(u8 x, u8 y)
 	// Porte de sortie
 	case TILE_DOOR1:
 	case TILE_DOOR2:
-		// Récuperer la tuile qui est 2 haut dessus
+		// Récupérer la tuile qui est 2 haut dessus
 
 		activateDoor(tile, x, y);
 		// TODO Animer porte qui s'ouvre et personnage qui passe
@@ -1108,7 +1170,7 @@ void main()
 	initPlayer(100, 103);
 
 	// Affichage de la pièce n°0 (la première)
-	displayLevel(0);
+	displayLevel(12);
 
 	while (1) // Pour un jeu en cartouche (ROM) on a pas besoin de gérer la sortie de la boucle principale
 	{

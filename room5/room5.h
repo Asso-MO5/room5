@@ -12,6 +12,7 @@
 
 // Configuration
 #define MAX_ELEVATOR 8
+#define MAX_MANUAL_ELEVATOR 8
 #define ELEVATOR_STAND 20
 #define EMPTY_ITEM 0
 #define INVENTORY_SIZE 4
@@ -24,6 +25,7 @@
 // Numéros de tuile
 #define TILE_EMPTY 0
 #define TILE_RAILS 28
+#define TILE_MANUAL_RAILS 35
 #define TILE_PHONE 80
 #define TILE_LIGHT1 81
 #define TILE_LIGHT2 82
@@ -42,9 +44,14 @@
 #define TILE_NOT_ELECTRIC_WALL 145
 #define TILE_NIGHT_LIGHT 44
 #define TILE_ALPHABET_ONE 209
+#define TILE_MANUAL_ELEVATOR 184
 
 // Interrupteur Minuteur
 #define TILE_SWITCH_TIMER 90
+
+// Contrôle des ascenseurs
+#define TILE_ELEVATOR_UP 87
+#define TILE_ELEVATOR_DOWN 86
 
 #define TILE_ITEM_KEY_ONE 96
 #define TILE_ITEM_KEY_DOOR 97
@@ -104,6 +111,12 @@ enum StoryDirection
 	THEME_HOSPITAL = 0,
 	THEME_ALIEN,
 	THEME_MATRIX, // follow the white rabbit
+};
+
+enum ElevatorDirection
+{
+	ELEVATOR_DIRECTION_UP,
+	ELEVATOR_DIRECTION_DOWN,
 };
 
 //-----------------------------------------------------------------------------

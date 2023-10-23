@@ -8084,4 +8084,4 @@ DEF G$g_InputBufferOld$0_0$0 0xC173
 DEF _g_InputBufferOld 0xC173
 DEF G$g_PrintInvalid$0_0$0 0xC175
 DEF _g_PrintInvalid 0xC175
-LOAD D:\Dev\Private\MSX\MSXgl\projects\room5\room5/out/room5.ihx
+LOAD F:\www\MO5\room5\room5/out/room5.ihx

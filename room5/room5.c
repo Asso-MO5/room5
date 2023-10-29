@@ -160,7 +160,8 @@ const struct RoomDefinition g_Rooms[] = {
 		{(32 - LEVEL021_WIDTH) / 2, (24 - LEVEL021_HEIGHT) / 2, LEVEL021_WIDTH, LEVEL021_HEIGHT, g_Level021, "", 21},
 		{(32 - LEVEL022_WIDTH) / 2, (24 - LEVEL022_HEIGHT) / 2, LEVEL022_WIDTH, LEVEL022_HEIGHT, g_Level022, "", 22},
 		{(32 - LEVEL023_WIDTH) / 2, (24 - LEVEL023_HEIGHT) / 2, LEVEL023_WIDTH, LEVEL023_HEIGHT, g_Level023, "", 23},
-		{(32 - LEVEL024_WIDTH) / 2, (24 - LEVEL024_HEIGHT) / 2, LEVEL024_WIDTH, LEVEL024_HEIGHT, g_Level024, "", 24},
+		// on saute les pièces non faites
+		{(32 - LEVEL024_WIDTH) / 2, (24 - LEVEL024_HEIGHT) / 2, LEVEL024_WIDTH, LEVEL024_HEIGHT, g_Level024, "", 27},
 		{(32 - LEVEL025_WIDTH) / 2, (24 - LEVEL025_HEIGHT) / 2, LEVEL025_WIDTH, LEVEL025_HEIGHT, g_Level025, "", 25},
 		{(32 - LEVEL026_WIDTH) / 2, (24 - LEVEL026_HEIGHT) / 2, LEVEL026_WIDTH, LEVEL026_HEIGHT, g_Level026, "", 26},
 		{(32 - LEVEL027_WIDTH) / 2, (24 - LEVEL027_HEIGHT) / 2, LEVEL027_WIDTH, LEVEL027_HEIGHT, g_Level027, "", 27},
@@ -891,6 +892,36 @@ void activateCupboard(u8 x, u8 y)
 	setTileByTileCoord(gX + 1, gY, tile);
 }
 
+void activateCloset(u8 x, u8 y)
+{
+
+	u8 gX = x / 8;
+	u8 gY = y / 8;
+	u8 tile = TILE_EMPTY;
+
+	for (u8 i = 0; i < g_VisibleObjectCount; ++i)
+	{
+		struct VisibleObject *pObj = &g_VisibleObjects[i];
+		if ((pObj->X == gX) && (pObj->Y == gY) && (pObj->ItemCondition == ITEM_COND_CUPBOARD))
+		{
+			tile = pObj->Tile;
+			break;
+		}
+
+		if ((pObj->X == gX) && (pObj->Y == gY) && (pObj->ItemCondition == ITEM_COND_CUPBOARD_LIGHT))
+		{
+
+			if (g_CurrentLightOn)
+				tile = pObj->Tile;
+
+			pObj->ItemCondition = ITEM_COND_LIGHT_ON;
+			break;
+		}
+	}
+
+	setTileByTileCoord(gX, gY, tile);
+}
+
 //-----------------------------------------------------------------------------
 // Ajout d'un objet conditionnel
 void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
@@ -1236,6 +1267,15 @@ bool interact(u8 x, u8 y)
 	case TILE_CUPBOARD + 2:
 		activateCupboard(x - 16, y);
 		return TRUE;
+
+	case TILE_CLOSET + 1:
+		if (hasItemInInventory(TILE_ITEM_KEY_CLOSET))
+		{
+			removeItemFromInventory(TILE_ITEM_KEY_CLOSET);
+			activateCloset(x, y);
+			return TRUE;
+		}
+		return FALSE;
 
 	case TILE_SWITCH_TIMER:
 	case TILE_SWITCH_TIMER + 1:

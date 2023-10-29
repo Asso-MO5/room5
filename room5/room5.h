@@ -57,6 +57,10 @@
 #define TILE_ELEVATOR_UP 87
 #define TILE_ELEVATOR_DOWN 86
 
+// Porte spéciale pour arriver à la fin du jeu
+#define TILE_DOOR_END1 75
+#define TILE_DOOR_END2 76
+
 #define TILE_ITEM_KEY_ONE 96
 #define TILE_ITEM_KEY_DOOR 97
 #define TILE_ITEM_KEY_THREE 98
@@ -72,6 +76,7 @@
 #define TILE_SPE_THEME_MATRIX 124
 #define TILE_SPE_CUPBOARD 112
 #define TILE_SPE_CUPBOARD_LIGHT 113
+#define TILE_SPE_DISPLAY_TEXT 114
 
 // Numéro de sprite
 #define SPT_PLAYER_HAIR 0

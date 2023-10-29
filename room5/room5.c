@@ -134,38 +134,48 @@ u8 g_DoorThemeCount[3];
 
 // Liste des pièces et de leur caracteristiques
 const struct RoomDefinition g_Rooms[] = {
-		//{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "", 1},
-		{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "", 1},
-		{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "", 2},
-		{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "", 3},
-		{(32 - LEVEL005_WIDTH) / 2, (24 - LEVEL005_HEIGHT) / 2, LEVEL005_WIDTH, LEVEL005_HEIGHT, g_Level005, "", 4},
-		{(32 - LEVEL006_WIDTH) / 2, (24 - LEVEL006_HEIGHT) / 2, LEVEL006_WIDTH, LEVEL006_HEIGHT, g_Level006, "", 5},
-		{(32 - LEVEL007_WIDTH) / 2, (24 - LEVEL007_HEIGHT) / 2, LEVEL007_WIDTH, LEVEL007_HEIGHT, g_Level007, "", 6},
-		{(32 - LEVEL008_WIDTH) / 2, (24 - LEVEL008_HEIGHT) / 2, LEVEL008_WIDTH, LEVEL008_HEIGHT, g_Level008, "", 7},
-		{(32 - LEVEL009_WIDTH) / 2, (24 - LEVEL009_HEIGHT) / 2, LEVEL009_WIDTH, LEVEL009_HEIGHT, g_Level009, "", 8},
-		{(32 - LEVEL010_WIDTH) / 2, (24 - LEVEL010_HEIGHT) / 2, LEVEL010_WIDTH, LEVEL010_HEIGHT, g_Level010, "", 9},
-		{(32 - LEVEL011_WIDTH) / 2, (24 - LEVEL011_HEIGHT) / 2, LEVEL011_WIDTH, LEVEL011_HEIGHT, g_Level011, "", 10},
-		{(32 - LEVEL012_WIDTH) / 2, (24 - LEVEL012_HEIGHT) / 2, LEVEL012_WIDTH, LEVEL012_HEIGHT, g_Level012, "", 11},
-		{(32 - LEVEL013_WIDTH) / 2, (24 - LEVEL013_HEIGHT) / 2, LEVEL013_WIDTH, LEVEL013_HEIGHT, g_Level013, "", 12},
-		{(32 - LEVEL014_WIDTH) / 2, (24 - LEVEL014_HEIGHT) / 2, LEVEL014_WIDTH, LEVEL014_HEIGHT, g_Level014, "", 13},
-		{(32 - LEVEL015_WIDTH) / 2, (24 - LEVEL015_HEIGHT) / 2, LEVEL015_WIDTH, LEVEL015_HEIGHT, g_Level015, "", 14},
-		{(32 - LEVEL016_WIDTH) / 2, (24 - LEVEL016_HEIGHT) / 2, LEVEL016_WIDTH, LEVEL016_HEIGHT, g_Level016, "", 15},
-		{(32 - LEVEL017_WIDTH) / 2, (24 - LEVEL017_HEIGHT) / 2, LEVEL017_WIDTH, LEVEL017_HEIGHT, g_Level017, "", 16},
-		{(32 - LEVEL018_WIDTH) / 2, (24 - LEVEL018_HEIGHT) / 2, LEVEL018_WIDTH, LEVEL018_HEIGHT, g_Level018, "", 17},
-		{(32 - LEVEL019_WIDTH) / 2, (24 - LEVEL019_HEIGHT) / 2, LEVEL019_WIDTH, LEVEL019_HEIGHT, g_Level019, "", 18},
-		{(32 - LEVEL020_WIDTH) / 2, (24 - LEVEL020_HEIGHT) / 2, LEVEL020_WIDTH, LEVEL020_HEIGHT, g_Level020, "", 19},
-		{(32 - LEVEL021_WIDTH) / 2, (24 - LEVEL021_HEIGHT) / 2, LEVEL021_WIDTH, LEVEL021_HEIGHT, g_Level021, "", 20},
-		{(32 - LEVEL022_WIDTH) / 2, (24 - LEVEL022_HEIGHT) / 2, LEVEL022_WIDTH, LEVEL022_HEIGHT, g_Level022, "", 21},
-		{(32 - LEVEL023_WIDTH) / 2, (24 - LEVEL023_HEIGHT) / 2, LEVEL023_WIDTH, LEVEL023_HEIGHT, g_Level023, "", 22},
-		{(32 - LEVEL024_WIDTH) / 2, (24 - LEVEL024_HEIGHT) / 2, LEVEL024_WIDTH, LEVEL024_HEIGHT, g_Level024, "", 23},
-		{(32 - LEVEL025_WIDTH) / 2, (24 - LEVEL025_HEIGHT) / 2, LEVEL025_WIDTH, LEVEL025_HEIGHT, g_Level025, "", 24},
-		{(32 - LEVEL026_WIDTH) / 2, (24 - LEVEL026_HEIGHT) / 2, LEVEL026_WIDTH, LEVEL026_HEIGHT, g_Level026, "", 25},
-		{(32 - LEVEL027_WIDTH) / 2, (24 - LEVEL027_HEIGHT) / 2, LEVEL027_WIDTH, LEVEL027_HEIGHT, g_Level027, "", 26},
-		{(32 - LEVEL028_WIDTH) / 2, (24 - LEVEL028_HEIGHT) / 2, LEVEL028_WIDTH, LEVEL028_HEIGHT, g_Level028, "", 27},
-		{(32 - LEVEL029_WIDTH) / 2, (24 - LEVEL029_HEIGHT) / 2, LEVEL029_WIDTH, LEVEL029_HEIGHT, g_Level029, "", 28},
-		{(32 - LEVEL030_WIDTH) / 2, (24 - LEVEL030_HEIGHT) / 2, LEVEL030_WIDTH, LEVEL030_HEIGHT, g_Level030, "", 29},
-		{(32 - LEVEL031_WIDTH) / 2, (24 - LEVEL031_HEIGHT) / 2, LEVEL031_WIDTH, LEVEL031_HEIGHT, g_Level031, "", 30},
+
+		// écran d'accueil
+		{(32 - LEVEL001_WIDTH) / 2, (24 - LEVEL001_HEIGHT) / 2, LEVEL001_WIDTH, LEVEL001_HEIGHT, g_Level001, "", 1},
+
+		{(32 - LEVEL002_WIDTH) / 2, (24 - LEVEL002_HEIGHT) / 2, LEVEL002_WIDTH, LEVEL002_HEIGHT, g_Level002, "", 2},
+		{(32 - LEVEL003_WIDTH) / 2, (24 - LEVEL003_HEIGHT) / 2, LEVEL003_WIDTH, LEVEL003_HEIGHT, g_Level003, "", 3},
+		{(32 - LEVEL004_WIDTH) / 2, (24 - LEVEL004_HEIGHT) / 2, LEVEL004_WIDTH, LEVEL004_HEIGHT, g_Level004, "", 4},
+		{(32 - LEVEL005_WIDTH) / 2, (24 - LEVEL005_HEIGHT) / 2, LEVEL005_WIDTH, LEVEL005_HEIGHT, g_Level005, "", 5},
+		{(32 - LEVEL006_WIDTH) / 2, (24 - LEVEL006_HEIGHT) / 2, LEVEL006_WIDTH, LEVEL006_HEIGHT, g_Level006, "", 6},
+		{(32 - LEVEL007_WIDTH) / 2, (24 - LEVEL007_HEIGHT) / 2, LEVEL007_WIDTH, LEVEL007_HEIGHT, g_Level007, "", 7},
+		{(32 - LEVEL008_WIDTH) / 2, (24 - LEVEL008_HEIGHT) / 2, LEVEL008_WIDTH, LEVEL008_HEIGHT, g_Level008, "", 8},
+		{(32 - LEVEL009_WIDTH) / 2, (24 - LEVEL009_HEIGHT) / 2, LEVEL009_WIDTH, LEVEL009_HEIGHT, g_Level009, "", 9},
+		{(32 - LEVEL010_WIDTH) / 2, (24 - LEVEL010_HEIGHT) / 2, LEVEL010_WIDTH, LEVEL010_HEIGHT, g_Level010, "", 10},
+		{(32 - LEVEL011_WIDTH) / 2, (24 - LEVEL011_HEIGHT) / 2, LEVEL011_WIDTH, LEVEL011_HEIGHT, g_Level011, "", 11},
+		{(32 - LEVEL012_WIDTH) / 2, (24 - LEVEL012_HEIGHT) / 2, LEVEL012_WIDTH, LEVEL012_HEIGHT, g_Level012, "", 12},
+		{(32 - LEVEL013_WIDTH) / 2, (24 - LEVEL013_HEIGHT) / 2, LEVEL013_WIDTH, LEVEL013_HEIGHT, g_Level013, "", 13},
+		{(32 - LEVEL014_WIDTH) / 2, (24 - LEVEL014_HEIGHT) / 2, LEVEL014_WIDTH, LEVEL014_HEIGHT, g_Level014, "", 14},
+		{(32 - LEVEL015_WIDTH) / 2, (24 - LEVEL015_HEIGHT) / 2, LEVEL015_WIDTH, LEVEL015_HEIGHT, g_Level015, "", 15},
+		{(32 - LEVEL016_WIDTH) / 2, (24 - LEVEL016_HEIGHT) / 2, LEVEL016_WIDTH, LEVEL016_HEIGHT, g_Level016, "", 16},
+		{(32 - LEVEL017_WIDTH) / 2, (24 - LEVEL017_HEIGHT) / 2, LEVEL017_WIDTH, LEVEL017_HEIGHT, g_Level017, "", 17},
+		{(32 - LEVEL018_WIDTH) / 2, (24 - LEVEL018_HEIGHT) / 2, LEVEL018_WIDTH, LEVEL018_HEIGHT, g_Level018, "", 18},
+		{(32 - LEVEL019_WIDTH) / 2, (24 - LEVEL019_HEIGHT) / 2, LEVEL019_WIDTH, LEVEL019_HEIGHT, g_Level019, "", 19},
+		{(32 - LEVEL020_WIDTH) / 2, (24 - LEVEL020_HEIGHT) / 2, LEVEL020_WIDTH, LEVEL020_HEIGHT, g_Level020, "", 20},
+		{(32 - LEVEL021_WIDTH) / 2, (24 - LEVEL021_HEIGHT) / 2, LEVEL021_WIDTH, LEVEL021_HEIGHT, g_Level021, "", 21},
+		{(32 - LEVEL022_WIDTH) / 2, (24 - LEVEL022_HEIGHT) / 2, LEVEL022_WIDTH, LEVEL022_HEIGHT, g_Level022, "", 22},
+		{(32 - LEVEL023_WIDTH) / 2, (24 - LEVEL023_HEIGHT) / 2, LEVEL023_WIDTH, LEVEL023_HEIGHT, g_Level023, "", 23},
+		{(32 - LEVEL024_WIDTH) / 2, (24 - LEVEL024_HEIGHT) / 2, LEVEL024_WIDTH, LEVEL024_HEIGHT, g_Level024, "", 24},
+		{(32 - LEVEL025_WIDTH) / 2, (24 - LEVEL025_HEIGHT) / 2, LEVEL025_WIDTH, LEVEL025_HEIGHT, g_Level025, "", 25},
+		{(32 - LEVEL026_WIDTH) / 2, (24 - LEVEL026_HEIGHT) / 2, LEVEL026_WIDTH, LEVEL026_HEIGHT, g_Level026, "", 26},
+		{(32 - LEVEL027_WIDTH) / 2, (24 - LEVEL027_HEIGHT) / 2, LEVEL027_WIDTH, LEVEL027_HEIGHT, g_Level027, "", 27},
+
+		// Mène à l'une des fin
+		{(32 - LEVEL028_WIDTH) / 2, (24 - LEVEL028_HEIGHT) / 2, LEVEL028_WIDTH, LEVEL028_HEIGHT, g_Level028, "", -1},
+
+		// Les fins
+		{(32 - LEVEL029_WIDTH) / 2, (24 - LEVEL029_HEIGHT) / 2, LEVEL029_WIDTH, LEVEL029_HEIGHT, g_Level029, "", 31},
+		{(32 - LEVEL030_WIDTH) / 2, (24 - LEVEL030_HEIGHT) / 2, LEVEL030_WIDTH, LEVEL030_HEIGHT, g_Level030, "", 31},
+		{(32 - LEVEL031_WIDTH) / 2, (24 - LEVEL031_HEIGHT) / 2, LEVEL031_WIDTH, LEVEL031_HEIGHT, g_Level031, "", 31},
+
+		// fin commune
 		{(32 - LEVEL032_WIDTH) / 2, (24 - LEVEL032_HEIGHT) / 2, LEVEL032_WIDTH, LEVEL032_HEIGHT, g_Level032, "", 0},
+
 };
 
 // Liste des frames d'animation du personnage
@@ -707,8 +717,6 @@ void activateDoor(u8 tile, u8 x, u8 y)
 	u8 roomNumber = getTile(x, y);
 	u8 doorIndex = 255;
 
-	// Print_SetPosition(0, 23);
-	// Print_DrawFormat("Room: %d, %d, %d,%d", tile, x, y, roomNumber);
 	switch (roomNumber)
 	{
 	case TILE_DOOR_NUMBER_ONE:
@@ -727,10 +735,30 @@ void activateDoor(u8 tile, u8 x, u8 y)
 	{
 		// Nous sommes dans une room avec téléphone.
 		// On incrément le compte de doorTheme
-		g_DoorThemeCount[doorIndex]++;
+		g_DoorThemeCount[g_DoorTheme[doorIndex]]++;
 	}
 
 	displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
+}
+
+void activateEndDoor()
+{
+	u8 hospital = g_DoorThemeCount[THEME_HOSPITAL];
+	u8 alien = g_DoorThemeCount[THEME_ALIEN];
+	u8 matrix = g_DoorThemeCount[THEME_MATRIX];
+
+	if (hospital > alien && hospital > matrix)
+	{
+		displayLevel(28);
+	}
+	else if (alien > hospital && alien > matrix)
+	{
+		displayLevel(29);
+	}
+	else // if (matrix > hospital && matrix > alien)
+	{
+		displayLevel(30);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -919,6 +947,11 @@ void addNotElectricWall(u8 levelIdx, u8 i, u8 j)
 //
 //.............................................................................
 
+void displayText(bool enabled)
+{
+	VDP_FillVRAM_16K(enabled ? 0xf1 : 0x11, g_ScreenColorLow + 192 / 8, 8);
+}
+
 //-----------------------------------------------------------------------------
 // Afficher une pièce
 void displayLevel(u8 levelIdx)
@@ -939,7 +972,8 @@ void displayLevel(u8 levelIdx)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 
 	// Masquage des textes par défaut
-	VDP_FillVRAM_16K(0, g_ScreenColorLow + 192 / 8, 8);
+
+	displayText(FALSE);
 
 	// Dessin de la pièce ligne par ligne
 	// I = ligne, J = colonne
@@ -960,6 +994,12 @@ void displayLevel(u8 levelIdx)
 			{
 				initPlayer(x * 8 - 4, y * 8 - 9);
 				setTileByTileCoord(x, y, TILE_EMPTY); // Effacement de la tuile de départ
+			}
+			else if (tile == TILE_SPE_DISPLAY_TEXT)
+			{
+
+				displayText(TRUE);
+				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
 			else if (tile == TILE_SPE_THEME_HOSPITAL)
 			{
@@ -1061,6 +1101,7 @@ void displayLevel(u8 levelIdx)
 	}
 
 	// Debug : affichage du tableau des thèmes
+	// displayText(TRUE);
 	//	Print_SetPosition(g_Rooms[levelIdx].X - 1, 0);
 	//	Print_DrawFormat(" %i, %i, %i ", g_DoorThemeCount[0], g_DoorThemeCount[1], g_DoorThemeCount[2]);
 }
@@ -1176,6 +1217,13 @@ bool interact(u8 x, u8 y)
 
 		activateDoor(tile, x, y);
 		// TODO Animer porte qui s'ouvre et personnage qui passe
+		return FALSE;
+
+		// Porte de fin
+	case TILE_DOOR_END1:
+	case TILE_DOOR_END2:
+
+		activateEndDoor();
 		return FALSE;
 
 	// Placard

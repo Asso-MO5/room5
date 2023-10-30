@@ -9,4 +9,4 @@
 
 cls
 
-..\MSXgl\tools\build\Node\node.exe ..\MSXgl\engine\script\js\build.js %1
+..\MSXgl\tools\build\Node\node.exe ..\MSXgl\engine\script\js\build.js target=%1

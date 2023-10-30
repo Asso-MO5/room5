@@ -1300,6 +1300,11 @@ bool interact(u8 x, u8 y)
 //
 //.............................................................................
 
+//
+void VDP_InterruptHandler()
+{
+}
+
 //-----------------------------------------------------------------------------
 // Point d'entrée du programme principal
 void main()
@@ -1314,9 +1319,8 @@ void main()
 	// Chargement des données graphique en mémoire vidéo (VRAM)
 	loadData();
 
-	g_DoorThemeCount[0] = 0;
-	g_DoorThemeCount[1] = 0;
-	g_DoorThemeCount[2] = 0;
+	for (u8 i = 0; i < THEME_NUMBER; ++i)
+		g_DoorThemeCount[i] = 0;
 
 	// Initialise le joueur
 	initPlayer(100, 103);

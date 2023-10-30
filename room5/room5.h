@@ -124,6 +124,7 @@ enum StoryDirection
 	THEME_HOSPITAL = 0,
 	THEME_ALIEN,
 	THEME_MATRIX, // follow the white rabbit
+	THEME_NUMBER, //
 };
 
 enum ElevatorDirection

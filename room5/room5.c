@@ -16,6 +16,7 @@
 #include "level_defs.h"
 #include "tiles_defs.h"
 #include "tiles.h"
+#include "inventory.h"
 
 //=============================================================================
 // DEFINITIONS
@@ -25,17 +26,15 @@
 
 void initPlayer(u8 x, u8 y);
 void updatePlayer();
-void initInventory();
+
 void initElevator(u8 num, u8 x, u8 y);
 void updateElevator(u8 num);
+
 void activateLight(bool bActivate);
+void activateElectricity(bool bActivate);
 void displayLevel(u8 levelIdx);
 bool interact(u8 x, u8 y);
 bool checkRails(u8 x, u8 y);
-bool addItemToInventory(u8 item);
-bool hasItemInInventory(u8 item);
-bool removeItemFromInventory(u8 item);
-void activateElectricity(bool bActivate);
 
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
@@ -55,7 +54,6 @@ bool g_CurrentElectricityOn;
 
 // Paramètres du joueur
 struct PlayerDefinition g_Player;
-u8 g_Inventory[INVENTORY_SIZE]; // Contenu de l'inventaire
 
 // Variables pour la gestion des ascenseurs automatiques
 u8 g_ElevatorCount = 0;
@@ -404,68 +402,6 @@ void updatePlayer()
 	VDP_SetSprite(SPT_PLAYER_SKIN, g_Player.X, g_Player.Y - 1, baseNumPattern + 4);
 	VDP_SetSprite(SPT_PLAYER_CHAIR, g_Player.X, g_Player.Y + 7, baseNumPattern + 8);
 	VDP_SetSprite(SPT_PLAYER_OUTLINE, g_Player.X, g_Player.Y - 1, baseNumPattern + 12);
-}
-
-//.............................................................................
-//
-//  GESTION DE L'INVENTAIRE
-//
-//.............................................................................
-
-//-----------------------------------------------------------------------------
-// Initialise l'inventaire
-void initInventory()
-{
-	for (u8 i = 0; i < INVENTORY_SIZE; i++)
-	{
-		g_Inventory[i] = EMPTY_ITEM;
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Ajout d'un objet dans l'inventaire
-bool addItemToInventory(u8 item)
-{
-	for (u8 i = 0; i < INVENTORY_SIZE; i++)
-	{
-		if (g_Inventory[i] == EMPTY_ITEM)
-		{
-			g_Inventory[i] = item;
-			setTile(8 + i * 16, (u8)(192 - 8), item);
-			return TRUE;
-		}
-	}
-	return FALSE;
-}
-
-//-----------------------------------------------------------------------------
-// Test la présence d'un objet dans l'inventaire
-bool hasItemInInventory(u8 item)
-{
-	for (u8 i = 0; i < INVENTORY_SIZE; i++)
-	{
-		if (g_Inventory[i] == item)
-		{
-			return TRUE;
-		}
-	}
-	return FALSE;
-}
-
-//-----------------------------------------------------------------------------
-// Retire un objet de l'inventaire
-bool removeItemFromInventory(u8 item)
-{
-	for (u8 i = 0; i < INVENTORY_SIZE; i++)
-	{
-		if (g_Inventory[i] == item)
-		{
-			g_Inventory[i] = EMPTY_ITEM;
-			setTile(8 + i * 16, (u8)(192 - 8), 0);
-			return TRUE;
-		}
-	}
-	return FALSE;
 }
 
 //.............................................................................

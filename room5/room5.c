@@ -1,11 +1,12 @@
-//  ______ _____  ________  ___  _____
-//  | ___ \  _  ||  _  |  \/  | |  ___|
-//  | |_/ / | | || | | | .  . | |___ \ 
-//  |    /| | | || | | | |\/| |     \ \
-//  | |\ \\ \_/ /\ \_/ / |  | | /\__/ /
-//  \_| \_|\___/  \___/\_|  |_/ \____/
-//
-//
+/*
+		______ _____  ________  ___  _____
+		| ___ \  _  ||  _  |  \/  | |  ___|
+		| |_/ / | | || | | | .  . | |___ \
+		|    /| | | || | | | |\/| |     \ \
+		| |\ \\ \_/ /\ \_/ / |  | | /\__/ /
+		\_| \_|\___/  \___/\_|  |_/ \____/
+
+*/
 
 //=============================================================================
 // INCLUDES
@@ -591,7 +592,7 @@ void moveManualElevator(u8 num, u8 direction)
 			setTileByTileCoord(elevator->X + 1, elevator->Y, TILE_MANUAL_RAILS);
 			elevator->Y--;
 			setTileByTileCoord(elevator->X, elevator->Y, TILE_MANUAL_ELEVATOR);
-			setTileByTileCoord(elevator->X + 1, elevator->Y, TILE_MANUAL_ELEVATOR + 1);
+			setTileByTileCoord(elevator->X + 1, elevator->Y, (u8)(TILE_MANUAL_ELEVATOR + 1));
 		}
 	}
 	else
@@ -602,7 +603,7 @@ void moveManualElevator(u8 num, u8 direction)
 			setTileByTileCoord(elevator->X + 1, elevator->Y, TILE_MANUAL_RAILS);
 			elevator->Y++;
 			setTileByTileCoord(elevator->X, elevator->Y, TILE_MANUAL_ELEVATOR);
-			setTileByTileCoord(elevator->X + 1, elevator->Y, TILE_MANUAL_ELEVATOR + 1);
+			setTileByTileCoord(elevator->X + 1, elevator->Y, (u8)(TILE_MANUAL_ELEVATOR + 1));
 		}
 	}
 }
@@ -687,7 +688,7 @@ void activateEndDoor()
 // Répondre au téléphone
 void activatePhone()
 {
-	VDP_FillVRAM_16K(COLOR_WHITE << 4, g_ScreenColorLow + 192 / 8, 8);
+	VDP_FillVRAM_16K((u8)(COLOR_WHITE << 4), g_ScreenColorLow + 192 / 8, 8);
 
 	for (u8 y = 0; y < 24; ++y)
 	{

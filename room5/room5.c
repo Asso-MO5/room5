@@ -960,12 +960,7 @@ bool interact(u8 x, u8 y)
 		if (hasItemInInventory(TILE_ITEM_KEY_DOOR))
 		{
 			removeItemFromInventory(TILE_ITEM_KEY_DOOR);
-			u8 tileX = x;
-			if (tile == TILE_LOCK_DOOR2)
-				tileX -= 8;
-
-			setTile(tileX, y, TILE_DOOR1);
-			setTile(tileX + 8, y, TILE_DOOR2);
+			activateDoor(tile, x, y);
 			return TRUE;
 		}
 		return FALSE;

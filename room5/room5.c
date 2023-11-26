@@ -13,6 +13,7 @@
 #include "msxgl.h"
 #include "room5.h"
 #include "level_defs.h"
+#include "tiles_defs.h"
 
 //=============================================================================
 // DEFINITIONS

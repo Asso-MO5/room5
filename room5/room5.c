@@ -852,16 +852,17 @@ void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
 	if (g_VisibleObjectCount >= MAX_VISIBLE_OBJECTS)
 		return;
 
-	u8 targetItem = g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * (i + 1) + j];
+	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
+	u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
 	struct VisibleObject *pObj = &g_VisibleObjects[g_VisibleObjectCount];
-	pObj->X = (g_Rooms[levelIdx].X + j);
-	pObj->Y = (g_Rooms[levelIdx].Y + (i + 1));
+	pObj->X = (pRoom->X + j);
+	pObj->Y = (pRoom->Y + (i + 1));
 	pObj->ItemCondition = condition;
 	pObj->Tile = targetItem;
 	g_VisibleObjectCount++;
 
-	u8 x = g_Rooms[levelIdx].X + j;
-	u8 y = g_Rooms[levelIdx].Y + i;
+	u8 x = pRoom->X + j;
+	u8 y = pRoom->Y + i;
 	setTileByTileCoord(x, y, TILE_EMPTY);
 }
 
@@ -873,9 +874,10 @@ void addElectricWall(u8 levelIdx, u8 i, u8 j)
 	if (g_ElectricWallCount >= MAX_ELECTRIC_WALL)
 		return;
 
+	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
 	struct ActiveObject *pObj = &g_ElectricWalls[g_ElectricWallCount];
-	pObj->X = (g_Rooms[levelIdx].X + j);
-	pObj->Y = (g_Rooms[levelIdx].Y + i);
+	pObj->X = (pRoom->X + j);
+	pObj->Y = (pRoom->Y + i);
 	pObj->Tile = TILE_ELECTRIC_WALL;
 	g_ElectricWallCount++;
 }
@@ -887,9 +889,10 @@ void addNotElectricWall(u8 levelIdx, u8 i, u8 j)
 	if (g_NotElectricWallCount >= MAX_NOT_ELECTRIC_WALL)
 		return;
 
+	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
 	struct ActiveObject *pObj = &g_NotElectricWalls[g_NotElectricWallCount];
-	pObj->X = (g_Rooms[levelIdx].X + j);
-	pObj->Y = (g_Rooms[levelIdx].Y + i);
+	pObj->X = (pRoom->X + j);
+	pObj->Y = (pRoom->Y + i);
 	pObj->Tile = TILE_NOT_ELECTRIC_WALL;
 	g_NotElectricWallCount++;
 }
@@ -928,20 +931,21 @@ void displayLevel(u8 levelIdx)
 
 	displayText(FALSE);
 
+	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
 	// Dessin de la pièce ligne par ligne
 	// I = ligne, J = colonne
-	for (u8 i = 0; i < g_Rooms[levelIdx].Height; ++i)
+	for (u8 i = 0; i < pRoom->Height; ++i)
 	{
 		// Copie une ligne de donnée en VRAM
-		VDP_WriteVRAM_16K(g_Rooms[levelIdx].Layout + g_Rooms[levelIdx].Width * i,
-											g_ScreenLayoutLow + 32 * (i + g_Rooms[levelIdx].Y) + (g_Rooms[levelIdx].X), g_Rooms[levelIdx].Width);
+		VDP_WriteVRAM_16K(pRoom->Layout + pRoom->Width * i,
+											g_ScreenLayoutLow + 32 * (i + pRoom->Y) + (pRoom->X), pRoom->Width);
 
-		for (u8 j = 0; j < g_Rooms[levelIdx].Width; ++j)
+		for (u8 j = 0; j < pRoom->Width; ++j)
 		{
-			u8 tile = g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * i + j];
+			u8 tile = pRoom->Layout[pRoom->Width * i + j];
 			// Positionnement du joueur centré sur la tuile trouvée
-			u8 x = g_Rooms[levelIdx].X + j;
-			u8 y = g_Rooms[levelIdx].Y + i;
+			u8 x = pRoom->X + j;
+			u8 y = pRoom->Y + i;
 
 			if (tile == TILE_START_POS) // Detection de la position initiale du joueur
 			{
@@ -956,7 +960,7 @@ void displayLevel(u8 levelIdx)
 			}
 			else if (tile == TILE_SPE_THEME_HOSPITAL)
 			{
-				u8 targetItem = g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * (i + 1) + j];
+				u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
 				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
 				g_DoorTheme[indexDoor] = THEME_HOSPITAL;
 				setTileByTileCoord(x, y, TILE_EMPTY);
@@ -964,7 +968,7 @@ void displayLevel(u8 levelIdx)
 
 			else if (tile == TILE_SPE_THEME_ALIEN)
 			{
-				u8 targetItem = g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * (i + 1) + j];
+				u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
 				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
 				g_DoorTheme[indexDoor] = THEME_ALIEN;
 				setTileByTileCoord(x, y, TILE_EMPTY);
@@ -972,7 +976,7 @@ void displayLevel(u8 levelIdx)
 
 			else if (tile == TILE_SPE_THEME_MATRIX)
 			{
-				u8 targetItem = g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * (i + 1) + j];
+				u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
 				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
 				g_DoorTheme[indexDoor] = THEME_MATRIX;
 				setTileByTileCoord(x, y, TILE_EMPTY);
@@ -1031,9 +1035,9 @@ void displayLevel(u8 levelIdx)
 			}
 			if ((tile == TILE_RAILS) && (g_ElevatorCount < MAX_ELEVATOR)) // Detection des rails pour placer les élévateurs
 			{
-				if (g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * i + j - 1] != TILE_RAILS)
+				if (pRoom->Layout[pRoom->Width * i + j - 1] != TILE_RAILS)
 				{
-					if (g_Rooms[levelIdx].Layout[g_Rooms[levelIdx].Width * (i - 1) + j] != TILE_RAILS)
+					if (pRoom->Layout[pRoom->Width * (i - 1) + j] != TILE_RAILS)
 					{
 						initElevator(g_ElevatorCount, x * 8, y * 8);
 						g_ElevatorCount++;
@@ -1055,7 +1059,7 @@ void displayLevel(u8 levelIdx)
 
 	// Debug : affichage du tableau des thèmes
 	// displayText(TRUE);
-	//	Print_SetPosition(g_Rooms[levelIdx].X - 1, 0);
+	//	Print_SetPosition(pRoom->X - 1, 0);
 	//	Print_DrawFormat(" %i, %i, %i ", g_DoorThemeCount[0], g_DoorThemeCount[1], g_DoorThemeCount[2]);
 }
 

@@ -11,9 +11,7 @@
 //-----------------------------------------------------------------------------
 
 // Configuration
-#define MAX_ELEVATOR 8
-#define MAX_MANUAL_ELEVATOR 8
-#define ELEVATOR_STAND 20
+
 #define MAX_VISIBLE_OBJECTS 16
 #define MAX_ELECTRIC_WALL 16
 #define MAX_NOT_ELECTRIC_WALL 16
@@ -45,13 +43,6 @@ enum PlayerState
 	PLAYER_STATE_FALL,
 };
 
-// Etats des élévateurs
-enum ElevatorState
-{
-	ELEVATOR_STATE_MOVE,
-	ELEVATOR_STATE_STAND,
-};
-
 // direction de l'histoire
 
 enum StoryDirection
@@ -60,12 +51,6 @@ enum StoryDirection
 	THEME_ALIEN,
 	THEME_MATRIX, // follow the white rabbit
 	THEME_NUMBER, //
-};
-
-enum ElevatorDirection
-{
-	ELEVATOR_DIRECTION_UP,
-	ELEVATOR_DIRECTION_DOWN,
 };
 
 //-----------------------------------------------------------------------------
@@ -81,17 +66,6 @@ struct PlayerDefinition
 	u8 State;			// État du personnage
 	bool InAir;		// Est-ce que le personnage est en train de sauter
 };
-
-// Structure des paramètres de l'élévateur
-struct ElevatorDefinition
-{
-	u8 X;
-	u8 Y;
-	i8 VelocityY;
-	u8 State;
-	u8 Timer;
-};
-
 // Structure d'un objet visible sous condition
 struct VisibleObject
 {

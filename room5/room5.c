@@ -19,6 +19,7 @@
 #include "inventory.h"
 #include "objects.h"
 #include "elevator.h"
+#include "sprite_fx.h"
 
 //=============================================================================
 // DEFINITIONS
@@ -43,6 +44,9 @@ u8 g_FrameCounter = 0;
 
 // Index de la pièce courante
 u8 g_CurrRoomIdx;
+
+u8 g_SpriteBuffer1[8 * 4 * 4];
+u8 g_SpriteBuffer2[8 * 4 * 4];
 
 // Définie si la lumière est active ou non
 bool g_CurrentLightOn;
@@ -112,7 +116,7 @@ void loadData()
 	g_PrintData.PatternOffset = 192;
 
 	// Chargement des formes des sprites
-	VDP_WriteVRAM_16K(g_SprtPlayer, g_SpritePatternLow, sizeof(g_SprtPlayer));
+	// VDP_WriteVRAM_16K(g_SprtPlayer, g_SpritePatternLow, sizeof(g_SprtPlayer));
 	VDP_WriteVRAM_16K(g_SprtElevator, g_SpritePatternLow + 4 * 4 * 12 * 8, sizeof(g_SprtElevator));
 
 	// Creation des 4 sprites du personnage (leur position et leur pattern seront mis-à-jour à chaque frame dans la boucle principale)
@@ -121,12 +125,6 @@ void loadData()
 	VDP_SetSpriteSM1(SPT_PLAYER_CHAIR, 0, 0, 8, COLOR_DARK_RED);
 	VDP_SetSpriteSM1(SPT_PLAYER_OUTLINE, 0, 0, 12, COLOR_BLACK);
 }
-
-//.............................................................................
-//
-//  GESTION DES TUILES
-//
-//.............................................................................
 
 //.............................................................................
 //
@@ -205,6 +203,7 @@ void initPlayer(u8 x, u8 y)
 	g_Player.VelocityY = 0;
 	g_Player.State = PLAYER_STATE_IDLE;
 	g_Player.InAir = TRUE;
+	g_Player.isLeft = FALSE;
 }
 
 //-----------------------------------------------------------------------------
@@ -215,8 +214,9 @@ void updatePlayer()
 	{
 		if (g_FrameCounter == 2 * 8)
 		{
+			i8 interactOffset = g_Player.isLeft ? 4 : 12;
 			// Interaction au milieu du personnage
-			if (interact(g_Player.X + 12, g_Player.Y + 4) || interact(g_Player.X + 12, g_Player.Y + 12))
+			if (interact(g_Player.X + interactOffset, g_Player.Y + 4) || interact(g_Player.X + interactOffset, g_Player.Y + 12))
 			{
 				g_Player.State = PLAYER_STATE_IDLE;
 			}
@@ -262,11 +262,13 @@ void updatePlayer()
 		{
 			xTemp--;
 			g_Player.State = PLAYER_STATE_MOVE;
+			g_Player.isLeft = TRUE;
 		}
 		else if (isMoveRight())
 		{
 			xTemp++;
 			g_Player.State = PLAYER_STATE_MOVE;
+			g_Player.isLeft = FALSE;
 		}
 
 		// Test du bouton d'interaction
@@ -377,11 +379,28 @@ void updatePlayer()
 		break;
 	}
 
-	// Mise à jour de la position et du pattern des sprites du joueur (1 par couleur)
-	VDP_SetSprite(SPT_PLAYER_HAIR, g_Player.X, g_Player.Y - 9, baseNumPattern);
-	VDP_SetSprite(SPT_PLAYER_SKIN, g_Player.X, g_Player.Y - 1, baseNumPattern + 4);
-	VDP_SetSprite(SPT_PLAYER_CHAIR, g_Player.X, g_Player.Y + 7, baseNumPattern + 8);
-	VDP_SetSprite(SPT_PLAYER_OUTLINE, g_Player.X, g_Player.Y - 1, baseNumPattern + 12);
+	// TODO LOADSTRIPE
+
+	if (g_Player.isLeft)
+	{
+		Mem_Copy(g_SprtPlayer + 8 * baseNumPattern, g_SpriteBuffer1, 8 * 4 * 4);
+		SpriteFX_FlipHorizontal16(g_SpriteBuffer1, g_SpriteBuffer2);
+		SpriteFX_FlipHorizontal16(g_SpriteBuffer1 + 32, g_SpriteBuffer2 + 32);
+		SpriteFX_FlipHorizontal16(g_SpriteBuffer1 + 64, g_SpriteBuffer2 + 64);
+		SpriteFX_FlipHorizontal16(g_SpriteBuffer1 + 96, g_SpriteBuffer2 + 96);
+	}
+	else
+	{
+		Mem_Copy(g_SprtPlayer + 8 * baseNumPattern, g_SpriteBuffer2, 8 * 4 * 4);
+	}
+
+	VDP_WriteVRAM_16K(g_SpriteBuffer2, g_SpritePatternLow, 8 * 4 * 4);
+
+	//  Mise à jour de la position et du pattern des sprites du joueur (1 par couleur)
+	VDP_SetSprite(SPT_PLAYER_HAIR, g_Player.X, g_Player.Y - 9, 0);
+	VDP_SetSprite(SPT_PLAYER_SKIN, g_Player.X, g_Player.Y - 1, 4);
+	VDP_SetSprite(SPT_PLAYER_CHAIR, g_Player.X, g_Player.Y + 7, 8);
+	VDP_SetSprite(SPT_PLAYER_OUTLINE, g_Player.X, g_Player.Y - 1, 12);
 }
 
 //.............................................................................

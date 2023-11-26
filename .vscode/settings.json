@@ -36,8 +36,9 @@
   "C_Cpp_Runner.useAddressSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
   "files.associations": {
-    "*.asm": "asz80"
-  },
+		"*.asm": "asz80",
+		"sprt_elevator.h": "c"
+	},
   "editor.insertSpaces": false,
   "editor.detectIndentation": false,
   "C_Cpp_Runner.msvcWarnings": [

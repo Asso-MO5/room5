@@ -137,18 +137,6 @@ enum ElevatorDirection
 // Structures de donnée
 //-----------------------------------------------------------------------------
 
-// Structure de description d'une pièce
-struct RoomDefinition
-{
-	u8 X;
-	u8 Y;
-	u8 Width;
-	u8 Height;
-	const u8 *Layout;
-	const c8 *Name;
-	u8 NextLvlIdx;
-};
-
 // Structure des paramètres du joueur
 struct PlayerDefinition
 {

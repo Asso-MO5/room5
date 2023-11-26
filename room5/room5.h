@@ -101,14 +101,6 @@ struct VisibleObject
 	u8 ItemCondition;
 };
 
-// Structure d'un element visible si l'électricité est allumée
-struct ActiveObject
-{
-	u8 X;
-	u8 Y;
-	u8 Tile;
-};
-
 struct SwitchTimer
 {
 	u8 X;

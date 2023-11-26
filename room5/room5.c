@@ -17,6 +17,7 @@
 #include "tiles_defs.h"
 #include "tiles.h"
 #include "inventory.h"
+#include "objects.h"
 
 //=============================================================================
 // DEFINITIONS

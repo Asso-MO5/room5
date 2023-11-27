@@ -647,7 +647,7 @@ void displayText(bool enabled)
 // Afficher une pièce
 void displayLevel(u8 levelIdx)
 {
-	initInventory();		  // Pas possible de changer de pièce avec un objet dans les mains
+	initInventory(); // Pas possible de changer de pièce avec un objet dans les mains
 	activateElectricity(TRUE);
 	resetElevators();
 
@@ -708,13 +708,10 @@ void displayLevel(u8 levelIdx)
 				setDoorTheme(indexDoor, theme);
 				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
-			else if (tile == TILE_SPE_LIGHT_ON)
+			else if (tile == TILE_SPE_LIGHT_ON ||
+					 tile == TILE_SPE_LIGHT_OFF)
 			{
-				addConditionalItem(levelIdx, i, j, ITEM_COND_LIGHT_ON);
-			}
-			else if (tile == TILE_SPE_LIGHT_OFF)
-			{
-				addConditionalItem(levelIdx, i, j, ITEM_COND_LIGHT_OFF);
+				addConditionalItem(levelIdx, i, j, tile - TILE_SPE_LIGHT_ON + ITEM_COND_LIGHT_ON);
 			}
 
 			else if (tile == TILE_FUSEBOX)

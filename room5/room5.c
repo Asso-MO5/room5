@@ -711,6 +711,7 @@ void displayLevel(u8 levelIdx)
 			else if (tile == TILE_SPE_LIGHT_ON ||
 					 tile == TILE_SPE_LIGHT_OFF)
 			{
+				// Ne fonctionne que si les tuiles sont dans le même ordre que l'enum
 				addConditionalItem(levelIdx, i, j, tile - TILE_SPE_LIGHT_ON + ITEM_COND_LIGHT_ON);
 			}
 
@@ -736,13 +737,11 @@ void displayLevel(u8 levelIdx)
 			{
 				addManualElevator(x, y);
 			}
-			else if (tile == TILE_SPE_CUPBOARD)
+			else if (tile == TILE_SPE_CUPBOARD ||
+					 tile == TILE_SPE_CUPBOARD_LIGHT)
 			{
-				addConditionalItem(levelIdx, i, j, ITEM_COND_CUPBOARD);
-			}
-			else if (tile == TILE_SPE_CUPBOARD_LIGHT)
-			{
-				addConditionalItem(levelIdx, i, j, ITEM_COND_CUPBOARD_LIGHT);
+				// Ne fonctionne que si les tuiles sont dans le même ordre que l'enum
+				addConditionalItem(levelIdx, i, j, tile - TILE_SPE_CUPBOARD + ITEM_COND_CUPBOARD);
 			}
 			// Ici on reconstruit les placards
 			else if (tile == TILE_CUPBOARD)

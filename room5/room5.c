@@ -20,6 +20,7 @@
 #include "objects.h"
 #include "elevator.h"
 #include "sprite_fx.h"
+#include "doors.h"
 
 //=============================================================================
 // DEFINITIONS
@@ -74,10 +75,6 @@ u8 g_ResetCount = 0;
 
 // Switch minuteur
 struct SwitchTimer g_SwitchTimer;
-
-// Connexion des portes aux thèmes du jeu
-u8 g_DoorTheme[3];
-u8 g_DoorThemeCount[3];
 
 //=============================================================================
 // DONNEES CONSTANTES (stockées dans le ROM)
@@ -424,60 +421,6 @@ void updateSwitchTimer()
 //
 //.............................................................................
 
-//-----------------------------------------------------------------------------
-// Ouvrir une porte
-void activateDoor(u8 tile, u8 x, u8 y)
-{
-	if (tile == TILE_DOOR2)
-		x -= 8;
-	y -= 16;
-
-	u8 roomNumber = getTile(x, y);
-	u8 doorIndex = 255;
-
-	switch (roomNumber)
-	{
-	case TILE_DOOR_NUMBER_ONE:
-		doorIndex = 0;
-		break;
-
-	case TILE_DOOR_NUMBER_TWO:
-		doorIndex = 1;
-		break;
-	case TILE_DOOR_NUMBER_THREE:
-		doorIndex = 2;
-		break;
-	}
-
-	if (doorIndex < 255)
-	{
-		// Nous sommes dans une room avec téléphone.
-		// On incrément le compte de doorTheme
-		g_DoorThemeCount[g_DoorTheme[doorIndex]]++;
-	}
-
-	displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
-}
-
-void activateEndDoor()
-{
-	u8 hospital = g_DoorThemeCount[THEME_HOSPITAL];
-	u8 alien = g_DoorThemeCount[THEME_ALIEN];
-	u8 matrix = g_DoorThemeCount[THEME_MATRIX];
-
-	if (hospital > alien && hospital > matrix)
-	{
-		displayLevel(28);
-	}
-	else if (alien > hospital && alien > matrix)
-	{
-		displayLevel(29);
-	}
-	else // if (matrix > hospital && matrix > alien)
-	{
-		displayLevel(30);
-	}
-}
 
 //-----------------------------------------------------------------------------
 // Répondre au téléphone
@@ -755,7 +698,7 @@ void displayLevel(u8 levelIdx)
 			{
 				u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
 				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
-				g_DoorTheme[indexDoor] = THEME_HOSPITAL;
+				setDoorTheme(indexDoor, THEME_HOSPITAL);
 				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
 
@@ -763,7 +706,7 @@ void displayLevel(u8 levelIdx)
 			{
 				u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
 				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
-				g_DoorTheme[indexDoor] = THEME_ALIEN;
+				setDoorTheme(indexDoor, THEME_ALIEN);
 				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
 
@@ -771,7 +714,7 @@ void displayLevel(u8 levelIdx)
 			{
 				u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
 				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
-				g_DoorTheme[indexDoor] = THEME_MATRIX;
+				setDoorTheme(indexDoor, THEME_MATRIX);
 				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
 
@@ -844,11 +787,6 @@ void displayLevel(u8 levelIdx)
 	activateLight(FALSE);
 
 	hideAllElevators();
-
-	// Debug : affichage du tableau des thèmes
-	// displayText(TRUE);
-	//	Print_SetPosition(pRoom->X - 1, 0);
-	//	Print_DrawFormat(" %i, %i, %i ", g_DoorThemeCount[0], g_DoorThemeCount[1], g_DoorThemeCount[2]);
 }
 
 //.............................................................................
@@ -945,7 +883,7 @@ bool interact(u8 x, u8 y)
 		if (hasItemInInventory(TILE_ITEM_KEY_DOOR))
 		{
 			removeItemFromInventory(TILE_ITEM_KEY_DOOR);
-			activateDoor(tile, x, y);
+			displayLevel(activateDoor(tile, x, y, g_CurrRoomIdx));
 			return TRUE;
 		}
 		return FALSE;
@@ -954,7 +892,7 @@ bool interact(u8 x, u8 y)
 	case TILE_DOOR2:
 		// Récupérer la tuile qui est 2 haut dessus
 
-		activateDoor(tile, x, y);
+		displayLevel(activateDoor(tile, x, y, g_CurrRoomIdx));
 		// TODO Animer porte qui s'ouvre et personnage qui passe
 		return FALSE;
 
@@ -962,7 +900,7 @@ bool interact(u8 x, u8 y)
 	case TILE_DOOR_END1:
 	case TILE_DOOR_END2:
 
-		activateEndDoor();
+		displayLevel(activateEndDoor());
 		return FALSE;
 
 	// Placard
@@ -1027,8 +965,7 @@ void main()
 	// Chargement des données graphique en mémoire vidéo (VRAM)
 	loadData();
 
-	for (u8 i = 0; i < THEME_NUMBER; ++i)
-		g_DoorThemeCount[i] = 0;
+	initializeDoors();
 
 	// Initialise le joueur
 	initPlayer(100, 103);

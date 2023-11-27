@@ -25,7 +25,7 @@
 ProjName = 'room5'
 
 //-- List of project modules to build (array). If empty, ProjName will be added
-ProjModules = [ProjName, 'level_defs', 'tiles', 'inventory', 'elevator']
+ProjModules = [ProjName, 'level_defs', 'tiles', 'inventory', 'elevator', 'doors']
 
 //-- Project segments base name (string). ProjName will be used if not defined
 // ProjSegments = "";

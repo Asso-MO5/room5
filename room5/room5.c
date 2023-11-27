@@ -326,18 +326,11 @@ void updatePlayer()
 
 		if (checkRails(g_Player.X + 8, g_Player.Y + 16) || checkRails(g_Player.X + 8, g_Player.Y + 8))
 		{
+			onElevator = isOnElevator(&g_Player.X, &g_Player.Y);
 
-			for (u8 i = 0; i < g_ElevatorCount; ++i)
+			if (onElevator)
 			{
-				if ((g_Player.X < g_Elevator[i].X - 16) || (g_Player.X > g_Elevator[i].X + 16))
-					continue;
-
-				if ((g_Player.Y + 17 > g_Elevator[i].Y) && (g_Player.Y + 17 < g_Elevator[i].Y + 8))
-				{
-					g_Player.Y = g_Elevator[i].Y - 16;
-					bFalling = FALSE;
-					onElevator = TRUE;
-				}
+				bFalling = FALSE;
 			}
 		}
 
@@ -527,9 +520,7 @@ void lightRoom(bool bActivate)
 	VDP_SetSpriteColorSM1(SPT_PLAYER_SKIN, bActivate ? COLOR_WHITE : COLOR_CYAN);
 	VDP_SetSpriteColorSM1(SPT_PLAYER_CHAIR, bActivate ? COLOR_MEDIUM_RED : COLOR_DARK_BLUE);
 
-	// Change la couleur des élévateurs
-	for (u8 i = 0; i < g_ElevatorCount; ++i)
-		VDP_SetSpriteColorSM1(SPT_ELEVATOR + i, bActivate ? COLOR_WHITE : COLOR_CYAN);
+	changeAllElevatorsColor(bActivate ? COLOR_WHITE : COLOR_CYAN);
 
 	for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 	{
@@ -716,8 +707,6 @@ void displayLevel(u8 levelIdx)
 {
 	initInventory();					// Pas possible de changer de pièce avec un objet dans les mains
 	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
-	g_ElevatorCount = 0;			// Initialisation du nombre d'élévateurs
-	g_ManualElevatorCount = 0;
 	activateElectricity(TRUE);
 	g_VisibleObjectCount = 0;
 	g_ElectricWallCount = 0;
@@ -725,6 +714,8 @@ void displayLevel(u8 levelIdx)
 	bool fuseboxOnIsEnabled = FALSE;
 	u8 fuseBoxCount = 0;
 	g_SwitchTimer.Timer = 0;
+
+	resetElevators();
 
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
@@ -813,8 +804,7 @@ void displayLevel(u8 levelIdx)
 			}
 			else if (tile == TILE_MANUAL_ELEVATOR)
 			{
-				addManualElevator(g_ManualElevatorCount, x, y);
-				g_ManualElevatorCount++;
+				addManualElevator(x, y);
 			}
 			else if (tile == TILE_SPE_CUPBOARD)
 			{
@@ -835,14 +825,13 @@ void displayLevel(u8 levelIdx)
 				setTileByTileCoord(x + 1, y, TILE_CLOSET + 1);
 				setTileByTileCoord(x + 1, y - 1, 38); // 38 Pour le haut de l'armoire
 			}
-			if ((tile == TILE_RAILS) && (g_ElevatorCount < MAX_ELEVATOR)) // Detection des rails pour placer les élévateurs
+			if ((tile == TILE_RAILS) && canAddElevator()) // Detection des rails pour placer les élévateurs
 			{
 				if (pRoom->Layout[pRoom->Width * i + j - 1] != TILE_RAILS)
 				{
 					if (pRoom->Layout[pRoom->Width * (i - 1) + j] != TILE_RAILS)
 					{
-						initElevator(g_ElevatorCount, x * 8, y * 8);
-						g_ElevatorCount++;
+						addElevator(x * 8, y * 8);
 					}
 				}
 			}
@@ -854,10 +843,7 @@ void displayLevel(u8 levelIdx)
 	// Initialisation de la couleur des tuiles
 	activateLight(FALSE);
 
-	for (u8 i = g_ElevatorCount; i < MAX_ELEVATOR; ++i)
-	{
-		VDP_HideSprite(SPT_ELEVATOR + i);
-	}
+	hideAllElevators();
 
 	// Debug : affichage du tableau des thèmes
 	// displayText(TRUE);
@@ -950,8 +936,7 @@ bool interact(u8 x, u8 y)
 	case TILE_ELEVATOR_DOWN:
 		if (!g_CurrentElectricityOn)
 			return FALSE;
-		for (u8 i = 0; i < g_ManualElevatorCount; ++i)
-			moveManualElevator(i, tile == TILE_ELEVATOR_UP ? ELEVATOR_DIRECTION_UP : ELEVATOR_DIRECTION_DOWN);
+		moveAllManualElevators(tile);
 		return TRUE;
 
 	case TILE_LOCK_DOOR1:

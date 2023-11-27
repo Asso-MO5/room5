@@ -663,7 +663,6 @@ void displayLevel(u8 levelIdx)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 
 	// Masquage des textes par défaut
-
 	displayText(FALSE);
 
 	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
@@ -795,12 +794,13 @@ bool interact(u8 x, u8 y)
 	{
 		if (addItemToInventory(tile))
 		{
-			setTile(x, y, 0);
+			setTile(x, y, TILE_EMPTY);
 			for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 			{
-				if ((g_VisibleObjects[i].X == x / 8) && (g_VisibleObjects[i].Y == y / 8))
+				struct VisibleObject *pObj = &g_VisibleObjects[i];
+				if ((pObj->X == x / 8) && (pObj->Y == y / 8))
 				{
-					g_VisibleObjects[i].ItemCondition = ITEM_COND_DISABLED;
+					pObj->ItemCondition = ITEM_COND_DISABLED;
 				}
 			}
 			return TRUE;
@@ -827,7 +827,7 @@ bool interact(u8 x, u8 y)
 		return FALSE;
 
 		// Scotch pour réparer les fils
-	case TILE_BROKE_CABLE:
+	case TILE_BROKEN_CABLE:
 		if (hasItemInInventory(TILE_ITEM_TAPE))
 		{
 			removeItemFromInventory(TILE_ITEM_TAPE);
@@ -839,7 +839,9 @@ bool interact(u8 x, u8 y)
 	// Fusible et boite à fusible
 	case TILE_FUSEBOX:
 		if (g_SwitchTimer.Timer > 0)
+		{
 			return FALSE;
+		}
 		if (hasItemInInventory(TILE_ITEM_FUSE))
 		{
 			removeItemFromInventory(TILE_ITEM_FUSE);
@@ -862,13 +864,14 @@ bool interact(u8 x, u8 y)
 	case TILE_ELEVATOR_UP:
 	case TILE_ELEVATOR_DOWN:
 		if (!g_CurrentElectricityOn)
+		{
 			return FALSE;
+		}
 		moveAllManualElevators(tile);
 		return TRUE;
 
 	case TILE_LOCK_DOOR1:
 	case TILE_LOCK_DOOR2:
-
 		if (hasItemInInventory(TILE_ITEM_KEY_DOOR))
 		{
 			removeItemFromInventory(TILE_ITEM_KEY_DOOR);
@@ -879,8 +882,6 @@ bool interact(u8 x, u8 y)
 	// Porte de sortie
 	case TILE_DOOR1:
 	case TILE_DOOR2:
-		// Récupérer la tuile qui est 2 haut dessus
-
 		displayLevel(activateDoor(tile, x, y, g_CurrRoomIdx));
 		// TODO Animer porte qui s'ouvre et personnage qui passe
 		return FALSE;
@@ -888,7 +889,6 @@ bool interact(u8 x, u8 y)
 		// Porte de fin
 	case TILE_DOOR_END1:
 	case TILE_DOOR_END2:
-
 		displayLevel(activateEndDoor());
 		return FALSE;
 

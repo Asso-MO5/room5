@@ -24,6 +24,7 @@ void setDoorTheme(u8 doorIdx, u8 theme)
 
 u8 activateDoor(u8 tile, u8 x, u8 y, u8 currentRoom)
 {
+	// Récupérer la tuile qui est 2 haut dessus
 	if (tile == TILE_DOOR2)
 		x -= 8;
 	y -= 16;

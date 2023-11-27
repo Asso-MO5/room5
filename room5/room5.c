@@ -421,7 +421,6 @@ void updateSwitchTimer()
 //
 //.............................................................................
 
-
 //-----------------------------------------------------------------------------
 // Répondre au téléphone
 void activatePhone()
@@ -648,7 +647,7 @@ void displayText(bool enabled)
 // Afficher une pièce
 void displayLevel(u8 levelIdx)
 {
-	initInventory();					// Pas possible de changer de pièce avec un objet dans les mains
+	initInventory();		  // Pas possible de changer de pièce avec un objet dans les mains
 	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
 	activateElectricity(TRUE);
 	g_VisibleObjectCount = 0;
@@ -668,17 +667,19 @@ void displayLevel(u8 levelIdx)
 	displayText(FALSE);
 
 	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
+	const u8 *pLayout = pRoom->Layout;
+
 	// Dessin de la pièce ligne par ligne
 	// I = ligne, J = colonne
 	for (u8 i = 0; i < pRoom->Height; ++i)
 	{
 		// Copie une ligne de donnée en VRAM
-		VDP_WriteVRAM_16K(pRoom->Layout + pRoom->Width * i,
+		VDP_WriteVRAM_16K(pLayout + pRoom->Width * i,
 						  g_ScreenLayoutLow + 32 * (i + pRoom->Y) + (pRoom->X), pRoom->Width);
 
 		for (u8 j = 0; j < pRoom->Width; ++j)
 		{
-			u8 tile = pRoom->Layout[pRoom->Width * i + j];
+			u8 tile = pLayout[pRoom->Width * i + j];
 			// Positionnement du joueur centré sur la tuile trouvée
 			u8 x = pRoom->X + j;
 			u8 y = pRoom->Y + i;
@@ -698,7 +699,7 @@ void displayLevel(u8 levelIdx)
 					 tile == TILE_SPE_THEME_ALIEN ||
 					 tile == TILE_SPE_THEME_MATRIX)
 			{
-				u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
+				u8 targetItem = pLayout[pRoom->Width * (i + 1) + j];
 				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
 
 				// Ne fonctionne que si les tuiles de thèmes sont dans le même ordre que l'enum de thème
@@ -759,9 +760,9 @@ void displayLevel(u8 levelIdx)
 			}
 			if ((tile == TILE_RAILS) && canAddElevator()) // Detection des rails pour placer les élévateurs
 			{
-				if (pRoom->Layout[pRoom->Width * i + j - 1] != TILE_RAILS)
+				if (pLayout[pRoom->Width * i + j - 1] != TILE_RAILS)
 				{
-					if (pRoom->Layout[pRoom->Width * (i - 1) + j] != TILE_RAILS)
+					if (pLayout[pRoom->Width * (i - 1) + j] != TILE_RAILS)
 					{
 						addElevator(x * 8, y * 8);
 					}
@@ -946,9 +947,9 @@ void main()
 {
 
 	// Initialisation de l'affichage
-	VDP_SetMode(VDP_MODE_SCREEN1);				 // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
+	VDP_SetMode(VDP_MODE_SCREEN1);		   // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16); // Sprite de taille 16x16
-	VDP_SetColor(COLOR_BLACK);						 // Couleur de la bordure et de la couleur 0
+	VDP_SetColor(COLOR_BLACK);			   // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();
 
 	// Chargement des données graphique en mémoire vidéo (VRAM)

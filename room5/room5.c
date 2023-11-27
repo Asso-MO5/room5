@@ -674,7 +674,7 @@ void displayLevel(u8 levelIdx)
 	{
 		// Copie une ligne de donnée en VRAM
 		VDP_WriteVRAM_16K(pRoom->Layout + pRoom->Width * i,
-											g_ScreenLayoutLow + 32 * (i + pRoom->Y) + (pRoom->X), pRoom->Width);
+						  g_ScreenLayoutLow + 32 * (i + pRoom->Y) + (pRoom->X), pRoom->Width);
 
 		for (u8 j = 0; j < pRoom->Width; ++j)
 		{
@@ -694,30 +694,19 @@ void displayLevel(u8 levelIdx)
 				displayText(TRUE);
 				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
-			else if (tile == TILE_SPE_THEME_HOSPITAL)
+			else if (tile == TILE_SPE_THEME_HOSPITAL ||
+					 tile == TILE_SPE_THEME_ALIEN ||
+					 tile == TILE_SPE_THEME_MATRIX)
 			{
 				u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
 				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
-				setDoorTheme(indexDoor, THEME_HOSPITAL);
+
+				// Ne fonctionne que si les tuiles de thèmes sont dans le même ordre que l'enum de thème
+				u8 theme = (tile - TILE_SPE_THEME_HOSPITAL) + THEME_HOSPITAL;
+
+				setDoorTheme(indexDoor, theme);
 				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
-
-			else if (tile == TILE_SPE_THEME_ALIEN)
-			{
-				u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
-				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
-				setDoorTheme(indexDoor, THEME_ALIEN);
-				setTileByTileCoord(x, y, TILE_EMPTY);
-			}
-
-			else if (tile == TILE_SPE_THEME_MATRIX)
-			{
-				u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
-				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
-				setDoorTheme(indexDoor, THEME_MATRIX);
-				setTileByTileCoord(x, y, TILE_EMPTY);
-			}
-
 			else if (tile == TILE_SPE_LIGHT_ON)
 			{
 				addConditionalItem(levelIdx, i, j, ITEM_COND_LIGHT_ON);

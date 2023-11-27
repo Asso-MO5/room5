@@ -673,12 +673,14 @@ void displayLevel(u8 levelIdx)
 	for (u8 i = 0; i < pRoom->Height; ++i)
 	{
 		// Copie une ligne de donnée en VRAM
-		VDP_WriteVRAM_16K(pLayout + pRoom->Width * i,
+		u16 lineIdx = pRoom->Width * i;
+		VDP_WriteVRAM_16K(pLayout + lineIdx,
 						  g_ScreenLayoutLow + 32 * (i + pRoom->Y) + (pRoom->X), pRoom->Width);
 
 		for (u8 j = 0; j < pRoom->Width; ++j)
 		{
-			u8 tile = pLayout[pRoom->Width * i + j];
+			u16 layoutIdx = lineIdx + j;
+			u8 tile = pLayout[layoutIdx];
 			// Positionnement du joueur centré sur la tuile trouvée
 			u8 x = pRoom->X + j;
 			u8 y = pRoom->Y + i;
@@ -758,9 +760,10 @@ void displayLevel(u8 levelIdx)
 			}
 			if ((tile == TILE_RAILS) && canAddElevator()) // Detection des rails pour placer les élévateurs
 			{
-				if (pLayout[pRoom->Width * i + j - 1] != TILE_RAILS)
+				if (pLayout[layoutIdx - 1] != TILE_RAILS) // Tile à gauche
 				{
-					if (pLayout[pRoom->Width * (i - 1) + j] != TILE_RAILS)
+					u16 previousLineIdx = layoutIdx - pRoom->Width;
+					if (pLayout[previousLineIdx] != TILE_RAILS) // Tile au dessus
 					{
 						addElevator(x * 8, y * 8);
 					}

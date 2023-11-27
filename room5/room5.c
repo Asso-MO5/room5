@@ -691,7 +691,6 @@ void displayLevel(u8 levelIdx)
 			}
 			else if (tile == TILE_SPE_DISPLAY_TEXT)
 			{
-
 				displayText(TRUE);
 				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
@@ -751,12 +750,12 @@ void displayLevel(u8 levelIdx)
 			else if (tile == TILE_CUPBOARD)
 			{
 				setTileByTileCoord(x + 1, y, TILE_CUPBOARD + 1);
-				setTileByTileCoord(x + 1, y - 1, 25); // 25 Pour le haut du placard
+				setTileByTileCoord(x + 1, y - 1, TILE_CUPBOARD_UPPER_PART);
 			}
 			else if (tile == TILE_CLOSET)
 			{
 				setTileByTileCoord(x + 1, y, TILE_CLOSET + 1);
-				setTileByTileCoord(x + 1, y - 1, 38); // 38 Pour le haut de l'armoire
+				setTileByTileCoord(x + 1, y - 1, TILE_CLOSET_UPPER_PART);
 			}
 			if ((tile == TILE_RAILS) && canAddElevator()) // Detection des rails pour placer les élévateurs
 			{

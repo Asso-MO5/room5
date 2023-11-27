@@ -648,16 +648,16 @@ void displayText(bool enabled)
 void displayLevel(u8 levelIdx)
 {
 	initInventory();		  // Pas possible de changer de pièce avec un objet dans les mains
-	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
 	activateElectricity(TRUE);
+	resetElevators();
+
+	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
 	g_VisibleObjectCount = 0;
 	g_ElectricWallCount = 0;
 	g_NotElectricWallCount = 0;
 	bool fuseboxOnIsEnabled = FALSE;
 	u8 fuseBoxCount = 0;
 	g_SwitchTimer.Timer = 0;
-
-	resetElevators();
 
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);

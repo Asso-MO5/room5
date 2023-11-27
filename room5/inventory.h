@@ -1,7 +1,6 @@
 #pragma once
 #include "core.h"
 
-#define INVENTORY_SIZE 4
 #define EMPTY_ITEM 0
 
 void initInventory();

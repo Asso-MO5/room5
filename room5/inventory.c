@@ -2,6 +2,8 @@
 #include "tiles.h"
 #include "msxgl.h"
 
+#define INVENTORY_SIZE 4
+
 u8 g_Inventory[INVENTORY_SIZE]; // Contenu de l'inventaire
 
 //-----------------------------------------------------------------------------

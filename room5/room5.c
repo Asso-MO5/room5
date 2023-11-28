@@ -295,22 +295,21 @@ void updatePlayer()
 		bool bFalling = TRUE;
 
 		// Test de collision
-		if (checkCollision(xTemp, yTemp))
+		if (checkCollision(xTemp, yTemp) && !isManualElevatorAt(xTemp, yTemp))
 			bCollide = TRUE;
-		if (checkCollision(xTemp + 15, yTemp))
+		if (checkCollision(xTemp + 15, yTemp) && !isManualElevatorAt(xTemp + 15, yTemp))
 			bCollide = TRUE;
-		if (checkCollision(xTemp + 15, yTemp + 15))
+		if (checkCollision(xTemp + 15, yTemp + 15) && !isManualElevatorAt(xTemp + 15, yTemp + 15))
 			bCollide = TRUE;
-		if (checkCollision(xTemp, yTemp + 15))
+		if (checkCollision(xTemp, yTemp + 15) && !isManualElevatorAt(xTemp, yTemp + 15))
 			bCollide = TRUE;
 
-		if (checkCollision(xTemp + 8, yTemp + 17))
+		if (checkCollision(xTemp + 8, yTemp + 16))
 			bFalling = FALSE;
 
 		if (!bCollide) // Application du déplacement si aucune collision n'est détectée
 		{
 			g_Player.X = xTemp;
-
 			// VDP_SetColor(COLOR_BLACK);
 		}
 		else
@@ -347,7 +346,6 @@ void updatePlayer()
 		{
 			g_Player.VelocityY = 0;
 			g_Player.Y &= 0b11111000;
-			// g_Player.Y--;
 		}
 	}
 

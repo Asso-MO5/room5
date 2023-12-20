@@ -16,7 +16,7 @@
 #define TILE_DOOR_NUMBER_TWO 3
 #define TILE_DOOR_NUMBER_THREE 5
 #define TILE_CABLE 29
-#define TILE_BROKE_CABLE 83
+#define TILE_BROKEN_CABLE 83
 #define TILE_FUSEBOX 84
 #define TILE_FUSEBOX_ON 85
 #define TILE_ELECTRIC_WALL 142
@@ -26,8 +26,10 @@
 #define TILE_MANUAL_ELEVATOR 184
 // placard en anglais
 #define TILE_CUPBOARD 67
+#define TILE_CUPBOARD_UPPER_PART 25
 #define TILE_CUPBOARD_OPEN 30
 #define TILE_CLOSET 73 // placard en français
+#define TILE_CLOSET_UPPER_PART 38
 
 // Interrupteur Minuteur
 #define TILE_SWITCH_TIMER 90

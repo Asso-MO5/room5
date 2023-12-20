@@ -5,6 +5,35 @@
 #include "objects.h"
 #include "msxgl.h"
 
+// Paramètres des élévateurs
+#define MAX_ELEVATOR 8
+#define MAX_MANUAL_ELEVATOR 8
+#define ELEVATOR_STAND 20
+
+// États des élévateurs
+enum ElevatorState
+{
+	ELEVATOR_STATE_MOVE,
+	ELEVATOR_STATE_STAND,
+};
+
+// Directions des élévateurs
+enum ElevatorDirection
+{
+	ELEVATOR_DIRECTION_UP,
+	ELEVATOR_DIRECTION_DOWN,
+};
+
+// Définition d'un élévateur
+struct ElevatorDefinition
+{
+	u8 X;
+	u8 Y;
+	i8 VelocityY;
+	u8 State;
+	u8 Timer;
+};
+
 // Variables pour la gestion des ascenseurs automatiques
 u8 g_ElevatorCount = 0;
 struct ElevatorDefinition g_Elevator[MAX_ELEVATOR];
@@ -14,17 +43,37 @@ u8 g_ManualElevatorCount = 0;
 struct ActiveObject g_ManualElevator[MAX_MANUAL_ELEVATOR];
 
 //-----------------------------------------------------------------------------
-void updateAllElevators()
+// Test la présence d'un rail à la position indiquée
+//-----------------------------------------------------------------------------
+
+bool checkRails(u8 x, u8 y)
 {
-	for (u8 i = 0; i < g_ElevatorCount; i++)
-	{
-		updateElevator(i);
-	}
+	return getTile(x, y) == TILE_RAILS; // N° de la tuile des rails
 }
 
-// Initialise un élévateur
-void initElevator(u8 num, u8 x, u8 y)
+bool checkManualRails(u8 x, u8 y)
 {
+	return getTileByTileCoord(x, y) == TILE_MANUAL_RAILS; // N° de la tuile des rails
+}
+
+//-----------------------------------------------------------------------------
+// Gestion des élévateurs automatiques
+//-----------------------------------------------------------------------------
+
+void resetElevators()
+{
+	g_ElevatorCount = 0;
+	g_ManualElevatorCount = 0;
+}
+
+bool canAddElevator()
+{
+	return g_ElevatorCount < MAX_ELEVATOR;
+}
+
+void addElevator(u8 x, u8 y)
+{
+	u8 num = g_ElevatorCount;
 	struct ElevatorDefinition *elevator = &g_Elevator[num];
 
 	elevator->X = x;
@@ -34,13 +83,12 @@ void initElevator(u8 num, u8 x, u8 y)
 	elevator->Timer = 0;
 
 	VDP_SetSpriteSM1(SPT_ELEVATOR + num, x, y - 9, 4 * 4 * 12, COLOR_WHITE);
+
+	g_ElevatorCount += 1;
 }
 
-//-----------------------------------------------------------------------------
-// Mise à jour d'un élévateur
 void updateElevator(u8 num)
 {
-
 	struct ElevatorDefinition *elevator = &g_Elevator[num];
 
 	if (elevator->Timer > 0) // Attendre que le timer d'attente tombe à 0
@@ -77,15 +125,61 @@ void updateElevator(u8 num)
 	VDP_SetSpritePosition(SPT_ELEVATOR + num, elevator->X, elevator->Y - 9);
 }
 
-// Elévateurs manuel
-
-void addManualElevator(u8 num, u8 x, u8 y)
+void updateAllElevators()
 {
+	for (u8 i = 0; i < g_ElevatorCount; ++i)
+	{
+		updateElevator(i);
+	}
+}
+
+void changeAllElevatorsColor(u8 color)
+{
+	for (u8 i = 0; i < g_ElevatorCount; ++i)
+	{
+		VDP_SetSpriteColorSM1(SPT_ELEVATOR + i, color);
+	}
+}
+
+void hideAllElevators()
+{
+	for (u8 i = g_ElevatorCount; i < MAX_ELEVATOR; ++i)
+	{
+		VDP_HideSprite(SPT_ELEVATOR + i);
+	}
+}
+
+bool isOnElevator(u8 *X, u8 *Y)
+{
+	for (u8 i = 0; i < g_ElevatorCount; ++i)
+	{
+		if ((*X < g_Elevator[i].X - 16) || (*X > g_Elevator[i].X + 16))
+			continue;
+
+		if ((*Y + 17 > g_Elevator[i].Y) && (*Y + 17 < g_Elevator[i].Y + 8))
+		{
+			*Y = g_Elevator[i].Y - 16;
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+//-----------------------------------------------------------------------------
+// Gestion des élévateurs manuels
+//-----------------------------------------------------------------------------
+
+void addManualElevator(u8 x, u8 y)
+{
+	u8 num = g_ManualElevatorCount;
 	struct ActiveObject *elevator = &g_ManualElevator[num];
 
 	elevator->X = x;
 	elevator->Y = y;
 	elevator->Tile = TILE_MANUAL_ELEVATOR;
+
+	g_ManualElevatorCount += 1;
 }
 
 void moveManualElevator(u8 num, u8 direction)
@@ -116,13 +210,10 @@ void moveManualElevator(u8 num, u8 direction)
 	}
 }
 
-// Test la présence d'un rail à la position indiquée
-bool checkRails(u8 x, u8 y)
+void moveAllManualElevators(u8 tile)
 {
-	return getTile(x, y) == TILE_RAILS; // N° de la tuile des rails
-}
-
-bool checkManualRails(u8 x, u8 y)
-{
-	return getTileByTileCoord(x, y) == TILE_MANUAL_RAILS; // N° de la tuile des rails
+	for (u8 i = 0; i < g_ManualElevatorCount; ++i)
+	{
+		moveManualElevator(i, tile == TILE_ELEVATOR_UP ? ELEVATOR_DIRECTION_UP : ELEVATOR_DIRECTION_DOWN);
+	}
 }

@@ -20,6 +20,7 @@
 #include "objects.h"
 #include "elevator.h"
 #include "sprite_fx.h"
+#include "doors.h"
 
 //=============================================================================
 // DEFINITIONS
@@ -74,10 +75,6 @@ u8 g_ResetCount = 0;
 
 // Switch minuteur
 struct SwitchTimer g_SwitchTimer;
-
-// Connexion des portes aux thèmes du jeu
-u8 g_DoorTheme[3];
-u8 g_DoorThemeCount[3];
 
 //=============================================================================
 // DONNEES CONSTANTES (stockées dans le ROM)
@@ -326,18 +323,11 @@ void updatePlayer()
 
 		if (checkRails(g_Player.X + 8, g_Player.Y + 16) || checkRails(g_Player.X + 8, g_Player.Y + 8))
 		{
+			onElevator = isOnElevator(&g_Player.X, &g_Player.Y);
 
-			for (u8 i = 0; i < g_ElevatorCount; ++i)
+			if (onElevator)
 			{
-				if ((g_Player.X < g_Elevator[i].X - 16) || (g_Player.X > g_Elevator[i].X + 16))
-					continue;
-
-				if ((g_Player.Y + 17 > g_Elevator[i].Y) && (g_Player.Y + 17 < g_Elevator[i].Y + 8))
-				{
-					g_Player.Y = g_Elevator[i].Y - 16;
-					bFalling = FALSE;
-					onElevator = TRUE;
-				}
+				bFalling = FALSE;
 			}
 		}
 
@@ -432,61 +422,6 @@ void updateSwitchTimer()
 //.............................................................................
 
 //-----------------------------------------------------------------------------
-// Ouvrir une porte
-void activateDoor(u8 tile, u8 x, u8 y)
-{
-	if (tile == TILE_DOOR2)
-		x -= 8;
-	y -= 16;
-
-	u8 roomNumber = getTile(x, y);
-	u8 doorIndex = 255;
-
-	switch (roomNumber)
-	{
-	case TILE_DOOR_NUMBER_ONE:
-		doorIndex = 0;
-		break;
-
-	case TILE_DOOR_NUMBER_TWO:
-		doorIndex = 1;
-		break;
-	case TILE_DOOR_NUMBER_THREE:
-		doorIndex = 2;
-		break;
-	}
-
-	if (doorIndex < 255)
-	{
-		// Nous sommes dans une room avec téléphone.
-		// On incrément le compte de doorTheme
-		g_DoorThemeCount[g_DoorTheme[doorIndex]]++;
-	}
-
-	displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
-}
-
-void activateEndDoor()
-{
-	u8 hospital = g_DoorThemeCount[THEME_HOSPITAL];
-	u8 alien = g_DoorThemeCount[THEME_ALIEN];
-	u8 matrix = g_DoorThemeCount[THEME_MATRIX];
-
-	if (hospital > alien && hospital > matrix)
-	{
-		displayLevel(28);
-	}
-	else if (alien > hospital && alien > matrix)
-	{
-		displayLevel(29);
-	}
-	else // if (matrix > hospital && matrix > alien)
-	{
-		displayLevel(30);
-	}
-}
-
-//-----------------------------------------------------------------------------
 // Répondre au téléphone
 void activatePhone()
 {
@@ -527,9 +462,7 @@ void lightRoom(bool bActivate)
 	VDP_SetSpriteColorSM1(SPT_PLAYER_SKIN, bActivate ? COLOR_WHITE : COLOR_CYAN);
 	VDP_SetSpriteColorSM1(SPT_PLAYER_CHAIR, bActivate ? COLOR_MEDIUM_RED : COLOR_DARK_BLUE);
 
-	// Change la couleur des élévateurs
-	for (u8 i = 0; i < g_ElevatorCount; ++i)
-		VDP_SetSpriteColorSM1(SPT_ELEVATOR + i, bActivate ? COLOR_WHITE : COLOR_CYAN);
+	changeAllElevatorsColor(bActivate ? COLOR_WHITE : COLOR_CYAN);
 
 	for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 	{
@@ -714,11 +647,11 @@ void displayText(bool enabled)
 // Afficher une pièce
 void displayLevel(u8 levelIdx)
 {
-	initInventory();					// Pas possible de changer de pièce avec un objet dans les mains
-	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
-	g_ElevatorCount = 0;			// Initialisation du nombre d'élévateurs
-	g_ManualElevatorCount = 0;
+	initInventory(); // Pas possible de changer de pièce avec un objet dans les mains
 	activateElectricity(TRUE);
+	resetElevators();
+
+	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
 	g_VisibleObjectCount = 0;
 	g_ElectricWallCount = 0;
 	g_NotElectricWallCount = 0;
@@ -730,21 +663,24 @@ void displayLevel(u8 levelIdx)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 
 	// Masquage des textes par défaut
-
 	displayText(FALSE);
 
 	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
+	const u8 *pLayout = pRoom->Layout;
+
 	// Dessin de la pièce ligne par ligne
 	// I = ligne, J = colonne
 	for (u8 i = 0; i < pRoom->Height; ++i)
 	{
 		// Copie une ligne de donnée en VRAM
-		VDP_WriteVRAM_16K(pRoom->Layout + pRoom->Width * i,
-											g_ScreenLayoutLow + 32 * (i + pRoom->Y) + (pRoom->X), pRoom->Width);
+		u16 lineIdx = pRoom->Width * i;
+		VDP_WriteVRAM_16K(pLayout + lineIdx,
+						  g_ScreenLayoutLow + 32 * (i + pRoom->Y) + (pRoom->X), pRoom->Width);
 
 		for (u8 j = 0; j < pRoom->Width; ++j)
 		{
-			u8 tile = pRoom->Layout[pRoom->Width * i + j];
+			u16 layoutIdx = lineIdx + j;
+			u8 tile = pLayout[layoutIdx];
 			// Positionnement du joueur centré sur la tuile trouvée
 			u8 x = pRoom->X + j;
 			u8 y = pRoom->Y + i;
@@ -756,41 +692,27 @@ void displayLevel(u8 levelIdx)
 			}
 			else if (tile == TILE_SPE_DISPLAY_TEXT)
 			{
-
 				displayText(TRUE);
 				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
-			else if (tile == TILE_SPE_THEME_HOSPITAL)
+			else if (tile == TILE_SPE_THEME_HOSPITAL ||
+					 tile == TILE_SPE_THEME_ALIEN ||
+					 tile == TILE_SPE_THEME_MATRIX)
 			{
-				u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
+				u8 targetItem = pLayout[pRoom->Width * (i + 1) + j];
 				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
-				g_DoorTheme[indexDoor] = THEME_HOSPITAL;
+
+				// Ne fonctionne que si les tuiles de thèmes sont dans le même ordre que l'enum de thème
+				u8 theme = (tile - TILE_SPE_THEME_HOSPITAL) + THEME_HOSPITAL;
+
+				setDoorTheme(indexDoor, theme);
 				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
-
-			else if (tile == TILE_SPE_THEME_ALIEN)
+			else if (tile == TILE_SPE_LIGHT_ON ||
+					 tile == TILE_SPE_LIGHT_OFF)
 			{
-				u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
-				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
-				g_DoorTheme[indexDoor] = THEME_ALIEN;
-				setTileByTileCoord(x, y, TILE_EMPTY);
-			}
-
-			else if (tile == TILE_SPE_THEME_MATRIX)
-			{
-				u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
-				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
-				g_DoorTheme[indexDoor] = THEME_MATRIX;
-				setTileByTileCoord(x, y, TILE_EMPTY);
-			}
-
-			else if (tile == TILE_SPE_LIGHT_ON)
-			{
-				addConditionalItem(levelIdx, i, j, ITEM_COND_LIGHT_ON);
-			}
-			else if (tile == TILE_SPE_LIGHT_OFF)
-			{
-				addConditionalItem(levelIdx, i, j, ITEM_COND_LIGHT_OFF);
+				// Ne fonctionne que si les tuiles sont dans le même ordre que l'enum
+				addConditionalItem(levelIdx, i, j, tile - TILE_SPE_LIGHT_ON + ITEM_COND_LIGHT_ON);
 			}
 
 			else if (tile == TILE_FUSEBOX)
@@ -813,36 +735,33 @@ void displayLevel(u8 levelIdx)
 			}
 			else if (tile == TILE_MANUAL_ELEVATOR)
 			{
-				addManualElevator(g_ManualElevatorCount, x, y);
-				g_ManualElevatorCount++;
+				addManualElevator(x, y);
 			}
-			else if (tile == TILE_SPE_CUPBOARD)
+			else if (tile == TILE_SPE_CUPBOARD ||
+					 tile == TILE_SPE_CUPBOARD_LIGHT)
 			{
-				addConditionalItem(levelIdx, i, j, ITEM_COND_CUPBOARD);
-			}
-			else if (tile == TILE_SPE_CUPBOARD_LIGHT)
-			{
-				addConditionalItem(levelIdx, i, j, ITEM_COND_CUPBOARD_LIGHT);
+				// Ne fonctionne que si les tuiles sont dans le même ordre que l'enum
+				addConditionalItem(levelIdx, i, j, tile - TILE_SPE_CUPBOARD + ITEM_COND_CUPBOARD);
 			}
 			// Ici on reconstruit les placards
 			else if (tile == TILE_CUPBOARD)
 			{
 				setTileByTileCoord(x + 1, y, TILE_CUPBOARD + 1);
-				setTileByTileCoord(x + 1, y - 1, 25); // 25 Pour le haut du placard
+				setTileByTileCoord(x + 1, y - 1, TILE_CUPBOARD_UPPER_PART);
 			}
 			else if (tile == TILE_CLOSET)
 			{
 				setTileByTileCoord(x + 1, y, TILE_CLOSET + 1);
-				setTileByTileCoord(x + 1, y - 1, 38); // 38 Pour le haut de l'armoire
+				setTileByTileCoord(x + 1, y - 1, TILE_CLOSET_UPPER_PART);
 			}
-			if ((tile == TILE_RAILS) && (g_ElevatorCount < MAX_ELEVATOR)) // Detection des rails pour placer les élévateurs
+			if ((tile == TILE_RAILS) && canAddElevator()) // Detection des rails pour placer les élévateurs
 			{
-				if (pRoom->Layout[pRoom->Width * i + j - 1] != TILE_RAILS)
+				if (pLayout[layoutIdx - 1] != TILE_RAILS) // Tile à gauche
 				{
-					if (pRoom->Layout[pRoom->Width * (i - 1) + j] != TILE_RAILS)
+					u16 previousLineIdx = layoutIdx - pRoom->Width;
+					if (pLayout[previousLineIdx] != TILE_RAILS) // Tile au dessus
 					{
-						initElevator(g_ElevatorCount, x * 8, y * 8);
-						g_ElevatorCount++;
+						addElevator(x * 8, y * 8);
 					}
 				}
 			}
@@ -854,15 +773,7 @@ void displayLevel(u8 levelIdx)
 	// Initialisation de la couleur des tuiles
 	activateLight(FALSE);
 
-	for (u8 i = g_ElevatorCount; i < MAX_ELEVATOR; ++i)
-	{
-		VDP_HideSprite(SPT_ELEVATOR + i);
-	}
-
-	// Debug : affichage du tableau des thèmes
-	// displayText(TRUE);
-	//	Print_SetPosition(pRoom->X - 1, 0);
-	//	Print_DrawFormat(" %i, %i, %i ", g_DoorThemeCount[0], g_DoorThemeCount[1], g_DoorThemeCount[2]);
+	hideAllElevators();
 }
 
 //.............................................................................
@@ -882,12 +793,13 @@ bool interact(u8 x, u8 y)
 	{
 		if (addItemToInventory(tile))
 		{
-			setTile(x, y, 0);
+			setTile(x, y, TILE_EMPTY);
 			for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 			{
-				if ((g_VisibleObjects[i].X == x / 8) && (g_VisibleObjects[i].Y == y / 8))
+				struct VisibleObject *pObj = &g_VisibleObjects[i];
+				if ((pObj->X == x / 8) && (pObj->Y == y / 8))
 				{
-					g_VisibleObjects[i].ItemCondition = ITEM_COND_DISABLED;
+					pObj->ItemCondition = ITEM_COND_DISABLED;
 				}
 			}
 			return TRUE;
@@ -914,7 +826,7 @@ bool interact(u8 x, u8 y)
 		return FALSE;
 
 		// Scotch pour réparer les fils
-	case TILE_BROKE_CABLE:
+	case TILE_BROKEN_CABLE:
 		if (hasItemInInventory(TILE_ITEM_TAPE))
 		{
 			removeItemFromInventory(TILE_ITEM_TAPE);
@@ -926,7 +838,9 @@ bool interact(u8 x, u8 y)
 	// Fusible et boite à fusible
 	case TILE_FUSEBOX:
 		if (g_SwitchTimer.Timer > 0)
+		{
 			return FALSE;
+		}
 		if (hasItemInInventory(TILE_ITEM_FUSE))
 		{
 			removeItemFromInventory(TILE_ITEM_FUSE);
@@ -949,35 +863,32 @@ bool interact(u8 x, u8 y)
 	case TILE_ELEVATOR_UP:
 	case TILE_ELEVATOR_DOWN:
 		if (!g_CurrentElectricityOn)
+		{
 			return FALSE;
-		for (u8 i = 0; i < g_ManualElevatorCount; ++i)
-			moveManualElevator(i, tile == TILE_ELEVATOR_UP ? ELEVATOR_DIRECTION_UP : ELEVATOR_DIRECTION_DOWN);
+		}
+		moveAllManualElevators(tile);
 		return TRUE;
 
 	case TILE_LOCK_DOOR1:
 	case TILE_LOCK_DOOR2:
-
 		if (hasItemInInventory(TILE_ITEM_KEY_DOOR))
 		{
 			removeItemFromInventory(TILE_ITEM_KEY_DOOR);
-			activateDoor(tile, x, y);
+			displayLevel(activateDoor(tile, x, y, g_CurrRoomIdx));
 			return TRUE;
 		}
 		return FALSE;
 	// Porte de sortie
 	case TILE_DOOR1:
 	case TILE_DOOR2:
-		// Récupérer la tuile qui est 2 haut dessus
-
-		activateDoor(tile, x, y);
+		displayLevel(activateDoor(tile, x, y, g_CurrRoomIdx));
 		// TODO Animer porte qui s'ouvre et personnage qui passe
 		return FALSE;
 
 		// Porte de fin
 	case TILE_DOOR_END1:
 	case TILE_DOOR_END2:
-
-		activateEndDoor();
+		displayLevel(activateEndDoor());
 		return FALSE;
 
 	// Placard
@@ -1034,16 +945,15 @@ void main()
 {
 
 	// Initialisation de l'affichage
-	VDP_SetMode(VDP_MODE_SCREEN1);				 // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
+	VDP_SetMode(VDP_MODE_SCREEN1);		   // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16); // Sprite de taille 16x16
-	VDP_SetColor(COLOR_BLACK);						 // Couleur de la bordure et de la couleur 0
+	VDP_SetColor(COLOR_BLACK);			   // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();
 
 	// Chargement des données graphique en mémoire vidéo (VRAM)
 	loadData();
 
-	for (u8 i = 0; i < THEME_NUMBER; ++i)
-		g_DoorThemeCount[i] = 0;
+	initializeDoors();
 
 	// Initialise le joueur
 	initPlayer(100, 103);

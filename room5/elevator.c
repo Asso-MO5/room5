@@ -217,3 +217,9 @@ void moveAllManualElevators(u8 tile)
 		moveManualElevator(i, tile == TILE_ELEVATOR_UP ? ELEVATOR_DIRECTION_UP : ELEVATOR_DIRECTION_DOWN);
 	}
 }
+
+bool isManualElevatorAt(u8 x, u8 y)
+{
+	return getTile(x, y) == TILE_MANUAL_ELEVATOR ||
+		   getTile(x, y) == TILE_MANUAL_ELEVATOR + 1;
+}

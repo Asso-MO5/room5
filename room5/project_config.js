@@ -25,13 +25,29 @@
 ProjName = 'room5'
 
 //-- List of project modules to build (array). If empty, ProjName will be added
-ProjModules = [ProjName, 'level_defs', 'tiles', 'inventory', 'elevator', 'doors']
+ProjModules = [
+  ProjName,
+  'level_defs',
+  'tiles',
+  'inventory',
+  'elevator',
+  'doors',
+]
 
 //-- Project segments base name (string). ProjName will be used if not defined
 // ProjSegments = "";
 
 //-- List of library modules to build (array)
-LibModules = ['system', 'bios', 'vdp', 'print', 'input', 'memory', 'sprite_fx']
+LibModules = [
+  'system',
+  'bios',
+  'vdp',
+  'print',
+  'input',
+  'memory',
+  'sprite_fx',
+  'compress/pletter',
+]
 
 //-- Additional sources to be compiled and linked with the project (array)
 // AddSources = [];

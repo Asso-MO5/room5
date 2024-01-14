@@ -1,5 +1,5 @@
 @echo off
-REM setlocal EnableDelayedExpansion
+setlocal EnableDelayedExpansion
 
 :: Setup path
 set Tools=..\MSXgl\tools
@@ -22,5 +22,13 @@ echo -- Export player sprite data...
 :: Export environment sprite
 echo -- Export environment sprite data...
 %MSXtk%\MSXimg.exe assets\sprt_enviro.png -out %Dest%/sprt_elevator.h -pos 0 0 -size 16 16 -num 2 1 -name g_SprtElevator -mode sprt -l i16 0 0 1 1 0xFFFFFF
+
+:: Convert binary level to header
+for %%G in (data\level\*.bin) do (
+    set "temp=%%~nG"
+    echo Converting %%~nG.bin...
+    %Tools%\compress\Pletter\pletter %%G data\level\%%~nG.pl5
+    %MSXtk%\MSXbin data\level\%%~nG.pl5 -ad -t g_Level!temp:~-3! -o data\level\%%~nG.h
+)
 
 REM pause

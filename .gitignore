@@ -51,3 +51,5 @@ Module.symvers
 Mkfile.old
 dkms.conf
 /room5/out
+/room5/data/level/*.pl5
+/room5/data/level/*.bin

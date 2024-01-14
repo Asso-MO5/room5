@@ -12,6 +12,7 @@
 // INCLUDES
 //=============================================================================
 #include "msxgl.h"
+#include "compress/pletter.h"
 #include "room5.h"
 #include "level_defs.h"
 #include "tiles_defs.h"
@@ -39,6 +40,8 @@ bool interact(u8 x, u8 y);
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
 //=============================================================================
+
+u8 g_ScreenBuffer[32 * 24]; // Buffer de l'écran (32x24 tuiles de 8x8 pixels)
 
 // Compteur de frame pour les animations (incrémenté à chaque boucle principale ; 50/60 Hz)
 u8 g_FrameCounter = 0;
@@ -586,7 +589,7 @@ void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
 		return;
 
 	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
-	u8 targetItem = pRoom->Layout[pRoom->Width * (i + 1) + j];
+	u8 targetItem = g_ScreenBuffer[pRoom->Width * (i + 1) + j];
 	struct VisibleObject *pObj = &g_VisibleObjects[g_VisibleObjectCount];
 	pObj->X = (pRoom->X + j);
 	pObj->Y = (pRoom->Y + (i + 1));
@@ -664,7 +667,10 @@ void displayLevel(u8 levelIdx)
 	displayText(FALSE);
 
 	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
-	const u8 *pLayout = pRoom->Layout;
+	const u8 *pLayout = g_ScreenBuffer;
+
+	// Décompresse
+	 Pletter_Unpack(pRoom->Layout, g_ScreenBuffer);
 
 	// Dessin de la pièce ligne par ligne
 	// I = ligne, J = colonne

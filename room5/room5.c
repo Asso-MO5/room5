@@ -79,6 +79,9 @@ u8 g_ResetCount = 0;
 // Switch minuteur
 struct SwitchTimer g_SwitchTimer;
 
+// Instances d'animations en cours
+struct TileAnimationInstance g_AnimationInstances[MAX_TILE_ANIMATION];
+
 //=============================================================================
 // DONNEES CONSTANTES (stockées dans le ROM)
 //=============================================================================
@@ -96,10 +99,101 @@ struct SwitchTimer g_SwitchTimer;
 const u8 g_PlayerFramesMove[] = {1, 2, 3, 4};
 const u8 g_PlayerFramesAction[] = {5, 6, 7, 8, 9, 10, 9, 11};
 const u8 g_PlayerFramesFall[] = {1, 2, 3, 4};
+const u8 g_DoorAnimationTiles[] = {
+		0, 0, 0, 0, 0, 0, // Frame 0
+		0, 0, 0, 0, 0, 0, // Frame 1
+		0, 0, 0, 0, 0, 0, // Frame 2
+};
+
+const u8 g_PhoneAnimationTiles[] = {
+		80, // Frame 0
+		16, // Frame 1
+		80, // Frame 2
+		17, // Frame 3
+};
+
+const struct TileAnimation g_PhoneAnimation = {
+		1,
+		1,
+		4,
+		0,
+		g_PhoneAnimationTiles};
+
+const struct TileAnimation g_DoorAnimation = {
+		2,
+		3,
+		3,
+		1,
+		g_DoorAnimationTiles};
 
 //=============================================================================
 // FONCTIONS
 //=============================================================================
+
+//-----------------------------------------------------------------------------
+// ...
+
+bool addAnimationInstance(u8 X, u8 Y, const struct TileAnimation *pAnimation, callback OnAnimationEnd)
+{
+
+	for (u8 i = 0; i < MAX_TILE_ANIMATION; ++i)
+	{
+		struct TileAnimationInstance *pInstance = &g_AnimationInstances[i];
+
+		if (!pInstance->isPlaying)
+		{
+			pInstance->X = X;
+			pInstance->Y = Y;
+			pInstance->FrameNumber = 0;
+			pInstance->LoopNumber = 0;
+			pInstance->isPlaying = TRUE;
+			pInstance->Animation = pAnimation;
+			pInstance->OnAnimationEnd = OnAnimationEnd;
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+void updateTileAnimations()
+{
+	for (u8 i = 0; i < MAX_TILE_ANIMATION; ++i)
+	{
+		struct TileAnimationInstance *pInstance = &g_AnimationInstances[i];
+
+		if (pInstance->isPlaying)
+		{
+			u8 size = pInstance->Animation->Width * pInstance->Animation->Height;
+			u16 index = size * pInstance->FrameNumber;
+			for (u8 y = 0; y < pInstance->Animation->Height; ++y)
+			{
+				for (u8 x = 0; x < pInstance->Animation->Width; ++x)
+				{
+					u8 tile = pInstance->Animation->FrameData[index++];
+					setTileByTileCoord(pInstance->X + x, pInstance->Y + y, tile);
+				}
+			}
+			pInstance->FrameNumber++;
+			if (pInstance->FrameNumber >= pInstance->Animation->FrameCount)
+			{
+				pInstance->FrameNumber = 0;
+
+				/*
+				pInstance->LoopNumber++;
+			if (pInstance->LoopNumber >= pInstance->Animation->LoopCount)
+			{
+				pInstance->isPlaying = FALSE;
+				if (pInstance->OnAnimationEnd != NULL)
+				{
+					pInstance->OnAnimationEnd();
+				}
+			}
+					*/
+			}
+		}
+	}
+}
 
 //-----------------------------------------------------------------------------
 // Chargement des données graphique en mémoire vidéo (VRAM)
@@ -670,7 +764,7 @@ void displayLevel(u8 levelIdx)
 	const u8 *pLayout = g_ScreenBuffer;
 
 	// Décompresse
-	 Pletter_Unpack(pRoom->Layout, g_ScreenBuffer);
+	Pletter_Unpack(pRoom->Layout, g_ScreenBuffer);
 
 	// Dessin de la pièce ligne par ligne
 	// I = ligne, J = colonne
@@ -679,7 +773,7 @@ void displayLevel(u8 levelIdx)
 		// Copie une ligne de donnée en VRAM
 		u16 lineIdx = pRoom->Width * i;
 		VDP_WriteVRAM_16K(pLayout + lineIdx,
-						  g_ScreenLayoutLow + 32 * (i + pRoom->Y) + (pRoom->X), pRoom->Width);
+											g_ScreenLayoutLow + 32 * (i + pRoom->Y) + (pRoom->X), pRoom->Width);
 
 		for (u8 j = 0; j < pRoom->Width; ++j)
 		{
@@ -700,8 +794,8 @@ void displayLevel(u8 levelIdx)
 				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
 			else if (tile == TILE_SPE_THEME_HOSPITAL ||
-					 tile == TILE_SPE_THEME_ALIEN ||
-					 tile == TILE_SPE_THEME_MATRIX)
+							 tile == TILE_SPE_THEME_ALIEN ||
+							 tile == TILE_SPE_THEME_MATRIX)
 			{
 				u8 targetItem = pLayout[pRoom->Width * (i + 1) + j];
 				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
@@ -713,7 +807,7 @@ void displayLevel(u8 levelIdx)
 				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
 			else if (tile == TILE_SPE_LIGHT_ON ||
-					 tile == TILE_SPE_LIGHT_OFF)
+							 tile == TILE_SPE_LIGHT_OFF)
 			{
 				// Ne fonctionne que si les tuiles sont dans le même ordre que l'enum
 				addConditionalItem(levelIdx, i, j, tile - TILE_SPE_LIGHT_ON + ITEM_COND_LIGHT_ON);
@@ -742,7 +836,7 @@ void displayLevel(u8 levelIdx)
 				addManualElevator(x, y);
 			}
 			else if (tile == TILE_SPE_CUPBOARD ||
-					 tile == TILE_SPE_CUPBOARD_LIGHT)
+							 tile == TILE_SPE_CUPBOARD_LIGHT)
 			{
 				// Ne fonctionne que si les tuiles sont dans le même ordre que l'enum
 				addConditionalItem(levelIdx, i, j, tile - TILE_SPE_CUPBOARD + ITEM_COND_CUPBOARD);
@@ -949,9 +1043,9 @@ void main()
 {
 
 	// Initialisation de l'affichage
-	VDP_SetMode(VDP_MODE_SCREEN1);		   // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
+	VDP_SetMode(VDP_MODE_SCREEN1);				 // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16); // Sprite de taille 16x16
-	VDP_SetColor(COLOR_BLACK);			   // Couleur de la bordure et de la couleur 0
+	VDP_SetColor(COLOR_BLACK);						 // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();
 
 	// Chargement des données graphique en mémoire vidéo (VRAM)
@@ -961,6 +1055,11 @@ void main()
 
 	// Initialise le joueur
 	initPlayer(100, 103);
+
+	// Who's gonna call ?
+
+	Mem_Set(0, g_AnimationInstances, sizeof(g_AnimationInstances));
+	addAnimationInstance(10, 10, &g_PhoneAnimation, NULL);
 
 	// Affichage de la pièce n°0 (la première)
 	displayLevel(0);
@@ -979,6 +1078,8 @@ void main()
 			}
 
 			updateSwitchTimer();
+
+			updateTileAnimations();
 		}
 		// Mise à jour du personnage
 		Keyboard_Update();

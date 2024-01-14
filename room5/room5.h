@@ -17,6 +17,7 @@
 #define MAX_NOT_ELECTRIC_WALL 16
 #define RESET_DURATION 50
 #define MAX_SWITCH_TIMER 127
+#define MAX_TILE_ANIMATION 10
 
 //-----------------------------------------------------------------------------
 // Enumérations
@@ -81,4 +82,24 @@ struct SwitchTimer
 	u8 X;
 	u8 Y;
 	u8 Timer;
+};
+
+struct TileAnimation 
+{
+	u8 Width;
+	u8 Height;
+	u8 FrameCount;
+	u8 LoopCount;
+	u8* FrameData;
+};
+
+struct TileAnimationInstance
+{
+	u8 X;
+	u8 Y;
+	u8 FrameNumber;
+	u8 LoopNumber;
+	bool isPlaying;
+	struct TileAnimation* Animation;
+	callback OnAnimationEnd;
 };

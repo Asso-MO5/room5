@@ -85,6 +85,7 @@
 // - VDP_UNIT_U16 ................. X and Y use 16-bits values
 #define VDP_UNIT VDP_UNIT_U8
 
+
 // VDP screen modes (additionnal limitations come from the selected MSX_VERSION)
 #define VDP_USE_MODE_T1 TRUE	// MSX1		Screen 0 Width 40
 #define VDP_USE_MODE_MC TRUE	// MSX1		Screen 3
@@ -463,3 +464,10 @@
 // - DEBUG_EMULICIOUS ............. Profile script for Emulicious
 #define DEBUG_TOOL DEBUG_DISABLE
 #define PROFILE_LEVEL 10
+
+
+#define VDP_USE_PALETTE16 FALSE
+#define RTC_USE_CLOCK_EXTRA TRUE
+#define RTC_USE_SAVEDATA TRUE
+#define  RTC_USE_SAVESIGNED TRUE
+#define RTC_USE_CLOCK TRUE

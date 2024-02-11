@@ -18,6 +18,7 @@
 #define RESET_DURATION 50
 #define MAX_SWITCH_TIMER 127
 #define MAX_TILE_ANIMATION 10
+typedef bool (*animCallback)(void);
 
 //-----------------------------------------------------------------------------
 // Enumérations
@@ -84,13 +85,13 @@ struct SwitchTimer
 	u8 Timer;
 };
 
-struct TileAnimation 
+struct TileAnimation
 {
 	u8 Width;
 	u8 Height;
 	u8 FrameCount;
 	u8 LoopCount;
-	u8* FrameData;
+	u8 *FrameData;
 };
 
 struct TileAnimationInstance
@@ -100,6 +101,6 @@ struct TileAnimationInstance
 	u8 FrameNumber;
 	u8 LoopNumber;
 	bool isPlaying;
-	struct TileAnimation* Animation;
-	callback OnAnimationEnd;
+	struct TileAnimation *Animation;
+	animCallback OnAnimationEnd;
 };

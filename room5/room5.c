@@ -35,6 +35,7 @@ void updatePlayer();
 void activateLight(bool bActivate);
 void activateElectricity(bool bActivate);
 void displayLevel(u8 levelIdx);
+bool onDoorAnimEnd();
 bool interact(u8 x, u8 y);
 
 //=============================================================================
@@ -99,19 +100,31 @@ struct TileAnimationInstance g_AnimationInstances[MAX_TILE_ANIMATION];
 const u8 g_PlayerFramesMove[] = {1, 2, 3, 4};
 const u8 g_PlayerFramesAction[] = {5, 6, 7, 8, 9, 10, 9, 11};
 const u8 g_PlayerFramesFall[] = {1, 2, 3, 4};
-const u8 g_DoorAnimationTiles[] = {
-		0, 0, 0, 0, 0, 0, // Frame 0
-		0, 0, 0, 0, 0, 0, // Frame 1
-		0, 0, 0, 0, 0, 0, // Frame 2
-};
 
+// Donnée d'animation des portes
+const u8 g_DoorAnimationTiles[] = {
+		44, 11, 45, 71, 46, 15, // Frame 0
+		44, 11, 45, 71, 46, 15, // Frame 1
+		44, 47, 45, 54, 46, 55, // Frame 2
+		44, 47, 45, 54, 46, 55, // Frame 3,
+		44, 47, 45, 54, 46, 55, // Frame 4,
+		44, 47, 45, 54, 46, 55, // Frame 5,
+		44, 47, 45, 54, 46, 55, // Frame 6
+};
+const struct TileAnimation g_DoorAnimation = {
+		2,
+		3,
+		7,
+		1,
+		g_DoorAnimationTiles};
+
+// Donnée d'animation du téléphone
 const u8 g_PhoneAnimationTiles[] = {
 		80, // Frame 0
 		16, // Frame 1
 		80, // Frame 2
 		17, // Frame 3
 };
-
 const struct TileAnimation g_PhoneAnimation = {
 		1,
 		1,
@@ -119,20 +132,13 @@ const struct TileAnimation g_PhoneAnimation = {
 		0,
 		g_PhoneAnimationTiles};
 
-const struct TileAnimation g_DoorAnimation = {
-		2,
-		3,
-		3,
-		1,
-		g_DoorAnimationTiles};
-
 //=============================================================================
 // FONCTIONS
 //=============================================================================
 
 //-----------------------------------------------------------------------------
 // Ajoute une nouvelle animation de tuiles à la position indiquée
-bool addAnimationInstance(u8 X, u8 Y, const struct TileAnimation *pAnimation, callback OnAnimationEnd)
+bool addAnimationInstance(u8 X, u8 Y, const struct TileAnimation *pAnimation, animCallback OnAnimationEnd)
 {
 	for (u8 i = 0; i < MAX_TILE_ANIMATION; ++i)
 	{
@@ -192,21 +198,28 @@ void updateTileAnimations()
 				}
 			}
 			pInstance->FrameNumber++;
+
 			if (pInstance->FrameNumber >= pInstance->Animation->FrameCount)
 			{
-				pInstance->FrameNumber = 0;
 
-				/*
-				pInstance->LoopNumber++;
-			if (pInstance->LoopNumber >= pInstance->Animation->LoopCount)
-			{
-				pInstance->isPlaying = FALSE;
-				if (pInstance->OnAnimationEnd != NULL)
+				if (pInstance->Animation->LoopCount != 0)
 				{
-					pInstance->OnAnimationEnd();
+					pInstance->LoopNumber++;
+					if (pInstance->LoopNumber >= pInstance->Animation->LoopCount)
+					{
+						if (pInstance->OnAnimationEnd != NULL)
+						{
+							if (pInstance->OnAnimationEnd() == FALSE)
+							{
+								return;
+							}
+						}
+						pInstance->isPlaying = FALSE;
+						continue; // Stop script
+					}
 				}
-			}
-					*/
+
+				pInstance->FrameNumber = 0;
 			}
 		}
 	}
@@ -750,6 +763,56 @@ void addNotElectricWall(u8 levelIdx, u8 i, u8 j)
 	g_NotElectricWallCount++;
 }
 
+//--- PORTE -------------------------------------------------------------------
+
+void startDoorAnim(u8 x, u8 y, u8 tile)
+{
+	// Récupérer la tuile qui est 2 haut dessus
+	if (tile == TILE_DOOR2 || tile == TILE_LOCK_DOOR2)
+		x -= 8;
+	y -= 8;
+
+	activateDoor(tile, x, y, g_CurrRoomIdx);
+	addAnimationInstance(x / 8, y / 8, &g_DoorAnimation, onDoorAnimEnd);
+}
+
+bool onDoorAnimEnd()
+{
+
+	// Récupérer la tuile qui est 2 haut dessus
+	if (g_InteractedDoor.tile == TILE_DOOR2)
+		g_InteractedDoor.x -= 8;
+	g_InteractedDoor.y -= 16;
+
+	u8 roomNumber = getTile(g_InteractedDoor.x, g_InteractedDoor.y);
+	u8 doorIndex = 255;
+
+	switch (roomNumber)
+	{
+	case TILE_DOOR_NUMBER_ONE:
+		doorIndex = 0;
+		break;
+
+	case TILE_DOOR_NUMBER_TWO:
+		doorIndex = 1;
+		break;
+	case TILE_DOOR_NUMBER_THREE:
+		doorIndex = 2;
+		break;
+	}
+
+	if (doorIndex < 255)
+	{
+		// Nous sommes dans une room avec téléphone.
+		// On incrément le compte de doorTheme
+		g_DoorThemeCount[g_DoorTheme[doorIndex]]++;
+	}
+
+	displayLevel(g_Rooms[g_InteractedDoor.currentRoom].NextLvlIdx);
+
+	return FALSE;
+}
+
 //.............................................................................
 //
 //  AFFICHAGE
@@ -912,7 +975,7 @@ void displayLevel(u8 levelIdx)
 //.............................................................................
 
 //-----------------------------------------------------------------------------
-// Interagit à une position donnée
+// Interagit à une position donnée - en PIXELS
 bool interact(u8 x, u8 y)
 {
 	u8 tile = getTile(x, y);
@@ -1005,15 +1068,15 @@ bool interact(u8 x, u8 y)
 		if (hasItemInInventory(TILE_ITEM_KEY_DOOR))
 		{
 			removeItemFromInventory(TILE_ITEM_KEY_DOOR);
-			displayLevel(activateDoor(tile, x, y, g_CurrRoomIdx));
+			startDoorAnim(x, y, tile);
 			return TRUE;
 		}
 		return FALSE;
+
 	// Porte de sortie
 	case TILE_DOOR1:
 	case TILE_DOOR2:
-		displayLevel(activateDoor(tile, x, y, g_CurrRoomIdx));
-		// TODO Animer porte qui s'ouvre et personnage qui passe
+		startDoorAnim(x, y, tile);
 		return FALSE;
 
 		// Porte de fin

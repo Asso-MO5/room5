@@ -18,3 +18,15 @@ u8 activateDoor(u8 tile, u8 x, u8 y, u8 currentRoom);
 // Renvoie le numéro de la salle dans laquelle on se rend en activant la porte de fin
 // La porte est choisie en fonction des thèmes choisis
 u8 activateEndDoor();
+
+struct InteractedDoor
+{
+	u8 tile;
+	u8 x;
+	u8 y;
+	u8 currentRoom;
+};
+
+extern struct InteractedDoor g_InteractedDoor;
+extern u8 g_DoorTheme[3];
+extern u8 g_DoorThemeCount[3];

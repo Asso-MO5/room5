@@ -131,11 +131,9 @@ const struct TileAnimation g_DoorAnimation = {
 //=============================================================================
 
 //-----------------------------------------------------------------------------
-// ...
-
+// Ajoute une nouvelle animation de tuiles à la position indiquée
 bool addAnimationInstance(u8 X, u8 Y, const struct TileAnimation *pAnimation, callback OnAnimationEnd)
 {
-
 	for (u8 i = 0; i < MAX_TILE_ANIMATION; ++i)
 	{
 		struct TileAnimationInstance *pInstance = &g_AnimationInstances[i];
@@ -156,6 +154,25 @@ bool addAnimationInstance(u8 X, u8 Y, const struct TileAnimation *pAnimation, ca
 	return FALSE;
 }
 
+bool stopAnimationInstance(const struct TileAnimation *pAnimation)
+{
+	bool foundThis = FALSE;
+	for (u8 i = 0; i < MAX_TILE_ANIMATION; ++i)
+	{
+		struct TileAnimationInstance *pInstance = &g_AnimationInstances[i];
+
+		if (pInstance->isPlaying && pInstance->Animation == pAnimation)
+		{
+			foundThis = TRUE;
+			Mem_Set(0, pInstance, sizeof(*pInstance));
+		}
+	}
+
+	return foundThis;
+}
+
+//-----------------------------------------------------------------------------
+// Met à jour toutes les animations de tuiles enregistrées
 void updateTileAnimations()
 {
 	for (u8 i = 0; i < MAX_TILE_ANIMATION; ++i)
@@ -518,10 +535,16 @@ void updateSwitchTimer()
 
 //-----------------------------------------------------------------------------
 // Répondre au téléphone
-void activatePhone()
+void activatePhone(u8 xP, u8 yP)
 {
+	// Arrêt de l'animation
+	stopAnimationInstance(&g_PhoneAnimation);
+	setTile(xP, yP, TILE_PHONE);
+
+	// Afficher le texte
 	VDP_FillVRAM_16K((u8)(COLOR_WHITE << 4), g_ScreenColorLow + 192 / 8, 8);
 
+	// Déverrouillage des portes
 	for (u8 y = 0; y < 24; ++y)
 	{
 		for (u8 x = 0; x < 32; ++x)
@@ -742,6 +765,10 @@ void displayText(bool enabled)
 // Afficher une pièce
 void displayLevel(u8 levelIdx)
 {
+
+	// Who's gonna call ?
+	Mem_Set(0, g_AnimationInstances, sizeof(g_AnimationInstances));
+
 	initInventory(); // Pas possible de changer de pièce avec un objet dans les mains
 	activateElectricity(TRUE);
 	resetElevators();
@@ -852,6 +879,10 @@ void displayLevel(u8 levelIdx)
 				setTileByTileCoord(x + 1, y, TILE_CLOSET + 1);
 				setTileByTileCoord(x + 1, y - 1, TILE_CLOSET_UPPER_PART);
 			}
+			else if (tile == TILE_PHONE)
+			{
+				addAnimationInstance(x, y, &g_PhoneAnimation, NULL);
+			}
 			if ((tile == TILE_RAILS) && canAddElevator()) // Detection des rails pour placer les élévateurs
 			{
 				if (pLayout[layoutIdx - 1] != TILE_RAILS) // Tile à gauche
@@ -908,7 +939,9 @@ bool interact(u8 x, u8 y)
 	{
 	// Téléphone
 	case TILE_PHONE:
-		activatePhone();
+	case TILE_PHONE_ANIM_ONE:
+	case TILE_PHONE_ANIM_TWO:
+		activatePhone(x, y);
 		return TRUE;
 
 	// Lumière allumée/éteinte
@@ -1055,11 +1088,6 @@ void main()
 
 	// Initialise le joueur
 	initPlayer(100, 103);
-
-	// Who's gonna call ?
-
-	Mem_Set(0, g_AnimationInstances, sizeof(g_AnimationInstances));
-	addAnimationInstance(10, 10, &g_PhoneAnimation, NULL);
 
 	// Affichage de la pièce n°0 (la première)
 	displayLevel(0);

@@ -328,6 +328,7 @@ void initPlayer(u8 x, u8 y)
 	g_Player.State = PLAYER_STATE_IDLE;
 	g_Player.InAir = TRUE;
 	g_Player.isLeft = FALSE;
+	g_Player.canMove = TRUE;
 }
 
 //-----------------------------------------------------------------------------
@@ -372,7 +373,7 @@ void updatePlayer()
 
 		g_Player.VelocityY = 0;
 	}
-	else
+	else if (g_Player.canMove)
 	{
 
 		u8 xTemp = g_Player.X; // Sauvegarde de l'ancienne position du joueur
@@ -493,8 +494,6 @@ void updatePlayer()
 		baseNumPattern = g_PlayerFramesFall[g_FrameCounter / 4 % 4] * 16;
 		break;
 	}
-
-	// TODO LOADSTRIPE
 
 	if (g_Player.isLeft)
 	{
@@ -767,6 +766,7 @@ void addNotElectricWall(u8 levelIdx, u8 i, u8 j)
 
 void startDoorAnim(u8 x, u8 y, u8 tile)
 {
+	g_Player.canMove = FALSE;
 	// Récupérer la tuile qui est 2 haut dessus
 	if (tile == TILE_DOOR2 || tile == TILE_LOCK_DOOR2)
 		x -= 8;

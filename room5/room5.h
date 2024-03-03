@@ -68,6 +68,7 @@ struct PlayerDefinition
 	u8 State;			// État du personnage
 	bool InAir;		// Est-ce que le personnage est en train de sauter
 	bool isLeft;	// Est-ce que le personnage est orienté vers la gauche
+	bool canMove; // Est-ce que le personnage peut bouger
 };
 // Structure d'un objet visible sous condition
 struct VisibleObject

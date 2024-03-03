@@ -18,6 +18,7 @@
 #define RESET_DURATION 50
 #define MAX_SWITCH_TIMER 127
 #define MAX_TILE_ANIMATION 10
+#define MAX_TEXT_COORD 8
 typedef bool (*animCallback)(void);
 
 //-----------------------------------------------------------------------------
@@ -104,4 +105,11 @@ struct TileAnimationInstance
 	bool isPlaying;
 	struct TileAnimation *Animation;
 	animCallback OnAnimationEnd;
+};
+
+struct TextCoordInstance
+{
+	u8 X;
+	u8 Y;
+	u8 Key;
 };

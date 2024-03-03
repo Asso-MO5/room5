@@ -12,6 +12,7 @@
 // INCLUDES
 //=============================================================================
 #include "msxgl.h"
+#include "localize.h"
 #include "compress/pletter.h"
 #include "room5.h"
 #include "level_defs.h"
@@ -83,6 +84,9 @@ struct SwitchTimer g_SwitchTimer;
 // Instances d'animations en cours
 struct TileAnimationInstance g_AnimationInstances[MAX_TILE_ANIMATION];
 
+struct TextCoordInstance g_TextCoordInstances[MAX_TEXT_COORD];
+u8 g_TextCoordCount = 0;
+
 //=============================================================================
 // DONNEES CONSTANTES (stockées dans le ROM)
 //=============================================================================
@@ -93,8 +97,11 @@ struct TileAnimationInstance g_AnimationInstances[MAX_TILE_ANIMATION];
 // Données des formes et couleurs des tuiles
 #include "data/bg_tileset.h"
 
-// Données des sprites de l'elevateur
+// Données des sprites de l'élévateur
 #include "data/sprt_elevator.h"
+
+// Données de traduction
+#include "data/translate.h"
 
 // Liste des frames d'animation du personnage
 const u8 g_PlayerFramesMove[] = {1, 2, 3, 4};
@@ -120,14 +127,14 @@ const struct TileAnimation g_DoorAnimation = {
 
 // Donnée d'animation du téléphone
 const u8 g_PhoneAnimationTiles[] = {
-		80, // Frame 0
-		16, // Frame 1
-		80, // Frame 2
-		17, // Frame 3
+		18, 80, // Frame 0
+		18, 16, // Frame 1
+		19, 80, // Frame 2
+		19, 17, // Frame 3
 };
 const struct TileAnimation g_PhoneAnimation = {
 		1,
-		1,
+		2,
 		4,
 		0,
 		g_PhoneAnimationTiles};
@@ -552,6 +559,7 @@ void activatePhone(u8 xP, u8 yP)
 	// Arrêt de l'animation
 	stopAnimationInstance(&g_PhoneAnimation);
 	setTile(xP, yP, TILE_PHONE);
+	setTile(xP, yP - 8, TILE_EMPTY);
 
 	// Afficher le texte
 	VDP_FillVRAM_16K((u8)(COLOR_WHITE << 4), g_ScreenColorLow + 192 / 8, 8);
@@ -843,6 +851,7 @@ void displayLevel(u8 levelIdx)
 	bool fuseboxOnIsEnabled = FALSE;
 	u8 fuseBoxCount = 0;
 	g_SwitchTimer.Timer = 0;
+	g_TextCoordCount = 0;
 
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
@@ -878,10 +887,32 @@ void displayLevel(u8 levelIdx)
 				initPlayer(x * 8 - 4, y * 8 - 9);
 				setTileByTileCoord(x, y, TILE_EMPTY); // Effacement de la tuile de départ
 			}
+			/**
+			 * @deprecated
+			 */
 			else if (tile == TILE_SPE_DISPLAY_TEXT)
 			{
 				displayText(TRUE);
 				setTileByTileCoord(x, y, TILE_EMPTY);
+			}
+			else if (tile == TILE_SPE_TRANSLATE)
+			{
+
+				u8 sX = x + 1;
+				u8 sTile = getTileByTileCoord(sX, y);
+				u8 transKey = 0;
+				while (sTile != TILE_EMPTY)
+				{
+
+					transKey *= 10;
+					transKey += sTile - TILE_NUM_ZERO;
+					sX++;
+					sTile = getTileByTileCoord(sX, y);
+				}
+				struct TextCoordInstance *txt = &g_TextCoordInstances[g_TextCoordCount++];
+				txt->X = x;
+				txt->Y = y;
+				txt->Key = transKey;
 			}
 			else if (tile == TILE_SPE_THEME_HOSPITAL ||
 							 tile == TILE_SPE_THEME_ALIEN ||
@@ -944,7 +975,7 @@ void displayLevel(u8 levelIdx)
 			}
 			else if (tile == TILE_PHONE)
 			{
-				addAnimationInstance(x, y, &g_PhoneAnimation, NULL);
+				addAnimationInstance(x, y - 1, &g_PhoneAnimation, NULL);
 			}
 			if ((tile == TILE_RAILS) && canAddElevator()) // Detection des rails pour placer les élévateurs
 			{
@@ -966,6 +997,12 @@ void displayLevel(u8 levelIdx)
 	activateLight(FALSE);
 
 	hideAllElevators();
+
+	for (u8 i = 0; i < g_TextCoordCount; i++)
+	{
+		struct TextCoordInstance *txt = &g_TextCoordInstances[i];
+		Print_DrawTextAt(txt->X, txt->Y, Loc_GetText(txt->Key));
+	}
 }
 
 //.............................................................................
@@ -1137,6 +1174,10 @@ void VDP_InterruptHandler()
 // Point d'entrée du programme principal
 void main()
 {
+
+	// langue
+	Loc_Initialize(g_TransData, TEXT_MAX);
+	Loc_SetLanguage(LANG_FR);
 
 	// Initialisation de l'affichage
 	VDP_SetMode(VDP_MODE_SCREEN1);				 // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)

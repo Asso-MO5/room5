@@ -26,6 +26,7 @@
 #define TILE_NIGHT_LIGHT 44
 #define TILE_ALPHABET_ONE 209
 #define TILE_MANUAL_ELEVATOR 184
+
 // placard en anglais
 #define TILE_CUPBOARD 67
 #define TILE_CUPBOARD_UPPER_PART 25
@@ -60,6 +61,8 @@
 #define TILE_SPE_CUPBOARD 112
 #define TILE_SPE_CUPBOARD_LIGHT 113
 #define TILE_SPE_DISPLAY_TEXT 114
+#define TILE_SPE_TRANSLATE 115
+#define TILE_NUM_ZERO 208
 
 // Numéro de sprite
 #define SPT_PLAYER_HAIR 0

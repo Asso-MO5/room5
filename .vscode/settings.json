@@ -37,7 +37,9 @@
   "C_Cpp_Runner.showCompilationTime": false,
   "files.associations": {
     "*.asm": "asz80",
-    "sprt_elevator.h": "c"
+    "sprt_elevator.h": "c",
+    "translate.h": "c",
+    "doors.h": "c"
   },
   "editor.insertSpaces": false,
   "editor.detectIndentation": false,
@@ -63,6 +65,6 @@
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "cSpell.words": [
     "Pletter"
-	],
-	"dotnet.defaultSolution": "MSXgl/tools/MSXtk/qrcode/qrcode.sln"
+  ],
+  "dotnet.defaultSolution": "MSXgl/tools/MSXtk/qrcode/qrcode.sln"
 }

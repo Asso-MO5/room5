@@ -22,8 +22,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "f:/www/MO5/room5/room5",
-      "program": "f:/www/MO5/room5/room5/build/Debug/outDebug",
+      "cwd": "f:/www/MO5/room5",
+      "program": "f:/www/MO5/room5/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

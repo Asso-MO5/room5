@@ -47,6 +47,7 @@ LibModules = [
   'memory',
   'sprite_fx',
   'compress/pletter',
+  'localize',
 ]
 
 //-- Additional sources to be compiled and linked with the project (array)
@@ -221,3 +222,12 @@ Verbose = true
 
 //-- Plug a virtual device into the joystick port B (string)
 // EmulPortB = "";
+
+//-- List files to be localized (array)
+LocFiles = ['assets/translate.ini']
+
+//-- Localization output filename (string)
+LocOutput = 'data/translate.h'
+
+//-- Localization structure name (string)
+LocStruct = 'g_TransData'

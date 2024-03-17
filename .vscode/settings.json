@@ -66,5 +66,6 @@
   "cSpell.words": [
     "Pletter"
   ],
-  "dotnet.defaultSolution": "MSXgl/tools/MSXtk/qrcode/qrcode.sln"
+	"dotnet.defaultSolution": "MSXgl/tools/MSXtk/qrcode/qrcode.sln",
+	"emulicious-debugger.emuliciousPath": ""
 }

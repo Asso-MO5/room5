@@ -7,7 +7,7 @@
 
 // Connexion des portes aux thèmes du jeu
 u8 g_DoorTheme[3];
-u8 g_DoorThemeCount[3];
+u8 g_DoorThemeCount[3]; // Incrémentation des thèmes des portes
 struct InteractedDoor g_InteractedDoor;
 void initializeDoors()
 {

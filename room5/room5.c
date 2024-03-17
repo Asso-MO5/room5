@@ -786,11 +786,7 @@ void startDoorAnim(u8 x, u8 y, u8 tile)
 
 bool onDoorAnimEnd()
 {
-
-	// Récupérer la tuile qui est 2 haut dessus
-	if (g_InteractedDoor.tile == TILE_DOOR2)
-		g_InteractedDoor.x -= 8;
-	g_InteractedDoor.y -= 16;
+	g_InteractedDoor.y -= 8;
 
 	u8 roomNumber = getTile(g_InteractedDoor.x, g_InteractedDoor.y);
 	u8 doorIndex = 255;
@@ -811,6 +807,7 @@ bool onDoorAnimEnd()
 
 	if (doorIndex < 255)
 	{
+
 		// Nous sommes dans une room avec téléphone.
 		// On incrément le compte de doorTheme
 		g_DoorThemeCount[g_DoorTheme[doorIndex]]++;
@@ -848,6 +845,7 @@ void displayLevel(u8 levelIdx)
 	g_VisibleObjectCount = 0;
 	g_ElectricWallCount = 0;
 	g_NotElectricWallCount = 0;
+	u8 themeCounter = 0;
 	bool fuseboxOnIsEnabled = FALSE;
 	u8 fuseBoxCount = 0;
 	g_SwitchTimer.Timer = 0;
@@ -857,7 +855,7 @@ void displayLevel(u8 levelIdx)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 
 	// Masquage des textes par défaut
-	displayText(FALSE);
+	displayText(TRUE); // REMETTRE A FALSE
 
 	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
 	const u8 *pLayout = g_ScreenBuffer;
@@ -918,14 +916,21 @@ void displayLevel(u8 levelIdx)
 							 tile == TILE_SPE_THEME_ALIEN ||
 							 tile == TILE_SPE_THEME_MATRIX)
 			{
+				u8 theme = (tile - TILE_SPE_THEME_HOSPITAL);
+				setDoorTheme(themeCounter, theme);
+				setTileByTileCoord(x, y, TILE_EMPTY);
+				themeCounter++;
+				/*
 				u8 targetItem = pLayout[pRoom->Width * (i + 1) + j];
 				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
 
 				// Ne fonctionne que si les tuiles de thèmes sont dans le même ordre que l'enum de thème
-				u8 theme = (tile - TILE_SPE_THEME_HOSPITAL) + THEME_HOSPITAL;
+
 
 				setDoorTheme(indexDoor, theme);
 				setTileByTileCoord(x, y, TILE_EMPTY);
+
+				*/
 			}
 			else if (tile == TILE_SPE_LIGHT_ON ||
 							 tile == TILE_SPE_LIGHT_OFF)
@@ -1003,6 +1008,13 @@ void displayLevel(u8 levelIdx)
 		struct TextCoordInstance *txt = &g_TextCoordInstances[i];
 		Print_DrawTextAt(txt->X, txt->Y, Loc_GetText(txt->Key));
 	}
+
+	/*
+	Ceci est tout à fait normal, nous avons besoin de régulièrement tester les thèmes
+
+	Print_SetPosition(0, 23);
+	Print_DrawFormat("TEST %i, %i, %i / %i, %i, %i", g_DoorThemeCount[0], g_DoorThemeCount[1], g_DoorThemeCount[2], g_DoorTheme[0], g_DoorTheme[1], g_DoorTheme[2]);
+	*/
 }
 
 //.............................................................................
@@ -1171,9 +1183,12 @@ void VDP_InterruptHandler()
 }
 
 //-----------------------------------------------------------------------------
+
 // Point d'entrée du programme principal
 void main()
 {
+	// Key click du MSX
+	Bios_SetKeyClick(FALSE);
 
 	// langue
 	Loc_Initialize(g_TransData, TEXT_MAX);

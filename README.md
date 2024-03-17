@@ -10,6 +10,10 @@ Retrouvez toute la doc ici:
 
 </center>
 
+Lien vers la documentation des librairies : 
+[Wiki](https://aoineko.org/msxgl/index.php?title=Main_Page)
+[Ref](https://aoineko.org/msxgl-doc/)
+
 ---
 
 Produit par

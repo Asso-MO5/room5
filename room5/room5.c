@@ -143,6 +143,25 @@ const struct TileAnimation g_PhoneAnimation = {
 // FONCTIONS
 //=============================================================================
 
+void displayTextAt(u8 x, u8 y, const c8 *text)
+{
+	u8 startX = x;
+	while (*text != '\0')
+	{
+		if (*text == '\n')
+		{
+			x = startX;
+			y++;
+		}
+		else
+		{
+			Print_DrawCharAt(x, y, *text);
+			x++;
+		}
+		text++;
+	}
+}
+
 //-----------------------------------------------------------------------------
 // Ajoute une nouvelle animation de tuiles à la position indiquée
 bool addAnimationInstance(u8 X, u8 Y, const struct TileAnimation *pAnimation, animCallback OnAnimationEnd)
@@ -1006,7 +1025,7 @@ void displayLevel(u8 levelIdx)
 	for (u8 i = 0; i < g_TextCoordCount; i++)
 	{
 		struct TextCoordInstance *txt = &g_TextCoordInstances[i];
-		Print_DrawTextAt(txt->X, txt->Y, Loc_GetText(txt->Key));
+		displayTextAt(txt->X, txt->Y, Loc_GetText(txt->Key));
 	}
 
 	/*

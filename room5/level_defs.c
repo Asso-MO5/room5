@@ -34,7 +34,6 @@
 #include "data/level/level031.h"
 #include "data/level/level032.h"
 
-
 // Liste des pièces et de leur caracteristiques
 const struct RoomDefinition g_Rooms[] = {
 
@@ -64,7 +63,7 @@ const struct RoomDefinition g_Rooms[] = {
 		{(32 - LEVEL022_WIDTH) / 2, (24 - LEVEL022_HEIGHT) / 2, LEVEL022_WIDTH, LEVEL022_HEIGHT, g_Level022, "", 22},
 		{(32 - LEVEL023_WIDTH) / 2, (24 - LEVEL023_HEIGHT) / 2, LEVEL023_WIDTH, LEVEL023_HEIGHT, g_Level023, "", 23},
 		// on saute les pièces non faites
-		{(32 - LEVEL024_WIDTH) / 2, (24 - LEVEL024_HEIGHT) / 2, LEVEL024_WIDTH, LEVEL024_HEIGHT, g_Level024, "", 27},
+		{(32 - LEVEL024_WIDTH) / 2, (24 - LEVEL024_HEIGHT) / 2, LEVEL024_WIDTH, LEVEL024_HEIGHT, g_Level024, "", 24},
 		{(32 - LEVEL025_WIDTH) / 2, (24 - LEVEL025_HEIGHT) / 2, LEVEL025_WIDTH, LEVEL025_HEIGHT, g_Level025, "", 25},
 		{(32 - LEVEL026_WIDTH) / 2, (24 - LEVEL026_HEIGHT) / 2, LEVEL026_WIDTH, LEVEL026_HEIGHT, g_Level026, "", 26},
 		{(32 - LEVEL027_WIDTH) / 2, (24 - LEVEL027_HEIGHT) / 2, LEVEL027_WIDTH, LEVEL027_HEIGHT, g_Level027, "", 27},

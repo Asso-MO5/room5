@@ -63,6 +63,7 @@
 #define TILE_SPE_DISPLAY_TEXT 114
 #define TILE_SPE_TRANSLATE 115
 #define TILE_NUM_ZERO 208
+#define TILE_SPE_TRANSLATE_PHONE 116
 
 // Numéro de sprite
 #define SPT_PLAYER_HAIR 0

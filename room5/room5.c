@@ -338,6 +338,20 @@ bool isCancel()
 	return FALSE;
 }
 
+// ------------------------------------------------------------------------------
+// Utilitaire pour afficher un texte à l'écran
+void displayTextByMode(u8 mode)
+{
+	for (u8 i = 0; i < g_TextCoordCount; i++)
+	{
+		struct TextCoordInstance *txt = &g_TextCoordInstances[i];
+
+		if (txt->Mode == mode)
+		{
+			displayTextAt(txt->X, txt->Y, Loc_GetText(txt->Key));
+		}
+	}
+}
 //.............................................................................
 //
 //  GESTION DU JOUEUR
@@ -599,6 +613,8 @@ void activatePhone(u8 xP, u8 yP)
 			}
 		}
 	}
+
+	displayTextByMode(TEXT_MODE_PHONE);
 }
 
 //-----------------------------------------------------------------------------
@@ -912,7 +928,8 @@ void displayLevel(u8 levelIdx)
 				displayText(TRUE);
 				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
-			else if (tile == TILE_SPE_TRANSLATE)
+
+			else if (tile == TILE_SPE_TRANSLATE || tile == TILE_SPE_TRANSLATE_PHONE)
 			{
 
 				u8 sX = x + 1;
@@ -920,7 +937,7 @@ void displayLevel(u8 levelIdx)
 				u8 transKey = 0;
 				while (sTile != TILE_EMPTY)
 				{
-
+					setTileByTileCoord(sX, y, TILE_EMPTY);
 					transKey *= 10;
 					transKey += sTile - TILE_NUM_ZERO;
 					sX++;
@@ -930,6 +947,7 @@ void displayLevel(u8 levelIdx)
 				txt->X = x;
 				txt->Y = y;
 				txt->Key = transKey;
+				txt->Mode = tile == TILE_SPE_TRANSLATE_PHONE ? TEXT_MODE_PHONE : TEXT_MODE_DEFAULT;
 			}
 			else if (tile == TILE_SPE_THEME_HOSPITAL ||
 							 tile == TILE_SPE_THEME_ALIEN ||
@@ -1022,11 +1040,7 @@ void displayLevel(u8 levelIdx)
 
 	hideAllElevators();
 
-	for (u8 i = 0; i < g_TextCoordCount; i++)
-	{
-		struct TextCoordInstance *txt = &g_TextCoordInstances[i];
-		displayTextAt(txt->X, txt->Y, Loc_GetText(txt->Key));
-	}
+	displayTextByMode(TEXT_MODE_DEFAULT);
 
 	/*
 	Ceci est tout à fait normal, nous avons besoin de régulièrement tester les thèmes
@@ -1211,7 +1225,7 @@ void main()
 
 	// langue
 	Loc_Initialize(g_TransData, TEXT_MAX);
-	Loc_SetLanguage(LANG_FR);
+	Loc_SetLanguage(LANG_EN);
 
 	// Initialisation de l'affichage
 	VDP_SetMode(VDP_MODE_SCREEN1);				 // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)

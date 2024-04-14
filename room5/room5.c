@@ -1217,6 +1217,62 @@ void VDP_InterruptHandler()
 
 //-----------------------------------------------------------------------------
 
+// Menu de langue
+
+void langMenu()
+{
+
+	u8 currentLanguage = LANG_EN;
+#define cursorY 10
+#define cursorX 10
+
+	for (u8 i = 0; i < LANG_MAX; i++)
+	{
+		Loc_SetLanguage(i);
+		displayTextAt(12, i + 10, Loc_GetText(TEXT_LANG_LABEL));
+	}
+
+	setTileByTileCoord(cursorX, cursorY + currentLanguage, SPT_CURSOR);
+
+	while (1)
+	{
+		Halt();
+		Keyboard_Update();
+		if (Keyboard_IsKeyPushed(KEY_UP))
+		{
+			setTileByTileCoord(cursorX, cursorY + currentLanguage, TILE_EMPTY);
+			if (currentLanguage == 0)
+			{
+				currentLanguage = LANG_MAX - 1;
+			}
+			else
+			{
+				currentLanguage--;
+			}
+
+			setTileByTileCoord(cursorX, cursorY + currentLanguage, SPT_CURSOR);
+		}
+		else if (Keyboard_IsKeyPushed(KEY_DOWN))
+		{
+			setTileByTileCoord(cursorX, cursorY + currentLanguage, TILE_EMPTY);
+			if (currentLanguage == LANG_MAX - 1)
+			{
+				currentLanguage = 0;
+			}
+			else
+			{
+				currentLanguage++;
+			}
+
+			setTileByTileCoord(cursorX, cursorY + currentLanguage, SPT_CURSOR);
+		}
+		else if (Keyboard_IsKeyPushed(KEY_ENTER) || Keyboard_IsKeyPushed(KEY_SPACE))
+		{
+			Loc_SetLanguage(currentLanguage);
+			return;
+		}
+	}
+}
 // Point d'entrée du programme principal
 void main()
 {
@@ -1235,6 +1291,8 @@ void main()
 
 	// Chargement des données graphique en mémoire vidéo (VRAM)
 	loadData();
+
+	langMenu();
 
 	initializeDoors();
 

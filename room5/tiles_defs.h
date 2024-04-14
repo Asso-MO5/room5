@@ -71,3 +71,6 @@
 #define SPT_PLAYER_CHAIR 2
 #define SPT_PLAYER_OUTLINE 16
 #define SPT_ELEVATOR 3
+
+// UI
+#define SPT_CURSOR 52

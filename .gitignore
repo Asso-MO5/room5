@@ -41,6 +41,8 @@
 *.su
 *.idb
 *.pdb
+*.noi
+*.cdb
 
 # Kernel Module Compile Results
 *.mod*
@@ -53,3 +55,5 @@ dkms.conf
 /room5/out
 /room5/data/level/*.pl5
 /room5/data/level/*.bin
+
+

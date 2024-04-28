@@ -587,12 +587,17 @@ void updateSwitchTimer()
 
 //-----------------------------------------------------------------------------
 // Répondre au téléphone
-void activatePhone(u8 xP, u8 yP)
+void activatePhone(u8 xP, u8 yP, bool bPhone)
 {
-	// Arrêt de l'animation
-	stopAnimationInstance(&g_PhoneAnimation);
-	setTile(xP, yP, TILE_PHONE);
-	setTile(xP, yP - 8, TILE_EMPTY);
+
+	if (bPhone)
+	{
+		// Arrêt de l'animation
+		stopAnimationInstance(&g_PhoneAnimation);
+		setTile(xP, yP, TILE_PHONE);
+		setTile(xP, yP - 8, TILE_EMPTY);
+	}
+	// Else = les fins
 
 	// Afficher le texte
 	VDP_FillVRAM_16K((u8)(COLOR_WHITE << 4), g_ScreenColorLow + 192 / 8, 8);
@@ -861,6 +866,7 @@ bool onDoorAnimEnd()
 
 void displayText(bool enabled)
 {
+
 	VDP_FillVRAM_16K(enabled ? 0xf1 : 0x11, g_ScreenColorLow + 192 / 8, 8);
 }
 
@@ -890,7 +896,7 @@ void displayLevel(u8 levelIdx)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 
 	// Masquage des textes par défaut
-	displayText(TRUE); // REMETTRE A FALSE
+	// displayText(TRUE); // REMETTRE A FALSE
 
 	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
 	const u8 *pLayout = g_ScreenBuffer;
@@ -923,18 +929,20 @@ void displayLevel(u8 levelIdx)
 			/**
 			 * @deprecated
 			 */
+			/*
 			else if (tile == TILE_SPE_DISPLAY_TEXT)
 			{
-				displayText(TRUE);
+					displayText(TRUE);
 				setTileByTileCoord(x, y, TILE_EMPTY);
 			}
-
+			*/
 			else if (tile == TILE_SPE_TRANSLATE || tile == TILE_SPE_TRANSLATE_PHONE)
 			{
 
 				u8 sX = x + 1;
 				u8 sTile = getTileByTileCoord(sX, y);
 				u8 transKey = 0;
+				setTileByTileCoord(x, y, TILE_EMPTY);
 				while (sTile != TILE_EMPTY)
 				{
 					setTileByTileCoord(sX, y, TILE_EMPTY);
@@ -1086,7 +1094,13 @@ bool interact(u8 x, u8 y)
 	case TILE_PHONE:
 	case TILE_PHONE_ANIM_ONE:
 	case TILE_PHONE_ANIM_TWO:
-		activatePhone(x, y);
+		activatePhone(x, y, true);
+		return TRUE;
+	case TILE_PNJ_HEAD_DOC:
+	case TILE_PNJ_HEAD_NEO:
+	case TILE_PNJ_HEAD_ALIEN:
+
+		activatePhone(x, y, false);
 		return TRUE;
 
 	// Lumière allumée/éteinte

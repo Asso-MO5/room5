@@ -45,6 +45,11 @@
 #define TILE_DOOR_END1 75
 #define TILE_DOOR_END2 76
 
+// tête de Pnj
+#define TILE_PNJ_HEAD_DOC 77
+#define TILE_PNJ_HEAD_NEO 78
+#define TILE_PNJ_HEAD_ALIEN 79
+
 #define TILE_ITEM_KEY_CLOSET 96
 #define TILE_ITEM_KEY_DOOR 97
 #define TILE_ITEM_KEY_THREE 98

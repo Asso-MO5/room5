@@ -463,13 +463,13 @@ void updatePlayer()
 		bool bFalling = TRUE;
 
 		// Test de collision
-		if (checkCollision(xTemp, yTemp) && !isManualElevatorAt(xTemp, yTemp))
+		if (checkCollision(xTemp, yTemp) && g_Player.isLeft)
 			bCollide = TRUE;
-		if (checkCollision(xTemp + 15, yTemp) && !isManualElevatorAt(xTemp + 15, yTemp))
+		if (checkCollision(xTemp + 15, yTemp) && !g_Player.isLeft)
 			bCollide = TRUE;
-		if (checkCollision(xTemp + 15, yTemp + 15) && !isManualElevatorAt(xTemp + 15, yTemp + 15))
+		if (checkCollision(xTemp + 15, yTemp + 15) && !g_Player.isLeft)
 			bCollide = TRUE;
-		if (checkCollision(xTemp, yTemp + 15) && !isManualElevatorAt(xTemp, yTemp + 15))
+		if (checkCollision(xTemp, yTemp + 15) && g_Player.isLeft)
 			bCollide = TRUE;
 
 		if (checkCollision(xTemp + 8, yTemp + 16))
@@ -864,12 +864,6 @@ bool onDoorAnimEnd()
 //
 //.............................................................................
 
-void displayText(bool enabled)
-{
-
-	VDP_FillVRAM_16K(enabled ? 0xf1 : 0x11, g_ScreenColorLow + 192 / 8, 8);
-}
-
 //-----------------------------------------------------------------------------
 // Afficher une pièce
 void displayLevel(u8 levelIdx)
@@ -894,9 +888,6 @@ void displayLevel(u8 levelIdx)
 
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
-
-	// Masquage des textes par défaut
-	// displayText(TRUE); // REMETTRE A FALSE
 
 	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
 	const u8 *pLayout = g_ScreenBuffer;
@@ -926,16 +917,7 @@ void displayLevel(u8 levelIdx)
 				initPlayer(x * 8 - 4, y * 8 - 9);
 				setTileByTileCoord(x, y, TILE_EMPTY); // Effacement de la tuile de départ
 			}
-			/**
-			 * @deprecated
-			 */
-			/*
-			else if (tile == TILE_SPE_DISPLAY_TEXT)
-			{
-					displayText(TRUE);
-				setTileByTileCoord(x, y, TILE_EMPTY);
-			}
-			*/
+
 			else if (tile == TILE_SPE_TRANSLATE || tile == TILE_SPE_TRANSLATE_PHONE)
 			{
 
@@ -965,17 +947,6 @@ void displayLevel(u8 levelIdx)
 				setDoorTheme(themeCounter, theme);
 				setTileByTileCoord(x, y, TILE_EMPTY);
 				themeCounter++;
-				/*
-				u8 targetItem = pLayout[pRoom->Width * (i + 1) + j];
-				u8 indexDoor = targetItem - TILE_ALPHABET_ONE;
-
-				// Ne fonctionne que si les tuiles de thèmes sont dans le même ordre que l'enum de thème
-
-
-				setDoorTheme(indexDoor, theme);
-				setTileByTileCoord(x, y, TILE_EMPTY);
-
-				*/
 			}
 			else if (tile == TILE_SPE_LIGHT_ON ||
 							 tile == TILE_SPE_LIGHT_OFF)

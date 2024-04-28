@@ -14,6 +14,7 @@
 #include "msxgl.h"
 #include "localize.h"
 #include "compress/pletter.h"
+#include "arkos/akg_player.h"
 #include "room5.h"
 #include "level_defs.h"
 #include "tiles_defs.h"
@@ -23,6 +24,8 @@
 #include "elevator.h"
 #include "sprite_fx.h"
 #include "doors.h"
+// COMPRESSER prochain live
+// #include "data/sounds/akg_HocusPocus.h"
 
 //=============================================================================
 // DEFINITIONS
@@ -1261,6 +1264,7 @@ void langMenu()
 // Point d'entrée du programme principal
 void main()
 {
+
 	// Key click du MSX
 	Bios_SetKeyClick(FALSE);
 
@@ -1273,6 +1277,13 @@ void main()
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16); // Sprite de taille 16x16
 	VDP_SetColor(COLOR_BLACK);						 // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();
+
+	// COMPRESSER prochain live
+	/*
+		Mem_Copy(g_AKG_HocusPocus, 0xD000, sizeof(g_AKG_HocusPocus));
+		AKG_Init(0xD000, 0);
+
+		*/
 
 	// Chargement des données graphique en mémoire vidéo (VRAM)
 	loadData();
@@ -1291,6 +1302,10 @@ void main()
 	{
 		// Attente de la synchronisation avec le processeur graphique (à 50 ou 60 Hz)
 		Halt();
+
+		// COMPRESSER prochain live
+		// --- SON
+		//	AKG_Decode();
 
 		// Mise à jour des élévateurs
 		if (g_FrameCounter % 4 == 0)

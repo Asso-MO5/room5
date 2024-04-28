@@ -39,7 +39,11 @@
     "*.asm": "asz80",
     "sprt_elevator.h": "c",
     "translate.h": "c",
-    "doors.h": "c"
+    "doors.h": "c",
+    "akg_player.h": "c",
+    "pletter.h": "c",
+    "localize.h": "c",
+    "msxgl.h": "c"
   },
   "editor.insertSpaces": false,
   "editor.detectIndentation": false,

@@ -48,6 +48,7 @@ LibModules = [
   'sprite_fx',
   'compress/pletter',
   'localize',
+  'arkos/akg_player',
 ]
 
 //-- Additional sources to be compiled and linked with the project (array)

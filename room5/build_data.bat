@@ -31,4 +31,6 @@ for %%G in (data\level\*.bin) do (
     %MSXtk%\MSXbin data\level\%%~nG.pl5 -ad -t g_Level!temp:~-3! -o data\level\%%~nG.h
 )
 
+%MSXtk%\MSXbin assets\hocuspocus.akg -ad -t g_AKG_HocusPocus -o data\sounds\akg_HocusPocus.h
+
 REM pause

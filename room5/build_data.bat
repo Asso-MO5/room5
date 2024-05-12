@@ -9,7 +9,7 @@ if not exist %Dest% md %Dest%
 
 :: Export background tiles
 echo -- Export background tiles data...
-%MSXtk%\MSXimg.exe assets\tileset.png -out %Dest%/bg_tileset.h -mode gm1 --tilesUnique -name g_Tiles -pos 0 0 -size 128 128
+%MSXtk%\MSXimg.exe assets\tileset.png -out %Dest%/bg_tileset.h -mode gm1 --tilesUnique -name g_Tiles -pos 0 0 -size 128 128 -compress pletter
 
 :: Export player sprite
 echo -- Export player sprite data...
@@ -31,6 +31,7 @@ for %%G in (data\level\*.bin) do (
     %MSXtk%\MSXbin data\level\%%~nG.pl5 -ad -t g_Level!temp:~-3! -o data\level\%%~nG.h
 )
 
-%MSXtk%\MSXbin assets\hocuspocus.akg -ad -t g_AKG_HocusPocus -o data\sounds\akg_HocusPocus.h
+%Tools%\compress\Pletter\pletter assets\hocuspocus.akg  assets\hocuspocus.pl5
+%MSXtk%\MSXbin assets\hocuspocus.pl5 -ad -t g_AKG_HocusPocus -o data\sounds\akg_HocusPocus.h
 
 REM pause

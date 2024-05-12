@@ -22,6 +22,7 @@
 #define TEXT_MODE_DEFAULT 0
 #define TEXT_MODE_PHONE 1
 #define TEXT_MODE_TALK 2
+#define MUSIC_ADDRESS 0xD000
 
 typedef bool (*animCallback)(void);
 

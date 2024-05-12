@@ -24,8 +24,7 @@
 #include "elevator.h"
 #include "sprite_fx.h"
 #include "doors.h"
-// COMPRESSER prochain live
-// #include "data/sounds/akg_HocusPocus.h"
+#include "data/sounds/akg_HocusPocus.h"
 
 //=============================================================================
 // DEFINITIONS
@@ -259,7 +258,7 @@ void updateTileAnimations()
 void loadData()
 {
 	// Chargement du tileset du décor en VRAM
-	VDP_WriteVRAM_16K(g_Tiles_Patterns, g_ScreenPatternLow, sizeof(g_Tiles_Patterns));
+	Pletter_UnpackToVRAM(g_Tiles_Patterns, g_ScreenPatternLow);
 	VDP_WriteVRAM_16K(g_Tiles_Colors, g_ScreenColorLow, sizeof(g_Tiles_Colors));
 
 	// Initialisation de la font de caractère
@@ -636,7 +635,8 @@ void lightRoom(bool bActivate)
 	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow, 7);
 	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow + (64 / 8), 8);
 	VDP_FillVRAM_16K(secondCol, g_ScreenColorLow + (128 / 8), 7);
-	VDP_FillVRAM_16K(bActivate ? 0xf1 : 0x71, g_ScreenColorLow + (184 / 8), 1);
+	// ancienne méthode pour modifier la couleurs des élévateurs manuels
+	// VDP_FillVRAM_16K(bActivate ? 0xf1 : 0x71, g_ScreenColorLow + (184 / 8), 1);
 
 	// Change la couleur du personnage
 	VDP_SetSpriteColorSM1(SPT_PLAYER_HAIR, bActivate ? COLOR_LIGHT_YELLOW : COLOR_LIGHT_BLUE);
@@ -1278,14 +1278,13 @@ void main()
 	VDP_SetColor(COLOR_BLACK);						 // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();
 
-	// COMPRESSER prochain live
-	/*
-		Mem_Copy(g_AKG_HocusPocus, 0xD000, sizeof(g_AKG_HocusPocus));
-		AKG_Init(0xD000, 0);
+	// === MUSIQUE ===
 
-		*/
+	Pletter_UnpackToRAM(g_AKG_HocusPocus, MUSIC_ADDRESS);
+	AKG_Init(MUSIC_ADDRESS, 0);
 
-	// Chargement des données graphique en mémoire vidéo (VRAM)
+	// 29673
+	//  Chargement des données graphique en mémoire vidéo (VRAM)
 	loadData();
 
 	langMenu();
@@ -1305,7 +1304,7 @@ void main()
 
 		// COMPRESSER prochain live
 		// --- SON
-		//	AKG_Decode();
+		AKG_Decode();
 
 		// Mise à jour des élévateurs
 		if (g_FrameCounter % 4 == 0)

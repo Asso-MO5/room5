@@ -139,6 +139,8 @@ void changeAllElevatorsColor(u8 color)
 	{
 		VDP_SetSpriteColorSM1(SPT_ELEVATOR + i, color);
 	}
+
+	VDP_Poke_16K(color << 4, VDP_GetColorTable() + 19);
 }
 
 void hideAllElevators()

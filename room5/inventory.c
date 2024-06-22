@@ -3,6 +3,8 @@
 #include "msxgl.h"
 
 #define INVENTORY_SIZE 4
+#define INVENTORY_DISPLAY_X 24
+#define INVENTORY_DISPLAY_Y 192
 
 u8 g_Inventory[INVENTORY_SIZE]; // Contenu de l'inventaire
 
@@ -25,7 +27,7 @@ bool addItemToInventory(u8 item)
 		if (g_Inventory[i] == EMPTY_ITEM)
 		{
 			g_Inventory[i] = item;
-			setTile(8 + i * 16, (u8)(192 - 8), item);
+			setTile(INVENTORY_DISPLAY_X + i * 16, (u8)(INVENTORY_DISPLAY_Y - 8), item);
 			return TRUE;
 		}
 	}

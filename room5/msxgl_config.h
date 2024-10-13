@@ -32,23 +32,17 @@
 // - TARGET_BIN_USR					BASIC USR binary driver (starting at C000h)
 // TARGET is defined by the build tool
 
-// Target type
-// - TYPE_BIN ..................... BASIC binary program
-// - TYPE_DOS ..................... MSX-DOS program
-// - TYPE_ROM ..................... ROM
-// TARGET_TYPE is defined by the build tool
-
 // MSX version
-// - MSX_1 ........................ MSX 1
-// - MSX_2 ........................ MSX 2
-// - MSX_12 ....................... MSX 1 and 2 (support each)
-// - MSX_2K ....................... Korean MSX 2 (SC9 support)
-// - MSX_2P ....................... MSX 2+
-// - MSX_22P ...................... MSX 2 and 2+ (support each)
-// - MSX_122P ..................... MSX 1, 2 and 2+ (support each)
-// - MSX_0 ........................ MSX 0 (MSX 2+)
+// - MSX_1 ........................ MSX1
+// - MSX_2 ........................ MSX2
+// - MSX_12 ....................... MSX1 and 2 (support each)
+// - MSX_2K ....................... Korean MSX2 (SC9 support)
+// - MSX_2P ....................... MSX2+
+// - MSX_22P ...................... MSX2 and 2+ (support each)
+// - MSX_122P ..................... MSX1, 2 and 2+ (support each)
+// - MSX_0 ........................ MSX0 (MSX2+)
 // - MSX_TR ....................... MSX turbo R
-// - MSX_3 ........................ MSX 3
+// - MSX_3 ........................ MSX3
 // MSX_VERSION is defined by the build tool
 
 //-----------------------------------------------------------------------------
@@ -66,7 +60,7 @@
 #define BIOS_USE_MAINROM TRUE // Allow use of Main-ROM routines
 #define BIOS_USE_VDP TRUE			// Give access to Main-ROM routines related to VDP
 #define BIOS_USE_PSG TRUE			// Give access to Main-ROM routines related to PSG
-#define BIOS_USE_SUBROM TRUE	// Allow use of Sub-ROM routines (MSX 2/2+/turbo R)
+#define BIOS_USE_SUBROM TRUE	// Allow use of Sub-ROM routines (MSX2/2+/turbo R)
 #define BIOS_USE_DISKROM TRUE // Allow use of Disk-ROM routines
 
 //-----------------------------------------------------------------------------
@@ -74,8 +68,8 @@
 //-----------------------------------------------------------------------------
 
 // VRAM addressing unit
-// - VDP_VRAM_ADDR_14 ............. Use 14-bits 16K VRAM addressing for MSX 1 (u16)
-// - VDP_VRAM_ADDR_17 ............. Use 17-bits 128K VRAM addressing for MSX 2/2+/turbo R (u32)
+// - VDP_VRAM_ADDR_14 ............. Use 14-bits 16K VRAM addressing for MSX1 (u16)
+// - VDP_VRAM_ADDR_17 ............. Use 17-bits 128K VRAM addressing for MSX2/2+/turbo R (u32)
 #define VDP_VRAM_ADDR VDP_VRAM_ADDR_14
 
 // VDP X/Y units
@@ -87,9 +81,9 @@
 
 // VDP screen modes (additionnal limitations come from the selected MSX_VERSION)
 #define VDP_USE_MODE_T1 TRUE	// MSX1		Screen 0 Width 40
-#define VDP_USE_MODE_MC TRUE	// MSX1		Screen 3
 #define VDP_USE_MODE_G1 TRUE	// MSX1		Screen 1
 #define VDP_USE_MODE_G2 TRUE	// MSX1		Screen 2
+#define VDP_USE_MODE_MC TRUE	// MSX1		Screen 3
 #define VDP_USE_MODE_T2 FALSE // MSX2		Screen 0 Width 80
 #define VDP_USE_MODE_G3 FALSE // MSX2		Screen 4
 #define VDP_USE_MODE_G4 FALSE // MSX2		Screen 5
@@ -104,11 +98,12 @@
 #define VDP_AUTO_INIT TRUE						// Call VDP_Initialize() at the first call to VDP_SetMode()
 #define VDP_USE_UNDOCUMENTED TRUE			// Allow the use of undocumented screen mode (WIP)
 #define VDP_USE_VALIDATOR TRUE				// Handle some option specific for each VDP mode (highly recommended)
-#define VDP_USE_DEFAULT_PALETTE FALSE // Add data for default MSX 2 palette
-#define VDP_USE_MSX1_PALETTE FALSE		// Add data for default MSX 1 palette
+#define VDP_USE_DEFAULT_PALETTE FALSE // Add data for default MSX2 palette
+#define VDP_USE_MSX1_PALETTE FALSE		// Add data for default MSX1 palette
 #define VDP_USE_DEFAULT_SETTINGS TRUE // Auto-initialization of common VDP feature
 #define VDP_USE_16X16_SPRITE TRUE			// Use 16x16 sprites mode
 #define VDP_USE_RESTORE_S0 TRUE				// Do restore of status register pointer to S#0 (needed onlt for default BIOS ISR)
+#define VDP_USE_PALETTE16 TRUE				// Use 16 entries palette (use only 15 entries otherwise)
 
 // ISR protection while modifiying VDP registers
 // - VDP_ISR_SAFE_NONE ............ No ISR protection (for program not using VDP interruption)
@@ -122,6 +117,29 @@
 // - VDP_INIT_AUTO ................ Determining the best value for the context
 // - VDP_INIT_DEFAULT ............. Keep default value
 #define VDP_INIT_50HZ VDP_INIT_ON
+
+//-----------------------------------------------------------------------------
+// V9990  MODULE
+//-----------------------------------------------------------------------------
+
+// V9990 screen modes support
+#define V9_USE_MODE_P1 TRUE // Tile mode 0 256x212
+#define V9_USE_MODE_P2 TRUE // Tile mode 1 512x212
+#define V9_USE_MODE_B0 TRUE // Bitmap mode 1 192x240 (Undocumented v9990 mode)
+#define V9_USE_MODE_B1 TRUE // Bitmap mode 1 256x212
+#define V9_USE_MODE_B2 TRUE // Bitmap mode 2 384x240
+#define V9_USE_MODE_B3 TRUE // Bitmap mode 3 512x212
+#define V9_USE_MODE_B4 TRUE // Bitmap mode 4 768x240
+#define V9_USE_MODE_B5 TRUE // Bitmap mode 5 640x400 (VGA)
+#define V9_USE_MODE_B6 TRUE // Bitmap mode 6 640x480 (VGA)
+#define V9_USE_MODE_B7 TRUE // Bitmap mode 7 1024x212 (Undocumented v9990 mode)
+
+#define V9_INT_PROTECT TRUE // VRAM access protection mode against interruption
+// Palette input data format
+// - V9_PALETTE_YSGBR_16 .......... 16 bits RGB + Ys [Ys|G|G|G|G|G|R|R] [R|R|R|B|B|B|B|B]
+// - V9_PALETTE_GBR_16 ............ 16 bits RGB      [0|G|G|G|G|G|R|R] [R|R|R|B|B|B|B|B]
+// - V9_PALETTE_RGB_24 ............ 24 bits RGB      [0|0|0|R|R|R|R|R] [0|0|0|G|G|G|G|G] [0|0|0|B|B|B|B|B]
+#define V9_PALETTE_MODE V9_PALETTE_RGB_24
 
 //-----------------------------------------------------------------------------
 // INPUT MODULE
@@ -156,6 +174,15 @@
 #define DOS_USE_HANDLE TRUE		 // Add support for file managment features through file handle
 #define DOS_USE_UTILITIES TRUE // Add support for file managment features through filename
 #define DOS_USE_VALIDATOR TRUE // Add support for last error backup and return value validation
+
+//-----------------------------------------------------------------------------
+// CLOCK MODULE
+//-----------------------------------------------------------------------------
+
+#define RTC_USE_CLOCK TRUE			 // Add functions to handle date and time
+#define RTC_USE_CLOCK_EXTRA TRUE // Add extra date and time functions that require additional data
+#define RTC_USE_SAVEDATA TRUE		 // Add functions to read/write into the CMOS
+#define RTC_USE_SAVESIGNED TRUE	 // Add signature handling to validate CMOS I/O
 
 //-----------------------------------------------------------------------------
 // DRAW MODULE
@@ -246,7 +273,10 @@
 // Top/bottom border position (in pixel)
 #define GAMEPAWN_BORDER_MIN_Y 0
 #define GAMEPAWN_BORDER_MAX_Y 191
-#define GAMEPAWN_FORCE_SM1 FALSE // Force the use sprite mode 1
+#define GAMEPAWN_FORCE_SM1 FALSE	 // Force the use sprite mode 1
+#define GAMEPAWN_USE_VRAM_COL TRUE // Use VRAM to chech tile collision (otherwise, use RAM buffer)
+#define GAMEPAWN_TILEMAP_WIDTH 32	 // Width of the tiles map
+#define GAMEPAWN_TILEMAP_HEIGHT 24 // Height of the tiles map
 
 //-----------------------------------------------------------------------------
 // GAME MENU MODULE
@@ -375,6 +405,11 @@
 // - PCMENC_NONE, PCMENC_8K, PCMENC_11K, PCMENC_22K and PCMENC_44K
 #define PCMENC_FREQ PCMENC_8K | PCMENC_11K | PCMENC_22K | PCMENC_44K
 
+// PCMPlay
+// - PCMPLAY_8K or PCMPLAY_11K
+#define PCMPLAY_FREQ PCMPLAY_8K
+#define PCMPLAY_USE_RESTORE FALSE
+
 // PT3 options
 #define PT3_SKIP_HEADER TRUE // Don't use PT3 data header (first 100 bytes must be truncated)
 #define PT3_AUTOPLAY TRUE		 // Play music automatically
@@ -384,6 +419,24 @@
 #define TRILO_USE_SFXPLAY TRUE // Add SFX playback through Trilo SCC player (ayFX + SCC format)
 #define TRILO_USE_TREMOLO TRUE // Add support for tremolo effect (little bit expensive)
 #define TRILO_USE_TAIL FALSE	 // Add tail to prevent volume to fall to zero
+
+// LVGM replayer options
+#define LVGM_USE_PSG TRUE			 // Add parser for PSG data
+#define LVGM_USE_MSXMUSIC TRUE // Add parser for MSX-Music data
+#define LVGM_USE_MSXAUDIO TRUE // Add parser for MSX-Audio data
+#define LVGM_USE_SCC TRUE			 // Add parser for Konami SCC data
+#define LVGM_USE_SCCI FALSE		 // Add parser for Konami SCC+ data
+#define LVGM_USE_PSG2 FALSE		 // Add parser for secondary PSG data
+#define LVGM_USE_OPL4 FALSE		 // Add parser for OPL4 data
+#define LVGM_USE_NOTIFY TRUE	 // Add parser for PSG data
+
+// WYZ Tracker replayer options
+// Channels number
+// - WYZ_3CH
+// - WYZ_6CH
+#define WYZ_CHANNELS WYZ_3CH				// Number of supported channels (can be 3 for 1 PSG or 6 for 2 PSG)
+#define WYZ_USE_DIRECT_ACCESS FALSE // Send data directly to PSG registers (otherwise, write in a RAM buffer)
+#define WYZ_CHAN_BUFFER_SIZE 0x20		// Size of the channel buffer
 
 //-----------------------------------------------------------------------------
 // MATH MODULE
@@ -419,8 +472,11 @@
 // - PLETTER_DI_LOOP .............. Disable interruption during VRAM write loop
 #define PLETTER_DI_MODE PLETTER_DI_LOOP
 // VRAM write timing mode
-// - PLETTER_WRITE_SAFE ........... Safe VRAM write speed (include nop between write)
-// - PLETTER_WRITE_QUICK .......... No wait beetween write
+// - PLETTER_WRITE_SAFE ........... Safe VRAM write speed (30 t-states)
+// - PLETTER_WRITE_NODISPLAY ...... Safe VRAM write speed when screen display disable (22 t-states)
+// - PLETTER_WRITE_MINIMAL ........ Minimal wait beetween write (17 t-states)
+// - PLETTER_WRITE_QUICK .......... No wait beetween write (12 t-states)
+// - PLETTER_WRITE_AUTO ........... Determine the worst case according to selected screen mode (12~30 t-states)
 #define PLETTER_WRITE_MODE PLETTER_WRITE_SAFE
 
 // BitBuster compression
@@ -428,6 +484,20 @@
 // - BITBUSTER_WRITE_SAFE ......... Safe VRAM write speed (include nop between write)
 // - BITBUSTER_WRITE_QUICK ........ No wait beetween write
 #define BITBUSTER_WRITE_MODE BITBUSTER_WRITE_SAFE
+
+// ZX0 compression
+// Unpack mode
+// - ZX0_MODE_STANDARD ............ Standard routine: 68 bytes only
+// - ZX0_MODE_TURBO ............... Turbo routine: 126 bytes, about 21% faster
+// - ZX0_MODE_FAST ................ Fast routine: 187 bytes, about 25% faster
+// - ZX0_MODE_MEGA ................ Mega routine: 673 bytes, about 28% faster
+#define ZX0_MODE ZX0_MODE_STANDARD
+
+// LZ48 compression
+// - LZ48_MODE_STANDARD ........... Standard routine
+// - LZ48_MODE_SPEED .............. Version optimized for speed
+// - LZ48_MODE_SIZE ............... Version optimized for size
+#define LZ48_MODE LZ48_MODE_STANDARD
 
 // MSXi compressor support
 #define MSXi_USE_COMP_NONE TRUE
@@ -453,20 +523,61 @@
 #define NTAP_USE_PREVIOUS TRUE // Backup previous data to allow push/release detection
 
 //-----------------------------------------------------------------------------
-// DEBUG
+// PAC MODULE
 //-----------------------------------------------------------------------------
 
-// Profiler method
-// - DEBUG_DISABLE ................ No profiler
-// - DEBUG_OPENMSX_G .............. Grauw profile script for OpenMSX
-// - DEBUG_OPENMSX_S .............. Salutte profile script for OpenMSX
-// - DEBUG_EMULICIOUS ............. Profile script for Emulicious
-#define DEBUG_TOOL DEBUG_DISABLE
-#define PROFILE_LEVEL 10
+#define PAC_USE_SIGNATURE TRUE // Handle application signature to validate saved data
+#define PAC_USE_VALIDATOR TRUE // Add code to validate input parameters
+#define PAC_DEVICE_MAX 4			 // Maximum number of supported PAC devices
+// SRAM access method
+// - PAC_ACCESS_DIRECT ............ Direct access to SRAM (must be selected in page 1)
+// - PAC_ACCESS_BIOS .............. Access through BIOS routines
+// - PAC_ACCESS_SWITCH_BIOS ....... Access through BIOS routines with BIOS switched in
+// - PAC_ACCESS_SYSTEM ............ Access through MSXgl routine (no need BIOS)
+#define PAC_ACCESS PAC_ACCESS_BIOS
 
-#define VDP_USE_PALETTE16 FALSE
-#define RTC_USE_CLOCK_EXTRA TRUE
-#define RTC_USE_SAVEDATA TRUE
-#define RTC_USE_SAVESIGNED TRUE
-#define RTC_USE_CLOCK TRUE
-#define MEM_USE_BUILTIN FALSE
+//-----------------------------------------------------------------------------
+// QR CODE MODULE
+//-----------------------------------------------------------------------------
+
+#define QRCODE_VERSION_MIN 1				// The minimum version number supported in the QR Code Model 2 standard
+#define QRCODE_VERSION_MAX 20				// The maximum version number supported in the QR Code Model 2 standard
+#define QRCODE_VERSION_CUSTOM FALSE // TRUE: Allow to define version using <QRCode_SetVersion>. FALSE: Use hardcoded min/max version
+#define QRCODE_USE_BYTE_ONLY TRUE		// TRUE: Allow only BYTE mode. FALSE allow all mode including NUMERIC, ALPHANUMERIC, KANJI and ECI.
+#define QRCODE_USE_EXTRA FALSE			// TRUE: Add extra function to generate custom data segments.
+#define QRCODE_BOOST_ECL FALSE			// If boostEcl is TRUE, then the ECC level of the result may be higher than the ecl argument if it can be done without increasing the version. QRCODE_PARAM_CUSTOM: Allow to use <QRCode_SetBoostECL> function.
+
+#define QRCODE_TINY_VERSION 10 // The version number supported in the QR Code Model 2 standard
+// Error correction level
+// - QRCODE_ECC_LOW ............... The QR Code can tolerate about  7% erroneous codewords
+// - QRCODE_ECC_MEDIUM ............ The QR Code can tolerate about 15% erroneous codewords
+// - QRCODE_ECC_QUARTILE .......... The QR Code can tolerate about 25% erroneous codewords
+// - QRCODE_ECC_HIGH .............. The QR Code can tolerate about 30% erroneous codewords
+#define QRCODE_TINY_ECC QRCODE_ECC_LOW
+// Mask pattern
+// - QRCODE_MASK_0 ................ (i + j) % 2 = 0
+// - QRCODE_MASK_1 ................ i % 2 = 0
+// - QRCODE_MASK_2 ................ j % 3 = 0
+// - QRCODE_MASK_3 ................ (i + j) % 3 = 0
+// - QRCODE_MASK_4 ................ (i / 2 + j / 3) % 2 = 0
+// - QRCODE_MASK_5 ................ (i * j) % 2 + (i * j) % 3 = 0
+// - QRCODE_MASK_6 ................ ((i * j) % 3 + i * j) % 2 = 0
+// - QRCODE_MASK_7 ................ ((i * j) % 3 + i + j) % 2 = 0
+#define QRCODE_TINY_MASK QRCODE_MASK_0
+
+//-----------------------------------------------------------------------------
+// DEBUG & PROFILE
+//-----------------------------------------------------------------------------
+
+// Debugger options
+// - DEBUG_DISABLE ................ No debug tool
+// - DEBUG_EMULICIOUS ............. Debug features for Emulicious
+// - DEBUG_OPENMSX ................ Debug features for openMSX using 'debugdevice' extension
+// - DEBUG_OPENMSX_P .............. Debug features for openMSX using PVM script (tools/script/openMSX/debugger_pvm.tcl)
+#define DEBUG_TOOL DEBUG_DISABLE
+// Profiler options
+// - PROFILE_DISABLE .............. No profile tool
+// - PROFILE_OPENMSX_G ............ Profiler features for openMSX using Grauw script (tools/script/openMSX/profiler_grauw.tcl)
+// - PROFILE_OPENMSX_S ............ Profiler features for openMSX using Salutte script (tools/script/openMSX/profiler_salutte.tcl)
+#define PROFILE_TOOL PROFILE_DISABLE
+#define PROFILE_LEVEL 10

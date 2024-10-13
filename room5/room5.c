@@ -24,7 +24,7 @@
 #include "elevator.h"
 #include "sprite_fx.h"
 #include "doors.h"
-#include "data/sounds/akg_HocusPocus.h"
+// #include "data/sounds/akg_HocusPocus.h"
 
 //=============================================================================
 // DEFINITIONS
@@ -40,6 +40,7 @@ void activateElectricity(bool bActivate);
 void displayLevel(u8 levelIdx);
 bool onDoorAnimEnd();
 bool interact(u8 x, u8 y);
+extern const unsigned char g_AKG_HocusPocus[];
 
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
@@ -1198,11 +1199,6 @@ bool interact(u8 x, u8 y)
 //
 //.............................................................................
 
-//
-void VDP_InterruptHandler()
-{
-}
-
 //-----------------------------------------------------------------------------
 
 // Menu de langue
@@ -1260,6 +1256,11 @@ void langMenu()
 			return;
 		}
 	}
+}
+
+void VDP_InterruptHandler()
+{
+	//@see https://aoineko.org/msxgl/index.php?title=Build_tool
 }
 // Point d'entrée du programme principal
 void main()

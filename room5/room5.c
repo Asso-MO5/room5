@@ -24,7 +24,6 @@
 #include "elevator.h"
 #include "sprite_fx.h"
 #include "doors.h"
-// #include "data/sounds/akg_HocusPocus.h"
 
 //=============================================================================
 // DEFINITIONS
@@ -45,6 +44,10 @@ extern const unsigned char g_AKG_HocusPocus[];
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
 //=============================================================================
+
+volatile bool g_vSync = TRUE;
+bool g_isNTSC = TRUE;
+u8 g_frameVSyncCounter = 0;
 
 u8 g_ScreenBuffer[32 * 24]; // Buffer de l'écran (32x24 tuiles de 8x8 pixels)
 
@@ -1261,11 +1264,37 @@ void langMenu()
 void VDP_InterruptHandler()
 {
 	//@see https://aoineko.org/msxgl/index.php?title=Build_tool
+	g_vSync = TRUE;
 }
+
+void waitVSync()
+{
+	while (g_vSync == FALSE)
+	{
+	}
+	g_vSync = FALSE;
+
+	if (g_isNTSC)
+	{
+
+		g_frameVSyncCounter++;
+		if (g_frameVSyncCounter == 6)
+		{
+			while (g_vSync == FALSE)
+			{
+			}
+			g_vSync = FALSE;
+			g_frameVSyncCounter = 0;
+		}
+	}
+}
+
 // Point d'entrée du programme principal
 void main()
 {
+	g_isNTSC = !(g_VersionROM & 0x80);
 
+	// Initialisation de la table de localisation
 	// Key click du MSX
 	Bios_SetKeyClick(FALSE);
 
@@ -1301,7 +1330,7 @@ void main()
 	while (1) // Pour un jeu en cartouche (ROM) on a pas besoin de gérer la sortie de la boucle principale
 	{
 		// Attente de la synchronisation avec le processeur graphique (à 50 ou 60 Hz)
-		Halt();
+		waitVSync();
 
 		// COMPRESSER prochain live
 		// --- SON

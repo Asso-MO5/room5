@@ -15,7 +15,7 @@
 // DoMake    = true;	//-- Link all the project and engine source code (boolean). Merge all REL into one IHX file
 // DoPackage = true;	//-- Generate final binary file (boolean). Binarize the IHX file
 // DoDeploy  = true;	//-- Gathering of all files necessary for the program to work (boolean). Depends on the type of target
-// DoRun     = false;	//-- Start the program automatically at the end of the build (boolean)
+DoRun = true //-- Start the program automatically at the end of the build (boolean)
 
 //*****************************************************************************
 // PROJECT SETTINGS
@@ -92,6 +92,7 @@ Machine = '1'
 //   - ROM_NEO8         .rom    NEO-8: 8 KB segments for a total of 1 MB to 32 MB
 //   - ROM_NEO16        .rom    NEO-16: 16 KB segments for a total of 1 MB to 64 MB
 Target = 'ROM_48K_ISR'
+Emulator = `C:/Program Files/openMSX/openmsx.exe`
 
 //-- ROM mapper total size in KB (number). Must be a multiple of 8 or 16 depending on the mapper type (from 64 to 4096)
 // ROMSize = 0;

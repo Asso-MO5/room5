@@ -15,7 +15,20 @@
 // DoMake    = true;	//-- Link all the project and engine source code (boolean). Merge all REL into one IHX file
 // DoPackage = true;	//-- Generate final binary file (boolean). Binarize the IHX file
 // DoDeploy  = true;	//-- Gathering of all files necessary for the program to work (boolean). Depends on the type of target
-DoRun = true //-- Start the program automatically at the end of the build (boolean)
+// DoRun     = false;	//-- Start the program automatically at the end of the build (boolean)
+
+//*****************************************************************************
+// TOOLS SETTINGS
+//*****************************************************************************
+
+//-- Path to the emulator to launch the project (string)
+// Emulator  = `${ToolsDir}openMSX/openmsx`;
+// Emulator  = `${ToolsDir}Emulicious/Emulicious`;
+// Emulator  = `${ToolsDir}fMSX/fMSX`;
+// Emulator  = `${ToolsDir}MSXEC\\MSXEC`;
+// Emulator  = `${ToolsDir}BlueMSX/blueMSX`;
+// Emulator  = `${ToolsDir}MEISEI/meisei`;
+// Emulator  = `${ToolsDir}RuMSX/MSX`;
 
 //*****************************************************************************
 // PROJECT SETTINGS
@@ -35,7 +48,7 @@ ProjModules = [
 ]
 
 //-- Project segments base name (string). ProjName will be used if not defined
-// ProjSegments = "";
+// ProjSegments = ProjName;
 
 //-- List of library modules to build (array)
 LibModules = [
@@ -92,10 +105,9 @@ Machine = '1'
 //   - ROM_NEO8         .rom    NEO-8: 8 KB segments for a total of 1 MB to 32 MB
 //   - ROM_NEO16        .rom    NEO-16: 16 KB segments for a total of 1 MB to 64 MB
 Target = 'ROM_48K_ISR'
-Emulator = `C:/Program Files/openMSX/openmsx.exe`
 
 //-- ROM mapper total size in KB (number). Must be a multiple of 8 or 16 depending on the mapper type (from 64 to 4096)
-// ROMSize = 0;
+// ROMSize = 128;
 
 //-- Postpone the ROM startup to let the other ROMs initialize like Disk controller or Network cartridge (boolean)
 // ROMDelayBoot = false;
@@ -119,7 +131,7 @@ CustomISR = 'VBLANK'
 //-- Overwrite RAM starting address (number). For example. 0xE0000 for 8K RAM machine
 // ForceRamAddr = 0;
 
-// --List of data files to copy to disk (array)
+//-- List of data files to copy to disk (array)
 // DiskFiles = [];
 
 //-- Size of the final disk (.DSK file). Can be "360K" or "720K" (string)
@@ -129,7 +141,7 @@ CustomISR = 'VBLANK'
 // USRAddr = 0xC000;
 
 //-- Parse MSX-DOS command-line arguments
-// DOSParseArg = false;
+// DOSParseArg = true;
 
 //*******************************************************************************
 // SIGNATURE SETTINGS

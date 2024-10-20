@@ -31,7 +31,11 @@ for %%G in (data\level\*.bin) do (
     %MSXtk%\MSXbin data\level\%%~nG.pl5 -ad -t g_Level!temp:~-3! -o data\level\%%~nG.h
 )
 
+:: Convert Arkos Tracker music
 %Tools%\compress\Pletter\pletter assets\hocuspocus.akg  assets\hocuspocus.pl5
 %MSXtk%\MSXbin assets\hocuspocus.pl5 -ad -t g_AKG_HocusPocus -o data\sounds\akg_HocusPocus.h
+
+:: Convert Japanese font
+%MSXtk%\MSXimg assets\font_kana8.png -out data\font_jp.h -pos 0 0 -size 8 8  -gap 0 0 -num 8 13  -trans 0x000000 -bpc 1 -name g_Font_JP
 
 REM pause

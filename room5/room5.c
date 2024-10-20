@@ -39,7 +39,63 @@ void activateElectricity(bool bActivate);
 void displayLevel(u8 levelIdx);
 bool onDoorAnimEnd();
 bool interact(u8 x, u8 y);
+
+// Variables statiques définies dans un autre module
 extern const unsigned char g_AKG_HocusPocus[];
+extern const unsigned char g_Font_JP[];
+
+//=============================================================================
+// DONNEES CONSTANTES (stockées dans le ROM)
+//=============================================================================
+
+// Données des sprites du joueur
+#include "data/sprt_player.h"
+
+// Données des formes et couleurs des tuiles
+#include "data/bg_tileset.h"
+
+// Données des sprites de l'élévateur
+#include "data/sprt_elevator.h"
+
+// Données de traduction
+#include "data/translate.h"
+
+// Liste des frames d'animation du personnage
+const u8 g_PlayerFramesMove[] = {1, 2, 3, 4};
+const u8 g_PlayerFramesAction[] = {5, 6, 7, 8, 9, 10, 9, 11};
+const u8 g_PlayerFramesFall[] = {1, 2, 3, 4};
+
+// Donnée d'animation des portes
+const u8 g_DoorAnimationTiles[] = {
+		44, 11, 45, 71, 46, 15, // Frame 0
+		44, 11, 45, 71, 46, 15, // Frame 1
+		44, 47, 45, 54, 46, 55, // Frame 2
+		44, 47, 45, 54, 46, 55, // Frame 3,
+		44, 47, 45, 54, 46, 55, // Frame 4,
+		44, 47, 45, 54, 46, 55, // Frame 5,
+		44, 47, 45, 54, 46, 55, // Frame 6
+};
+const struct TileAnimation g_DoorAnimation = {
+		2,
+		3,
+		7,
+		1,
+		g_DoorAnimationTiles};
+
+// Donnée d'animation du téléphone
+const u8 g_PhoneAnimationTiles[] = {
+		18, 80, // Frame 0
+		18, 16, // Frame 1
+		19, 80, // Frame 2
+		19, 17, // Frame 3
+};
+const struct TileAnimation g_PhoneAnimation = {
+		1,
+		2,
+		4,
+		0,
+		g_PhoneAnimationTiles};
+
 
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
@@ -93,57 +149,8 @@ struct TileAnimationInstance g_AnimationInstances[MAX_TILE_ANIMATION];
 struct TextCoordInstance g_TextCoordInstances[MAX_TEXT_COORD];
 u8 g_TextCoordCount = 0;
 
-//=============================================================================
-// DONNEES CONSTANTES (stockées dans le ROM)
-//=============================================================================
-
-// Données des sprites du joueur
-#include "data/sprt_player.h"
-
-// Données des formes et couleurs des tuiles
-#include "data/bg_tileset.h"
-
-// Données des sprites de l'élévateur
-#include "data/sprt_elevator.h"
-
-// Données de traduction
-#include "data/translate.h"
-
-// Liste des frames d'animation du personnage
-const u8 g_PlayerFramesMove[] = {1, 2, 3, 4};
-const u8 g_PlayerFramesAction[] = {5, 6, 7, 8, 9, 10, 9, 11};
-const u8 g_PlayerFramesFall[] = {1, 2, 3, 4};
-
-// Donnée d'animation des portes
-const u8 g_DoorAnimationTiles[] = {
-		44, 11, 45, 71, 46, 15, // Frame 0
-		44, 11, 45, 71, 46, 15, // Frame 1
-		44, 47, 45, 54, 46, 55, // Frame 2
-		44, 47, 45, 54, 46, 55, // Frame 3,
-		44, 47, 45, 54, 46, 55, // Frame 4,
-		44, 47, 45, 54, 46, 55, // Frame 5,
-		44, 47, 45, 54, 46, 55, // Frame 6
-};
-const struct TileAnimation g_DoorAnimation = {
-		2,
-		3,
-		7,
-		1,
-		g_DoorAnimationTiles};
-
-// Donnée d'animation du téléphone
-const u8 g_PhoneAnimationTiles[] = {
-		18, 80, // Frame 0
-		18, 16, // Frame 1
-		19, 80, // Frame 2
-		19, 17, // Frame 3
-};
-const struct TileAnimation g_PhoneAnimation = {
-		1,
-		2,
-		4,
-		0,
-		g_PhoneAnimationTiles};
+// Index de la langue selecitonnée
+u8 g_Language = LANG_EN;
 
 //=============================================================================
 // FONCTIONS
@@ -272,7 +279,6 @@ void loadData()
 	g_PrintData.PatternOffset = 192;
 
 	// Chargement des formes des sprites
-	// VDP_WriteVRAM_16K(g_SprtPlayer, g_SpritePatternLow, sizeof(g_SprtPlayer));
 	VDP_WriteVRAM_16K(g_SprtElevator, g_SpritePatternLow + 4 * 4 * 12 * 8, sizeof(g_SprtElevator));
 
 	// Creation des 4 sprites du personnage (leur position et leur pattern seront mis-à-jour à chaque frame dans la boucle principale)
@@ -400,12 +406,9 @@ void updatePlayer()
 	}
 	else if (Keyboard_IsKeyPressed(KEY_CTRL)) // Déplacement de debug (sans collision ni gravité)
 	{
-		if (Keyboard_IsKeyPressed(KEY_SPACE))
+		if (Keyboard_IsKeyPushed(KEY_SPACE))
 		{
 			displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
-			while (Keyboard_IsKeyPressed(KEY_SPACE))
-			{
-			}
 		}
 
 		if (Keyboard_IsKeyPressed(KEY_LEFT))
@@ -606,7 +609,7 @@ void activatePhone(u8 xP, u8 yP, bool bPhone)
 	// Else = les fins
 
 	// Afficher le texte
-	VDP_FillVRAM_16K((u8)(COLOR_WHITE << 4), g_ScreenColorLow + 192 / 8, 8);
+	VDP_FillVRAM_16K((u8)(COLOR_WHITE << 4), g_ScreenColorLow + 152 / 8, 8);
 
 	// Déverrouillage des portes
 	for (u8 y = 0; y < 24; ++y)
@@ -638,7 +641,7 @@ void lightRoom(bool bActivate)
 	u8 secondCol = bActivate ? 0xB1 : 0x51;
 	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow, 7);
 	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow + (64 / 8), 8);
-	VDP_FillVRAM_16K(secondCol, g_ScreenColorLow + (128 / 8), 7);
+	VDP_FillVRAM_16K(secondCol, g_ScreenColorLow + (128 / 8), 3);
 	// ancienne méthode pour modifier la couleurs des élévateurs manuels
 	// VDP_FillVRAM_16K(bActivate ? 0xf1 : 0x71, g_ScreenColorLow + (184 / 8), 1);
 
@@ -1203,70 +1206,82 @@ bool interact(u8 x, u8 y)
 //.............................................................................
 
 //-----------------------------------------------------------------------------
-
 // Menu de langue
-
 void langMenu()
 {
-
-	u8 currentLanguage = LANG_EN;
-#define cursorY 10
-#define cursorX 10
-
+	// Initialisation du menu
 	for (u8 i = 0; i < LANG_MAX; i++)
 	{
 		Loc_SetLanguage(i);
 		displayTextAt(12, i + 10, Loc_GetText(TEXT_LANG_LABEL));
 	}
 
-	setTileByTileCoord(cursorX, cursorY + currentLanguage, SPT_CURSOR);
+	// Affichage du curseur
+	setTileByTileCoord(LANG_CURSORX, LANG_CURSORY + g_Language, SPT_CURSOR);
 
 	while (1)
 	{
-		Halt();
+		waitVSync();
 		Keyboard_Update();
 		if (Keyboard_IsKeyPushed(KEY_UP))
 		{
-			setTileByTileCoord(cursorX, cursorY + currentLanguage, TILE_EMPTY);
-			if (currentLanguage == 0)
+			setTileByTileCoord(LANG_CURSORX, LANG_CURSORY + g_Language, TILE_EMPTY);
+			if (g_Language == 0)
 			{
-				currentLanguage = LANG_MAX - 1;
+				g_Language = LANG_MAX - 1;
 			}
 			else
 			{
-				currentLanguage--;
+				g_Language--;
 			}
 
-			setTileByTileCoord(cursorX, cursorY + currentLanguage, SPT_CURSOR);
+			setTileByTileCoord(LANG_CURSORX, LANG_CURSORY + g_Language, SPT_CURSOR);
 		}
 		else if (Keyboard_IsKeyPushed(KEY_DOWN))
 		{
-			setTileByTileCoord(cursorX, cursorY + currentLanguage, TILE_EMPTY);
-			if (currentLanguage == LANG_MAX - 1)
+			setTileByTileCoord(LANG_CURSORX, LANG_CURSORY + g_Language, TILE_EMPTY);
+			if (g_Language == LANG_MAX - 1)
 			{
-				currentLanguage = 0;
+				g_Language = 0;
 			}
 			else
 			{
-				currentLanguage++;
+				g_Language++;
 			}
 
-			setTileByTileCoord(cursorX, cursorY + currentLanguage, SPT_CURSOR);
+			setTileByTileCoord(LANG_CURSORX, LANG_CURSORY + g_Language, SPT_CURSOR);
 		}
 		else if (Keyboard_IsKeyPushed(KEY_ENTER) || Keyboard_IsKeyPushed(KEY_SPACE))
 		{
-			Loc_SetLanguage(currentLanguage);
-			return;
+			Loc_SetLanguage(g_Language);
+			break;
 		}
 	}
+
+	// Traitement spécifique à une langue
+	// switch(g_Language)
+	// {
+	// case LANG_JA:
+	// 	VDP_WriteVRAM_16K(g_Font_JP, g_ScreenPatternLow + (8 * 152), 8 * 13 * 8);
+	// 	g_PrintData.PatternOffset = 152;
+	// 	g_PrintData.CharFirst = 32;
+	// 	g_PrintData.CharLast = 255;
+	// 	break;
+	// }
 }
 
+//-----------------------------------------------------------------------------
+// Gestionnaire d'interruption
+// Cette fonction est appelée à chaque interruption venant du processeur graphique pour signifier la fin de l'affichage du image (50 ou 60 fois par secondes). 
 void VDP_InterruptHandler()
 {
 	//@see https://aoineko.org/msxgl/index.php?title=Build_tool
 	g_vSync = TRUE;
 }
 
+//-----------------------------------------------------------------------------
+// Bloque le programme jusqu'à la fin de l'affichage de l'image en cours
+// Cela permet de synchroniser le jeu à 50 frames par seconde.
 void waitVSync()
 {
 	while (g_vSync == FALSE)
@@ -1303,7 +1318,7 @@ void main()
 	Loc_SetLanguage(LANG_EN);
 
 	// Initialisation de l'affichage
-	VDP_SetMode(VDP_MODE_SCREEN1);				 // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs)
+	VDP_SetMode(VDP_MODE_SCREEN1);				 // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs parmi 32 combinaisons)
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16); // Sprite de taille 16x16
 	VDP_SetColor(COLOR_BLACK);						 // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();

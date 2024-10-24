@@ -29,11 +29,9 @@
 // DEFINITIONS
 //=============================================================================
 
-// Function prototypes
-
+// Prototypes de fonctions
 void initPlayer(u8 x, u8 y);
 void updatePlayer();
-
 void activateLight(bool bActivate);
 void activateElectricity(bool bActivate);
 void displayLevel(u8 levelIdx);

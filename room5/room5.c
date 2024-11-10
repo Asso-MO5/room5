@@ -41,7 +41,8 @@ bool interact(u8 x, u8 y);
 
 // Variables statiques définies dans un autre module
 extern const unsigned char g_AKG_HocusPocus[];
-extern const unsigned char g_Font_JP[];
+// extern const unsigned char g_AKG_MusicMain[];
+// extern const unsigned char g_Font_JP[];
 
 //=============================================================================
 // DONNEES CONSTANTES (stockées dans le ROM)

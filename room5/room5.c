@@ -40,8 +40,7 @@ bool onDoorAnimEnd();
 bool interact(u8 x, u8 y);
 
 // Variables statiques définies dans un autre module
-extern const unsigned char g_AKG_HocusPocus[];
-// extern const unsigned char g_AKG_MusicMain[];
+extern const unsigned char g_AKG_MusicMain[];
 // extern const unsigned char g_Font_JP[];
 
 //=============================================================================
@@ -95,7 +94,6 @@ const struct TileAnimation g_PhoneAnimation = {
 		4,
 		0,
 		g_PhoneAnimationTiles};
-
 
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
@@ -1272,7 +1270,7 @@ void langMenu()
 
 //-----------------------------------------------------------------------------
 // Gestionnaire d'interruption
-// Cette fonction est appelée à chaque interruption venant du processeur graphique pour signifier la fin de l'affichage du image (50 ou 60 fois par secondes). 
+// Cette fonction est appelée à chaque interruption venant du processeur graphique pour signifier la fin de l'affichage du image (50 ou 60 fois par secondes).
 void VDP_InterruptHandler()
 {
 	//@see https://aoineko.org/msxgl/index.php?title=Build_tool
@@ -1325,7 +1323,7 @@ void main()
 
 	// === MUSIQUE ===
 
-	Pletter_UnpackToRAM(g_AKG_HocusPocus, MUSIC_ADDRESS);
+	Pletter_UnpackToRAM(g_AKG_MusicMain, MUSIC_ADDRESS);
 	AKG_Init(MUSIC_ADDRESS, 0);
 
 	// 29673

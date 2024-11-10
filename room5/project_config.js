@@ -45,6 +45,7 @@ ProjModules = [
   'inventory',
   'elevator',
   'doors',
+  'save',
 ]
 
 //-- Project segments base name (string). ProjName will be used if not defined
@@ -62,6 +63,7 @@ LibModules = [
   'compress/pletter',
   'localize',
   'arkos/akg_player',
+  'crypt',
 ]
 
 //-- Additional sources to be compiled and linked with the project (array)

@@ -24,6 +24,7 @@
 #include "elevator.h"
 #include "sprite_fx.h"
 #include "doors.h"
+#include "save.h"
 
 //=============================================================================
 // DEFINITIONS
@@ -102,6 +103,8 @@ const struct TileAnimation g_PhoneAnimation = {
 volatile bool g_vSync = TRUE;
 bool g_isNTSC = TRUE;
 u8 g_frameVSyncCounter = 0;
+u8 g_frameTimeCounter = 0;
+u16 g_SecondCounter = 0;
 
 u8 g_ScreenBuffer[32 * 24]; // Buffer de l'écran (32x24 tuiles de 8x8 pixels)
 
@@ -113,6 +116,8 @@ u8 g_CurrRoomIdx;
 
 u8 g_SpriteBuffer1[8 * 4 * 4];
 u8 g_SpriteBuffer2[8 * 4 * 4];
+
+u8 g_SaveCodeBuffer[16];
 
 // Définie si la lumière est active ou non
 bool g_CurrentLightOn;
@@ -147,8 +152,10 @@ struct TileAnimationInstance g_AnimationInstances[MAX_TILE_ANIMATION];
 struct TextCoordInstance g_TextCoordInstances[MAX_TEXT_COORD];
 u8 g_TextCoordCount = 0;
 
-// Index de la langue selecitonnée
+// Index de la langue sélectionnée
 u8 g_Language = LANG_EN;
+
+// Compteur de temps
 
 //=============================================================================
 // FONCTIONS
@@ -877,6 +884,16 @@ bool onDoorAnimEnd()
 void displayLevel(u8 levelIdx)
 {
 
+	struct SaveData save;
+
+	save.currentLevel = levelIdx;
+	save.currentTime = g_SecondCounter;
+	save.themes[0] = g_DoorThemeCount[0];
+	save.themes[1] = g_DoorThemeCount[1];
+	save.themes[2] = g_DoorThemeCount[2];
+
+	SaveEncode(&save, g_SaveCodeBuffer);
+
 	// Who's gonna call ?
 	Mem_Set(0, g_AnimationInstances, sizeof(g_AnimationInstances));
 
@@ -1035,6 +1052,9 @@ void displayLevel(u8 levelIdx)
 	Print_SetPosition(0, 23);
 	Print_DrawFormat("TEST %i, %i, %i / %i, %i, %i", g_DoorThemeCount[0], g_DoorThemeCount[1], g_DoorThemeCount[2], g_DoorTheme[0], g_DoorTheme[1], g_DoorTheme[2]);
 	*/
+
+	Print_SetPosition(0, 0);
+	Print_DrawText(g_SaveCodeBuffer);
 }
 
 //.............................................................................
@@ -1299,6 +1319,14 @@ void waitVSync()
 			g_vSync = FALSE;
 			g_frameVSyncCounter = 0;
 		}
+	}
+
+	g_frameTimeCounter++;
+
+	if (g_frameTimeCounter == 50)
+	{
+		g_frameTimeCounter = 0;
+		g_SecondCounter++;
 	}
 }
 

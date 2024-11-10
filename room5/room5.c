@@ -30,6 +30,7 @@
 //=============================================================================
 
 // Prototypes de fonctions
+void waitVSync();
 void initPlayer(u8 x, u8 y);
 void updatePlayer();
 void activateLight(bool bActivate);

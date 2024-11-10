@@ -41,7 +41,7 @@ bool interact(u8 x, u8 y);
 
 // Variables statiques définies dans un autre module
 extern const unsigned char g_AKG_MusicMain[];
-// extern const unsigned char g_Font_JP[];
+extern const unsigned char g_Font_JP[];
 
 //=============================================================================
 // DONNEES CONSTANTES (stockées dans le ROM)
@@ -1257,15 +1257,15 @@ void langMenu()
 	}
 
 	// Traitement spécifique à une langue
-	// switch(g_Language)
-	// {
-	// case LANG_JA:
-	// 	VDP_WriteVRAM_16K(g_Font_JP, g_ScreenPatternLow + (8 * 152), 8 * 13 * 8);
-	// 	g_PrintData.PatternOffset = 152;
-	// 	g_PrintData.CharFirst = 32;
-	// 	g_PrintData.CharLast = 255;
-	// 	break;
-	// }
+	switch (g_Language)
+	{
+	case LANG_JA:
+		VDP_WriteVRAM_16K(g_Font_JP, g_ScreenPatternLow + (8 * 152), 8 * 13 * 8);
+		g_PrintData.PatternOffset = 152;
+		g_PrintData.CharFirst = 32;
+		g_PrintData.CharLast = 255;
+		break;
+	}
 }
 
 //-----------------------------------------------------------------------------

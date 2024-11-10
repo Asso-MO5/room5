@@ -42,22 +42,22 @@ bool interact(u8 x, u8 y);
 // Variables statiques définies dans un autre module
 extern const unsigned char g_AKG_MusicMain[];
 extern const unsigned char g_Font_JP[];
+extern const unsigned char g_SprtPlayer[];
+
+extern const unsigned char g_SprtElevator[];
+
+// Même fichier.
+extern const unsigned char g_Tiles_Patterns[];
+extern const unsigned char g_Tiles_Colors[];
 
 //=============================================================================
 // DONNEES CONSTANTES (stockées dans le ROM)
 //=============================================================================
 
-// Données des sprites du joueur
-#include "data/sprt_player.h"
-
-// Données des formes et couleurs des tuiles
-#include "data/bg_tileset.h"
-
-// Données des sprites de l'élévateur
-#include "data/sprt_elevator.h"
-
-// Données de traduction
+// TODO : Faire une demande officiiiiiiiel à MSXGL pour intégrer les Constantes externe.
 #include "data/translate.h"
+#include "data/bg_tileset.h"
+#include "data/sprt_elevator.h"
 
 // Liste des frames d'animation du personnage
 const u8 g_PlayerFramesMove[] = {1, 2, 3, 4};

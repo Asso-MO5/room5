@@ -1,19 +1,29 @@
--------------------------------------------------------------------------------
---
--- @description à ajouter dans les script ASEPRITE : https://community.aseprite.org/t/aseprite-scripts-collection/3599
--- Ce script permet d'exporter les données des niveaux dans des fichiers .h, qui se trouvent dans le dossier data/level
---
--------------------------------------------------------------------------------
-
 -- Setup ----------------------------------------------------------------------
+
 local worldWidth = 4
 local worldHeight = 8
 local levelMaxWidth = 32
 local levelMaxHeight = 24
 local outputDir = "F:/www/MO5/room5/room5/data/level" -- CHANGER LE CHEMIN, ICI C'EST POUR MON PC
 local doLog = true
+local saveBin = true
+
+-- Dialog -----------------------------------------------------------------
+local dlg = Dialog("Export slices")
+dlg:file{
+	id = "directory",
+	label = "Output directory:",
+	filename = outputDir,
+	open = false
+}
+dlg:check{id = "bin", label = "Save binary:", selected = saveBin}
+dlg:button{id = "ok", text = "Export"}
+dlg:show()
+
+saveBin = dlg.data.bin
 
 -- Initialize -----------------------------------------------------------------
+
 if doLog then print("Export - Start") end
 
 local spr = app.activeSprite
@@ -30,11 +40,20 @@ local currentRoom = ""
 local roomIndex = 0
 
 -- Function to write data to a file
-local function write_data(filename, data)
+local function write_text(filename, data)
 	if doLog then print("Export - Write: " .. filename) end
 	local file = io.open(filename, "w")
 	file:write(data)
-	file:close()
+	assert(file:close())
+end
+
+-- Function to write data to a file
+local function write_data(filename, data)
+	if doLog then print("Export - Write: " .. filename) end
+	local file = io.open(filename, "wb")
+	local str = string.char(table.unpack(data))
+	file:write(str)
+	assert(file:close())
 end
 
 -- Function to export the tileset index layout
@@ -58,6 +77,7 @@ local function export_cel(cel, cColStart, cColEnd, cRowStart, cRowEnd)
 				levelHeight = levelMaxHeight
 				lineLength = 0
 				content = "const unsigned char g_Level" .. string.format("%03i", roomIndex) .. "[] = {"
+				dataTab = {}
 
 				-- Parsing room bounds
 				for it in tilemap:pixels(bounds) do
@@ -90,18 +110,27 @@ local function export_cel(cel, cColStart, cColEnd, cRowStart, cRowEnd)
 						-- Add tile index
 						content = content .. string.format("%3i", val) ..", "
 						lineLength = lineLength + 1
+						dataTab[#dataTab + 1] = val
 					end
 				end
-				content = content .. "\n};"
+				content = content .. "\n};\n\n"
 
 				-- Save level size
-				content = content .. "\n\n#define LEVEL" .. string.format("%03i", roomIndex) .. "_WIDTH " .. levelWidth
-				content = content .. "\n#define LEVEL" .. string.format("%03i", roomIndex) .. "_HEIGHT " .. levelHeight
+				defines = "#define LEVEL" .. string.format("%03i", roomIndex) .. "_WIDTH " .. levelWidth
+				defines = defines .. "\n#define LEVEL" .. string.format("%03i", roomIndex) .. "_HEIGHT " .. levelHeight
+				defines = defines .. "\nextern const unsigned char g_Level" .. string.format("%03i", roomIndex) .. "[];"
+				content = content .. defines
 
 				-- Save level data
-				filename = outputDir .. "/level" .. string.format("%03i", roomIndex)..".h"
-				write_data(filename, content)
-
+				if (saveBin) then -- Binary
+					filename = outputDir .. "/level" .. string.format("%03i", roomIndex)..".bin"
+					write_data(filename, dataTab)
+					filename = outputDir .. "/level" .. string.format("%03i", roomIndex).."_def.h"
+					write_text(filename, defines)
+				else -- Text
+					filename = outputDir .. "/level" .. string.format("%03i", roomIndex)..".h"
+					write_text(filename, content)
+				end
 				roomIndex = roomIndex + 1
 			end
 		end

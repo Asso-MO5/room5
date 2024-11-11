@@ -1,3 +1,3 @@
-#define LEVEL009_WIDTH 16
-#define LEVEL009_HEIGHT 21
+#define LEVEL009_WIDTH 32
+#define LEVEL009_HEIGHT 24
 extern const unsigned char g_Level009[];

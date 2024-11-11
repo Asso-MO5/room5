@@ -781,16 +781,16 @@ void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
 		return;
 
 	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
-	u8 targetItem = g_ScreenBuffer[pRoom->Width * (i + 1) + j];
+	u8 targetItem = g_ScreenBuffer[32 * (i + 1) + j];
 	struct VisibleObject *pObj = &g_VisibleObjects[g_VisibleObjectCount];
-	pObj->X = (pRoom->X + j);
-	pObj->Y = (pRoom->Y + (i + 1));
+	pObj->X = j;
+	pObj->Y = (i + 1);
 	pObj->ItemCondition = condition;
 	pObj->Tile = targetItem;
 	g_VisibleObjectCount++;
 
-	u8 x = pRoom->X + j;
-	u8 y = pRoom->Y + i;
+	u8 x = j;
+	u8 y = i;
 	setTileByTileCoord(x, y, TILE_EMPTY);
 }
 
@@ -804,8 +804,8 @@ void addElectricWall(u8 levelIdx, u8 i, u8 j)
 
 	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
 	struct ActiveObject *pObj = &g_ElectricWalls[g_ElectricWallCount];
-	pObj->X = (pRoom->X + j);
-	pObj->Y = (pRoom->Y + i);
+	pObj->X = j;
+	pObj->Y = i;
 	pObj->Tile = TILE_ELECTRIC_WALL;
 	g_ElectricWallCount++;
 }
@@ -819,8 +819,8 @@ void addNotElectricWall(u8 levelIdx, u8 i, u8 j)
 
 	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
 	struct ActiveObject *pObj = &g_NotElectricWalls[g_NotElectricWallCount];
-	pObj->X = (pRoom->X + j);
-	pObj->Y = (pRoom->Y + i);
+	pObj->X = j;
+	pObj->Y = i;
 	pObj->Tile = TILE_NOT_ELECTRIC_WALL;
 	g_NotElectricWallCount++;
 }
@@ -922,20 +922,19 @@ void displayLevel(u8 levelIdx)
 
 	// Dessin de la pièce ligne par ligne
 	// I = ligne, J = colonne
-	for (u8 i = 0; i < pRoom->Height; ++i)
+	for (u8 i = 0; i < 24; ++i)
 	{
 		// Copie une ligne de donnée en VRAM
-		u16 lineIdx = pRoom->Width * i;
-		VDP_WriteVRAM_16K(pLayout + lineIdx,
-											g_ScreenLayoutLow + 32 * (i + pRoom->Y) + (pRoom->X), pRoom->Width);
+		u16 lineIdx = 32 * i;
+		VDP_WriteVRAM_16K(pLayout + lineIdx, g_ScreenLayoutLow + 32 * i, 32);
 
-		for (u8 j = 0; j < pRoom->Width; ++j)
+		for (u8 j = 0; j < 32; ++j)
 		{
 			u16 layoutIdx = lineIdx + j;
 			u8 tile = pLayout[layoutIdx];
 			// Positionnement du joueur centré sur la tuile trouvée
-			u8 x = pRoom->X + j;
-			u8 y = pRoom->Y + i;
+			u8 x = j;
+			u8 y = i;
 
 			if (tile == TILE_START_POS) // Detection de la position initiale du joueur
 			{
@@ -959,10 +958,10 @@ void displayLevel(u8 levelIdx)
 					sTile = getTileByTileCoord(sX, y);
 				}
 				struct TextCoordInstance *txt = &g_TextCoordInstances[g_TextCoordCount++];
-				txt->X = x;
+				txt->X = (tile == TILE_SPE_TRANSLATE_PHONE) ? 1 : x;
 				txt->Y = y;
 				txt->Key = transKey;
-				txt->Mode = tile == TILE_SPE_TRANSLATE_PHONE ? TEXT_MODE_PHONE : TEXT_MODE_DEFAULT;
+				txt->Mode = (tile == TILE_SPE_TRANSLATE_PHONE) ? TEXT_MODE_PHONE : TEXT_MODE_DEFAULT;
 			}
 			else if (tile == TILE_SPE_THEME_HOSPITAL ||
 							 tile == TILE_SPE_THEME_ALIEN ||
@@ -1027,7 +1026,7 @@ void displayLevel(u8 levelIdx)
 			{
 				if (pLayout[layoutIdx - 1] != TILE_RAILS) // Tile à gauche
 				{
-					u16 previousLineIdx = layoutIdx - pRoom->Width;
+					u16 previousLineIdx = layoutIdx - 32;
 					if (pLayout[previousLineIdx] != TILE_RAILS) // Tile au dessus
 					{
 						addElevator(x * 8, y * 8);

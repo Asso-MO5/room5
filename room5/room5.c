@@ -57,6 +57,7 @@ extern const unsigned char g_Tiles_Colors[];
 
 // TODO : Faire une demande officiiiiiiiel à MSXGL pour intégrer les Constantes externe.
 #include "data/translate.h"
+#include "data/translate_def.h"
 #include "data/bg_tileset.h"
 #include "data/sprt_elevator.h"
 
@@ -883,9 +884,10 @@ bool onDoorAnimEnd()
 // Afficher une pièce
 void displayLevel(u8 levelIdx)
 {
+	// VDP_EnableDisplay(FALSE);
 
+	// Initialise la structure
 	struct SaveData save;
-
 	save.currentLevel = levelIdx;
 	save.currentTime = g_SecondCounter;
 	save.themes[0] = g_DoorThemeCount[0];
@@ -1054,6 +1056,8 @@ void displayLevel(u8 levelIdx)
 
 	Print_SetPosition(0, 0);
 	Print_DrawText(g_SaveCodeBuffer);
+
+	// VDP_EnableDisplay(TRUE);
 }
 
 //.............................................................................

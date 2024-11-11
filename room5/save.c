@@ -11,5 +11,7 @@ bool SaveEncode(struct SaveData *pData, c8 *saveCode)
 
 bool SaveDecode(c8 *saveCode, struct SaveData *pData)
 {
+	saveCode;
+	pData;
 	return TRUE;
 }

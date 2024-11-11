@@ -169,7 +169,7 @@ AppID = 'R5'
 BuildLibrary = false
 
 //-- Prepare program for debug (boolean)
-Debug = false
+Debug = true
 
 //-- Move debug symbols to deployement folder (boolean)
 DebugSymbols = true
@@ -210,13 +210,20 @@ DebugSymbols = true
 // BuildVersion = false;
 
 //-- List files to be localized (array)
-LocFiles = ['assets/translate.ini']
+LocFiles = [
+	'assets/translate_en.ini',
+	'assets/translate_fr.ini',
+	'assets/translate_ja.ini',
+]
 
 //-- Localization output filename (string)
 LocOutput = 'data/translate.h'
 
 //-- Localization structure name (string)
 LocStruct = 'g_TransData'
+
+//-- Split socalization data and definitions in different files (boolean)
+LocSplitDef = true;
 
 //-- Package all segments into a lib file to reduce the number of files to link (boolean)
 // PackSegments = false;

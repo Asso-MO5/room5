@@ -39,7 +39,7 @@ struct RoomDefinition
 {
 	const u8 *Layout;
 	const c8 *Name;
-	u8 NextLvlIdx;
+	i8 NextLvlIdx;
 };
 
 extern const struct RoomDefinition g_Rooms[];

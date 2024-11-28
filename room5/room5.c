@@ -884,7 +884,7 @@ bool onDoorAnimEnd()
 // Afficher une pièce
 void displayLevel(u8 levelIdx)
 {
-	// VDP_EnableDisplay(FALSE);
+	VDP_EnableDisplay(FALSE);
 
 	// Initialise la structure
 	struct SaveData save;
@@ -1054,10 +1054,12 @@ void displayLevel(u8 levelIdx)
 	Print_DrawFormat("TEST %i, %i, %i / %i, %i, %i", g_DoorThemeCount[0], g_DoorThemeCount[1], g_DoorThemeCount[2], g_DoorTheme[0], g_DoorTheme[1], g_DoorTheme[2]);
 	*/
 
-	Print_SetPosition(0, 0);
+	Print_SetPosition(24, 23);
 	Print_DrawText(g_SaveCodeBuffer);
 
-	// VDP_EnableDisplay(TRUE);
+	// Print_DrawText(g_SecondCounter);
+
+	VDP_EnableDisplay(TRUE);
 }
 
 //.............................................................................

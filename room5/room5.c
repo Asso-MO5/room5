@@ -1094,6 +1094,9 @@ bool interact(u8 x, u8 y)
 
 	switch (tile)
 	{
+	case TILE_PC_CODE:
+		handleTypeSaveCode();
+		return TRUE;
 	// Téléphone
 	case TILE_PHONE:
 	case TILE_PHONE_ANIM_ONE:
@@ -1290,6 +1293,21 @@ void langMenu()
 		g_PrintData.CharFirst = 32;
 		g_PrintData.CharLast = 255;
 		break;
+	}
+}
+
+// POUR LE LIVE DE DEMAIN !!!
+void handleTypeSaveCode()
+{
+	// Initialisation du menu
+
+	bool bContinue = TRUE;
+	while (bContinue)
+	{
+		waitVSync();
+		Keyboard_Update();
+		// Mise à jour du menu
+		// TODO déplacer les data dans la PAGE 0.
 	}
 }
 

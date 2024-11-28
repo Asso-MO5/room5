@@ -1,6 +1,8 @@
 
 #pragma once
 
+// Tuile de sauvegarde
+#define TILE_PC_CODE 94
 // Numéros de tuile
 #define TILE_EMPTY 0
 #define TILE_RAILS 28

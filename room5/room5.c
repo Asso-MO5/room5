@@ -37,6 +37,7 @@ void updatePlayer();
 void activateLight(bool bActivate);
 void activateElectricity(bool bActivate);
 void displayLevel(u8 levelIdx);
+void SaveInit();
 bool onDoorAnimEnd();
 bool interact(u8 x, u8 y);
 
@@ -1296,7 +1297,6 @@ void langMenu()
 	}
 }
 
-// POUR LE LIVE DE DEMAIN !!!
 void handleTypeSaveCode()
 {
 	// Initialisation du menu
@@ -1371,6 +1371,9 @@ void main()
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16); // Sprite de taille 16x16
 	VDP_SetColor(COLOR_BLACK);						 // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();
+
+	// === SAVE ===
+	SaveInit();
 
 	// === MUSIQUE ===
 

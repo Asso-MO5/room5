@@ -1,5 +1,6 @@
 #include "tiles.h"
 #include "msxgl.h"
+#include "tiles_defs.h"
 
 //-----------------------------------------------------------------------------
 // Récupère la tuile à la position indiquée
@@ -34,5 +35,7 @@ void setTileByTileCoord(u8 x, u8 y, u8 tile)
 //-----------------------------------------------------------------------------
 bool checkCollision(u8 x, u8 y)
 {
-	return getTile(x, y) >= 128;
+	u8 tile = getTile(x, y);
+
+	return tile >= 128 || tile == TILE_MANUAL_ELEVATOR || tile == TILE_MANUAL_ELEVATOR + 1;
 }

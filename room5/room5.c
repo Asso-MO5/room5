@@ -37,7 +37,6 @@ void updatePlayer();
 void activateLight(bool bActivate);
 void activateElectricity(bool bActivate);
 void displayLevel(u8 levelIdx);
-void SaveInit();
 bool onDoorAnimEnd();
 bool interact(u8 x, u8 y);
 
@@ -119,7 +118,7 @@ u8 g_CurrRoomIdx;
 u8 g_SpriteBuffer1[8 * 4 * 4];
 u8 g_SpriteBuffer2[8 * 4 * 4];
 
-u8 g_SaveCodeBuffer[16];
+u8 g_SaveCodeBuffer[PLAYER_CODE_SIZE];
 
 // Définie si la lumière est active ou non
 bool g_CurrentLightOn;
@@ -163,6 +162,14 @@ u8 g_Language = LANG_EN;
 // FONCTIONS
 //=============================================================================
 
+void initFont()
+{
+	// Initialisation de la font de caractère
+	Print_SetMode(PRINT_MODE_TEXT);
+	Print_SetFontEx(8, 8, 1, 1, ' ', '_', g_Tiles_Patterns + 192);
+	Print_Initialize();
+	g_PrintData.PatternOffset = 192;
+}
 void displayTextAt(u8 x, u8 y, const c8 *text)
 {
 	u8 startX = x;
@@ -280,11 +287,7 @@ void loadData()
 	VDP_WriteVRAM_16K(g_Tiles_Colors, g_ScreenColorLow, sizeof(g_Tiles_Colors));
 
 	// Initialisation de la font de caractère
-	Print_SetMode(PRINT_MODE_TEXT);
-	Print_SetFontEx(8, 8, 1, 1, ' ', '_', g_Tiles_Patterns + 192);
-	Print_Initialize();
-	g_PrintData.PatternOffset = 192;
-
+	initFont();
 	// Chargement des formes des sprites
 	VDP_WriteVRAM_16K(g_SprtElevator, g_SpritePatternLow + 4 * 4 * 12 * 8, sizeof(g_SprtElevator));
 
@@ -329,6 +332,31 @@ bool isMoveLeft()
 	return FALSE;
 }
 
+bool isMoveCursorUp()
+{
+	if (Keyboard_IsKeyPushed(KEY_UP))
+		return TRUE;
+
+	if (Joystick_GetDirectionChange(JOY_PORT_1) == JOY_INPUT_DIR_UP)
+		return TRUE;
+	if (Joystick_GetDirectionChange(JOY_PORT_2) == JOY_INPUT_DIR_UP)
+		return TRUE;
+
+	return FALSE;
+}
+
+bool isMoveCursorDown()
+{
+	if (Keyboard_IsKeyPushed(KEY_DOWN))
+		return TRUE;
+	if (Joystick_GetDirectionChange(JOY_PORT_1) == JOY_INPUT_DIR_DOWN)
+		return TRUE;
+	if (Joystick_GetDirectionChange(JOY_PORT_2) == JOY_INPUT_DIR_DOWN)
+		return TRUE;
+
+	return FALSE;
+}
+
 //-----------------------------------------------------------------------------
 // Test de l'action 'interact' sur n'importe quel contrôleur
 bool isInteract()
@@ -338,6 +366,26 @@ bool isInteract()
 	if ((Joystick_Read(JOY_PORT_1) & JOY_INPUT_TRIGGER_A) == 0)
 		return TRUE;
 	if ((Joystick_Read(JOY_PORT_2) & JOY_INPUT_TRIGGER_A) == 0)
+		return TRUE;
+
+	return FALSE;
+}
+
+/**
+ *
+ *
+ * @TODO factoriser en une fonction de test de bouton
+ *
+ *
+ */
+// interact Pour les cursors
+bool isSelect()
+{
+	if (Keyboard_IsKeyPushed(KEY_SPACE))
+		return TRUE;
+	if (Joystick_IsButtonPushed(JOY_PORT_1, JOY_INPUT_TRIGGER_A))
+		return TRUE;
+	if (Joystick_IsButtonPushed(JOY_PORT_2, JOY_INPUT_TRIGGER_A))
 		return TRUE;
 
 	return FALSE;
@@ -1233,6 +1281,20 @@ bool interact(u8 x, u8 y)
 //.............................................................................
 
 //-----------------------------------------------------------------------------
+
+void applyLanguage()
+{
+	// Traitement spécifique à une langue
+	switch (g_Language)
+	{
+	case LANG_JA:
+		VDP_WriteVRAM_16K(g_Font_JP, g_ScreenPatternLow + (8 * 152), 8 * 13 * 8);
+		g_PrintData.PatternOffset = 152;
+		g_PrintData.CharFirst = 32;
+		g_PrintData.CharLast = 255;
+		break;
+	}
+}
 // Menu de langue
 void langMenu()
 {
@@ -1285,30 +1347,106 @@ void langMenu()
 		}
 	}
 
-	// Traitement spécifique à une langue
-	switch (g_Language)
-	{
-	case LANG_JA:
-		VDP_WriteVRAM_16K(g_Font_JP, g_ScreenPatternLow + (8 * 152), 8 * 13 * 8);
-		g_PrintData.PatternOffset = 152;
-		g_PrintData.CharFirst = 32;
-		g_PrintData.CharLast = 255;
-		break;
-	}
+	applyLanguage();
 }
 
 void handleTypeSaveCode()
 {
+
+	VDP_DisableSpritesFrom(0);
+	Pletter_UnpackToVRAM(g_Tiles_Patterns, g_ScreenPatternLow);
+
+	// clean screen
+	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
+	initFont();
+
 	// Initialisation du menu
 
+	for (u8 i = 0; i < 16; i++)
+	{
+		Print_SetPosition(10, MARGIN_CHAR_CODE + i);
+		Print_DrawChar(g_CryptRoom5Map[i]);
+	}
+
+	Mem_Set(0, g_SaveCodeBuffer, PLAYER_CODE_SIZE);
+
 	bool bContinue = TRUE;
+	u8 numDestLevel = 0;
+
+	// Affichage du curseur
+	u8 charIndex = 8;
+	setTileByTileCoord(9, charIndex + MARGIN_CHAR_CODE, SPT_CURSOR);
+
 	while (bContinue)
 	{
 		waitVSync();
 		Keyboard_Update();
-		// Mise à jour du menu
-		// TODO déplacer les data dans la PAGE 0.
+		Joystick_Update();
+		if (isCancel())
+		{
+			bContinue = FALSE;
+		}
+
+		if (isMoveCursorUp())
+		{
+			setTileByTileCoord(9, charIndex + MARGIN_CHAR_CODE, TILE_EMPTY);
+			if (charIndex == 0)
+			{
+				charIndex = 15;
+			}
+			else
+			{
+				charIndex--;
+			}
+			setTileByTileCoord(9, charIndex + MARGIN_CHAR_CODE, SPT_CURSOR);
+		}
+		else if (isMoveCursorDown())
+		{
+			setTileByTileCoord(9, charIndex + MARGIN_CHAR_CODE, TILE_EMPTY);
+			if (charIndex == 15)
+			{
+				charIndex = 0;
+			}
+			else
+			{
+				charIndex++;
+			}
+			setTileByTileCoord(9, charIndex + MARGIN_CHAR_CODE, SPT_CURSOR);
+		}
+		if (isSelect())
+		{
+			u8 i = 0;
+			for (; i < PLAYER_CODE_SIZE; i++)
+			{
+				if (g_SaveCodeBuffer[i] == 0)
+				{
+					g_SaveCodeBuffer[i] = g_CryptRoom5Map[charIndex];
+					break;
+				}
+			}
+			if (i == 7)
+			{
+				// Initialise la structure
+				struct SaveData save;
+
+				SaveDecode(g_SaveCodeBuffer, &save);
+				numDestLevel = save.currentLevel;
+				g_SecondCounter = save.currentTime;
+				g_DoorThemeCount[0] = save.themes[0];
+				g_DoorThemeCount[1] = save.themes[1];
+				g_DoorThemeCount[2] = save.themes[2];
+				// TODO vérifier le code, si pas bon,
+				bContinue = FALSE;
+			}
+			Print_DrawTextAt(12, MARGIN_CHAR_CODE + 8, (const c8 *)g_SaveCodeBuffer);
+		}
+
+		// ICI
+		//  Mise à jour du menu
+		//  TODO déplacer les data dans la PAGE 0.
 	}
+	applyLanguage();
+	displayLevel(numDestLevel);
 }
 
 //-----------------------------------------------------------------------------
@@ -1377,8 +1515,8 @@ void main()
 
 	// === MUSIQUE ===
 
-	Pletter_UnpackToRAM(g_AKG_MusicMain, MUSIC_ADDRESS);
-	AKG_Init(MUSIC_ADDRESS, 0);
+	//	Pletter_UnpackToRAM(g_AKG_MusicMain, MUSIC_ADDRESS);
+	//	AKG_Init(MUSIC_ADDRESS, 0);
 
 	// 29673
 	//  Chargement des données graphique en mémoire vidéo (VRAM)

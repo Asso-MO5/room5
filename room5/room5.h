@@ -18,6 +18,8 @@
 #define MUSIC_ADDRESS 0xD000
 #define LANG_CURSORY 10
 #define LANG_CURSORX 10
+#define MARGIN_CHAR_CODE 4
+#define PLAYER_CODE_SIZE 16
 
 typedef bool (*animCallback)(void);
 

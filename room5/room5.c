@@ -39,17 +39,20 @@ void activateElectricity(bool bActivate);
 void displayLevel(u8 levelIdx);
 bool onDoorAnimEnd();
 bool interact(u8 x, u8 y);
+void handleTypeSaveCode();
 
 // Variables statiques définies dans un autre module
-extern const unsigned char g_AKG_MusicMain[];
-extern const unsigned char g_Font_JP[];
-extern const unsigned char g_SprtPlayer[];
+extern const u8 g_AKG_MusicMain[];
+// extern const u8 g_AKG_MusicPhone[];
+// extern const u8 g_AKG_MusicEmpty[];
+extern const u8 g_Font_JP[];
+extern const u8 g_SprtPlayer[];
 
-extern const unsigned char g_SprtElevator[];
+extern const u8 g_SprtElevator[];
 
 // Même fichier.
-extern const unsigned char g_Tiles_Patterns[];
-extern const unsigned char g_Tiles_Colors[];
+extern const u8 g_Tiles_Patterns[];
+extern const u8 g_Tiles_Colors[];
 
 //=============================================================================
 // DONNEES CONSTANTES (stockées dans le ROM)
@@ -935,14 +938,13 @@ void displayLevel(u8 levelIdx)
 {
 	VDP_EnableDisplay(FALSE);
 
-	// Initialise la structure
+	// Génération du code de sauvegarde
 	struct SaveData save;
 	save.currentLevel = levelIdx;
 	save.currentTime = g_SecondCounter;
 	save.themes[0] = g_DoorThemeCount[0];
 	save.themes[1] = g_DoorThemeCount[1];
 	save.themes[2] = g_DoorThemeCount[2];
-
 	SaveEncode(&save, g_SaveCodeBuffer);
 
 	// Who's gonna call ?
@@ -965,10 +967,9 @@ void displayLevel(u8 levelIdx)
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 
+	// Décompression de la pièce dans le buffet en RAM
 	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
 	const u8 *pLayout = g_ScreenBuffer;
-
-	// Décompresse
 	Pletter_Unpack(pRoom->Layout, g_ScreenBuffer);
 
 	// Dessin de la pièce ligne par ligne
@@ -1274,6 +1275,7 @@ bool interact(u8 x, u8 y)
 	}
 	return FALSE;
 }
+
 //.............................................................................
 //
 // BOUCLE PRINCIPALE
@@ -1281,7 +1283,7 @@ bool interact(u8 x, u8 y)
 //.............................................................................
 
 //-----------------------------------------------------------------------------
-
+// Application du choix d'une langue et selection de la police de caractère appropriée
 void applyLanguage()
 {
 	// Traitement spécifique à une langue
@@ -1295,7 +1297,9 @@ void applyLanguage()
 		break;
 	}
 }
-// Menu de langue
+
+//-----------------------------------------------------------------------------
+// Menu de selection d'une langue
 void langMenu()
 {
 	// Initialisation du menu
@@ -1350,6 +1354,8 @@ void langMenu()
 	applyLanguage();
 }
 
+//-----------------------------------------------------------------------------
+// Menu de saisi d'un code de sauvegarde
 void handleTypeSaveCode()
 {
 
@@ -1367,6 +1373,7 @@ void handleTypeSaveCode()
 		Print_SetPosition(10, MARGIN_CHAR_CODE + i);
 		Print_DrawChar(g_CryptRoom5Map[i]);
 	}
+	Print_DrawCharAt(12, MARGIN_CHAR_CODE + 8, '>');
 
 	Mem_Set(0, g_SaveCodeBuffer, PLAYER_CODE_SIZE);
 
@@ -1438,7 +1445,7 @@ void handleTypeSaveCode()
 				// TODO vérifier le code, si pas bon,
 				bContinue = FALSE;
 			}
-			Print_DrawTextAt(12, MARGIN_CHAR_CODE + 8, (const c8 *)g_SaveCodeBuffer);
+			Print_DrawTextAt(14, MARGIN_CHAR_CODE + 8, (const c8 *)g_SaveCodeBuffer);
 		}
 
 		// ICI
@@ -1491,6 +1498,7 @@ void waitVSync()
 	}
 }
 
+//-----------------------------------------------------------------------------
 // Point d'entrée du programme principal
 void main()
 {
@@ -1514,9 +1522,8 @@ void main()
 	SaveInit();
 
 	// === MUSIQUE ===
-
-	//	Pletter_UnpackToRAM(g_AKG_MusicMain, MUSIC_ADDRESS);
-	//	AKG_Init(MUSIC_ADDRESS, 0);
+	// Pletter_UnpackToRAM(g_AKG_MusicMain, MUSIC_ADDRESS);
+	// AKG_Init(MUSIC_ADDRESS, 0);
 
 	// 29673
 	//  Chargement des données graphique en mémoire vidéo (VRAM)

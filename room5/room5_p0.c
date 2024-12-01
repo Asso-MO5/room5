@@ -1,4 +1,9 @@
+// Données des musiques et SFX
 #include "data/sounds/music_main.h"
+// #include "data/sounds/music_phone.h"
+// #include "data/sounds/music_empty.h"
+
+// Données des polices de character 
 #include "data/font_jp.h"
 
 // Données des sprites du joueur

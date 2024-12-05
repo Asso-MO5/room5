@@ -5,6 +5,7 @@
 
 // Données des polices de character 
 #include "data/font_jp.h"
+// #include "data/font_eu.h"
 
 // Données des sprites du joueur
 #include "data/sprt_player.h"

@@ -46,6 +46,7 @@ extern const u8 g_AKG_MusicMain[];
 // extern const u8 g_AKG_MusicPhone[];
 // extern const u8 g_AKG_MusicEmpty[];
 extern const u8 g_Font_JP[];
+// extern const u8 g_Font_EU[];
 extern const u8 g_SprtPlayer[];
 
 extern const u8 g_SprtElevator[];
@@ -165,6 +166,8 @@ u8 g_Language = LANG_EN;
 // FONCTIONS
 //=============================================================================
 
+//-----------------------------------------------------------------------------
+// Initialisation de la police de caractère
 void initFont()
 {
 	// Initialisation de la font de caractère
@@ -173,6 +176,9 @@ void initFont()
 	Print_Initialize();
 	g_PrintData.PatternOffset = 192;
 }
+
+//-----------------------------------------------------------------------------
+// Afficher un text à une position donnée
 void displayTextAt(u8 x, u8 y, const c8 *text)
 {
 	u8 startX = x;
@@ -216,6 +222,8 @@ bool addAnimationInstance(u8 X, u8 Y, const struct TileAnimation *pAnimation, an
 	return FALSE;
 }
 
+//-----------------------------------------------------------------------------
+//
 bool stopAnimationInstance(const struct TileAnimation *pAnimation)
 {
 	bool foundThis = FALSE;
@@ -335,6 +343,8 @@ bool isMoveLeft()
 	return FALSE;
 }
 
+//-----------------------------------------------------------------------------
+//
 bool isMoveCursorUp()
 {
 	if (Keyboard_IsKeyPushed(KEY_UP))
@@ -348,6 +358,8 @@ bool isMoveCursorUp()
 	return FALSE;
 }
 
+//-----------------------------------------------------------------------------
+//
 bool isMoveCursorDown()
 {
 	if (Keyboard_IsKeyPushed(KEY_DOWN))
@@ -408,7 +420,7 @@ bool isCancel()
 	return FALSE;
 }
 
-// ------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Utilitaire pour afficher un texte à l'écran
 void displayTextByMode(u8 mode)
 {
@@ -761,8 +773,8 @@ void activateElectricity(bool bActivate)
 	}
 }
 
+//-----------------------------------------------------------------------------
 // Ouvre les placard
-
 void activateCupboard(u8 x, u8 y)
 {
 	u8 gX = x / 8;
@@ -795,6 +807,8 @@ void activateCupboard(u8 x, u8 y)
 	setTileByTileCoord(gX + 1, gY, tile);
 }
 
+//-----------------------------------------------------------------------------
+//
 void activateCloset(u8 x, u8 y)
 {
 
@@ -892,6 +906,8 @@ void startDoorAnim(u8 x, u8 y, u8 tile)
 	addAnimationInstance(x / 8, y / 8, &g_DoorAnimation, onDoorAnimEnd);
 }
 
+//-----------------------------------------------------------------------------
+//
 bool onDoorAnimEnd()
 {
 	g_InteractedDoor.y -= 8;
@@ -1010,7 +1026,7 @@ void displayLevel(u8 levelIdx)
 					sTile = getTileByTileCoord(sX, y);
 				}
 				struct TextCoordInstance *txt = &g_TextCoordInstances[g_TextCoordCount++];
-				txt->X = (tile == TILE_SPE_TRANSLATE_PHONE) ? 1 : x;
+				txt->X = 1;//(tile == TILE_SPE_TRANSLATE_PHONE) ? 1 : x;
 				txt->Y = y;
 				txt->Key = transKey;
 				txt->Mode = (tile == TILE_SPE_TRANSLATE_PHONE) ? TEXT_MODE_PHONE : TEXT_MODE_DEFAULT;
@@ -1295,6 +1311,12 @@ void applyLanguage()
 		g_PrintData.CharFirst = 32;
 		g_PrintData.CharLast = 255;
 		break;
+	// default:
+	// 	VDP_WriteVRAM_16K(g_Font_EU, g_ScreenPatternLow + (8 * 152), 8 * 13 * 8);
+	// 	g_PrintData.PatternOffset = 152;
+	// 	g_PrintData.CharFirst = 32;
+	// 	g_PrintData.CharLast = 255;
+	// 	break;
 	}
 }
 
@@ -1306,7 +1328,7 @@ void langMenu()
 	for (u8 i = 0; i < LANG_MAX; i++)
 	{
 		Loc_SetLanguage(i);
-		displayTextAt(12, i + 10, Loc_GetText(TEXT_LANG_LABEL));
+		displayTextAt(LANG_CURSORX + 2, i + LANG_CURSORY, Loc_GetText(TEXT_LANG_LABEL));
 	}
 
 	// Affichage du curseur
@@ -1382,7 +1404,7 @@ void handleTypeSaveCode()
 
 	// Affichage du curseur
 	u8 charIndex = 8;
-	setTileByTileCoord(9, charIndex + MARGIN_CHAR_CODE, SPT_CURSOR);
+	setTileByTileCoord(8, charIndex + MARGIN_CHAR_CODE, SPT_CURSOR);
 
 	while (bContinue)
 	{
@@ -1396,7 +1418,7 @@ void handleTypeSaveCode()
 
 		if (isMoveCursorUp())
 		{
-			setTileByTileCoord(9, charIndex + MARGIN_CHAR_CODE, TILE_EMPTY);
+			setTileByTileCoord(8, charIndex + MARGIN_CHAR_CODE, TILE_EMPTY);
 			if (charIndex == 0)
 			{
 				charIndex = 15;
@@ -1405,11 +1427,11 @@ void handleTypeSaveCode()
 			{
 				charIndex--;
 			}
-			setTileByTileCoord(9, charIndex + MARGIN_CHAR_CODE, SPT_CURSOR);
+			setTileByTileCoord(8, charIndex + MARGIN_CHAR_CODE, SPT_CURSOR);
 		}
 		else if (isMoveCursorDown())
 		{
-			setTileByTileCoord(9, charIndex + MARGIN_CHAR_CODE, TILE_EMPTY);
+			setTileByTileCoord(8, charIndex + MARGIN_CHAR_CODE, TILE_EMPTY);
 			if (charIndex == 15)
 			{
 				charIndex = 0;
@@ -1418,7 +1440,7 @@ void handleTypeSaveCode()
 			{
 				charIndex++;
 			}
-			setTileByTileCoord(9, charIndex + MARGIN_CHAR_CODE, SPT_CURSOR);
+			setTileByTileCoord(8, charIndex + MARGIN_CHAR_CODE, SPT_CURSOR);
 		}
 		if (isSelect())
 		{

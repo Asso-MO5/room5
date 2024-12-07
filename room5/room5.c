@@ -40,13 +40,14 @@ void displayLevel(u8 levelIdx);
 bool onDoorAnimEnd();
 bool interact(u8 x, u8 y);
 void handleTypeSaveCode();
+void applyLanguage();
 
 // Variables statiques définies dans un autre module
 extern const u8 g_AKG_MusicMain[];
 // extern const u8 g_AKG_MusicPhone[];
 // extern const u8 g_AKG_MusicEmpty[];
 extern const u8 g_Font_JP[];
-// extern const u8 g_Font_EU[];
+extern const u8 g_Font_EU[];
 extern const u8 g_SprtPlayer[];
 
 extern const u8 g_SprtElevator[];
@@ -60,10 +61,17 @@ extern const u8 g_Tiles_Colors[];
 //=============================================================================
 
 // TODO : Faire une demande officiiiiiiiel à MSXGL pour intégrer les Constantes externe.
-#include "data/translate.h"
+// #include "data/translate.h"
 #include "data/translate_def.h"
 #include "data/bg_tileset.h"
 #include "data/sprt_elevator.h"
+
+// Données des sprites du joueur
+#include "data/sprt_player.h"
+
+// Données des polices de character 
+#include "data/font_jp.h"
+#include "data/font_eu.h"
 
 // Liste des frames d'animation du personnage
 const u8 g_PlayerFramesMove[] = {1, 2, 3, 4};
@@ -168,14 +176,14 @@ u8 g_Language = LANG_EN;
 
 //-----------------------------------------------------------------------------
 // Initialisation de la police de caractère
-void initFont()
-{
-	// Initialisation de la font de caractère
-	Print_SetMode(PRINT_MODE_TEXT);
-	Print_SetFontEx(8, 8, 1, 1, ' ', '_', g_Tiles_Patterns + 192);
-	Print_Initialize();
-	g_PrintData.PatternOffset = 192;
-}
+// void initFont()
+// {
+// 	// Initialisation de la font de caractère
+// 	Print_SetMode(PRINT_MODE_TEXT);
+// 	Print_SetFontEx(8, 8, 1, 1, ' ', '_', g_Tiles_Patterns + 192);
+// 	Print_Initialize();
+// 	g_PrintData.PatternOffset = 192;
+// }
 
 //-----------------------------------------------------------------------------
 // Afficher un text à une position donnée
@@ -298,7 +306,9 @@ void loadData()
 	VDP_WriteVRAM_16K(g_Tiles_Colors, g_ScreenColorLow, sizeof(g_Tiles_Colors));
 
 	// Initialisation de la font de caractère
-	initFont();
+	applyLanguage();
+	// initFont();
+
 	// Chargement des formes des sprites
 	VDP_WriteVRAM_16K(g_SprtElevator, g_SpritePatternLow + 4 * 4 * 12 * 8, sizeof(g_SprtElevator));
 
@@ -1303,21 +1313,23 @@ bool interact(u8 x, u8 y)
 void applyLanguage()
 {
 	// Traitement spécifique à une langue
+	// Initialisation de la font de caractère
+	Print_SetMode(PRINT_MODE_TEXT);
 	switch (g_Language)
 	{
 	case LANG_JA:
+		Print_SetFontEx(8, 8, 1, 1, 32, 255, g_Font_JP);
 		VDP_WriteVRAM_16K(g_Font_JP, g_ScreenPatternLow + (8 * 152), 8 * 13 * 8);
-		g_PrintData.PatternOffset = 152;
-		g_PrintData.CharFirst = 32;
-		g_PrintData.CharLast = 255;
 		break;
-	// default:
-	// 	VDP_WriteVRAM_16K(g_Font_EU, g_ScreenPatternLow + (8 * 152), 8 * 13 * 8);
-	// 	g_PrintData.PatternOffset = 152;
-	// 	g_PrintData.CharFirst = 32;
-	// 	g_PrintData.CharLast = 255;
-	// 	break;
+	default:
+		Print_SetFontEx(8, 8, 1, 1, 32, 255, g_Font_EU);
+		VDP_WriteVRAM_16K(g_Font_EU, g_ScreenPatternLow + (8 * 152), 8 * 13 * 8);
+		break;
 	}
+	Print_Initialize();
+	g_PrintData.PatternOffset = 152;
+	g_PrintData.CharFirst = 32;
+	g_PrintData.CharLast = 255;
 }
 
 //-----------------------------------------------------------------------------
@@ -1386,7 +1398,7 @@ void handleTypeSaveCode()
 
 	// clean screen
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
-	initFont();
+	// initFont();
 
 	// Initialisation du menu
 

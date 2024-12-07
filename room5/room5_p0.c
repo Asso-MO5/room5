@@ -4,11 +4,11 @@
 // #include "data/sounds/music_empty.h"
 
 // Données des polices de character 
-#include "data/font_jp.h"
+// #include "data/font_jp.h"
 // #include "data/font_eu.h"
 
 // Données des sprites du joueur
-#include "data/sprt_player.h"
+// #include "data/sprt_player.h"
 
 // Données des formes et couleurs des tuiles
 // #include "data/bg_tileset.h"
@@ -17,7 +17,7 @@
 // #include "data/sprt_elevator.h"
 
 // Données de traduction
-// #include "data/translate.h"
+#include "data/translate.h"
 
 // ====== NIVEAUX ======
 

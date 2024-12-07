@@ -218,6 +218,7 @@ LocFiles = [
 	'assets/translate_ja.ini',
 	// 'assets/translate_nl.ini',
 	// 'assets/translate_pt_BR.ini',
+	// 'assets/translate_tl.ini',
 ]
 
 //-- Localization output filename (string)

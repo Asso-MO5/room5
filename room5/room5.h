@@ -17,9 +17,11 @@
 #define TEXT_MODE_TALK 2
 #define MUSIC_ADDRESS 0xD000
 // #define SFX_ADDRESS 0xE000
-#define LANG_CURSORY 6
 #define LANG_CURSORX 8
-#define MARGIN_CHAR_CODE 4
+#define LANG_CURSORY 6
+#define CODE_CURSORX 8
+#define CODE_CURSORY 4
+#define CODE_VAL_OFFSET 8
 #define PLAYER_CODE_SIZE 16
 
 typedef bool (*animCallback)(void);

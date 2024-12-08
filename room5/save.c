@@ -18,6 +18,8 @@ const u16 g_CryptRoom5Code[8] =
 				0b0000000000000010, // 7
 };
 
+//-----------------------------------------------------------------------------
+// Initilisation du système de sauvegarde
 void SaveInit()
 {
 	// Le sel, c'est pour le cryptage, pas dans le beurre.
@@ -26,21 +28,30 @@ void SaveInit()
 	Crypt_SetMap(g_CryptRoom5Map);
 }
 
+//-----------------------------------------------------------------------------
+// Sauvegarde de l'état actuel du jeu
 bool SaveEncode(struct SaveData *pData, c8 *saveCode)
 {
 	u16 saveBuffer[2];
-	saveBuffer[0] = pData->currentTime;
-	saveBuffer[1] = pData->currentLevel & 0b111111 | (pData->themes[0] & 0b111) << 6 | (pData->themes[1] & 0b111) << 9 | (pData->themes[2] & 0b111) << 12;
+
+	//  F |  E  D  C |  B  A  9 |  8  7  6 |  5  4  3  2  1  0
+	//----+----------+----------+----------+-------------------
+	// L0 | M2 M1 M0 | A2 A1 A0 | I2 I1 I2 | L5 L4 L3 L2 L1 L0
+	saveBuffer[0] = pData->currentLevel & 0b111111 | (pData->themes[0] & 0b111) << 6 | (pData->themes[1] & 0b111) << 9 | (pData->themes[2] & 0b111) << 12;
+
+	//  F |  E  D  C  B  A  9  8  7  6  5  4  3  2  1  0
+	//----+----------------------------------------------
+	// T0 | TE TD TC TB TA T9 T8 T7 T6 T5 T4 T3 T2 T1 T0
+	saveBuffer[1] = pData->currentTime;
 
 	Crypt_Encode((u8 *)saveBuffer, 4, (u8 *)saveCode);
 	return TRUE;
 }
 
+//-----------------------------------------------------------------------------
+// Recharge l'état du jeu
 bool SaveDecode(const c8 *saveCode, struct SaveData *pData)
 {
-	saveCode;
-	pData;
-
 	u16 saveBuffer[2];
 	bool checkDecode = Crypt_Decode(saveCode, (u8 *)saveBuffer);
 
@@ -49,14 +60,18 @@ bool SaveDecode(const c8 *saveCode, struct SaveData *pData)
 		return FALSE;
 	}
 
-	// F|E D C|B A 9|8 7 6|5 4 3 2 1 0
-	// x|M M M|A A A|I I I|L L L L L L
-	pData->currentTime = saveBuffer[0];
+	//  F |  E  D  C |  B  A  9 |  8  7  6 |  5  4  3  2  1  0
+	//----+----------+----------+----------+-------------------
+	// L0 | M2 M1 M0 | A2 A1 A0 | I2 I1 I2 | L5 L4 L3 L2 L1 L0
+	pData->currentLevel = saveBuffer[0] & 0b111111;
+	pData->themes[0] = (saveBuffer[0] >> 6) & 0b111;
+	pData->themes[1] = (saveBuffer[0] >> 9) & 0b111;
+	pData->themes[2] = (saveBuffer[0] >> 12) & 0b111;
 
-	pData->currentLevel = saveBuffer[1] & 0b111111;
-	pData->themes[0] = (saveBuffer[1] >> 6) & 0b111;
-	pData->themes[1] = (saveBuffer[1] >> 9) & 0b111;
-	pData->themes[2] = (saveBuffer[1] >> 12) & 0b111;
+	//  F |  E  D  C  B  A  9  8  7  6  5  4  3  2  1  0
+	//----+----------------------------------------------
+	// T0 | TE TD TC TB TA T9 T8 T7 T6 T5 T4 T3 T2 T1 T0
+	pData->currentTime = saveBuffer[1];
 
 	return TRUE;
 }

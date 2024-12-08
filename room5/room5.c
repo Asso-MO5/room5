@@ -73,6 +73,45 @@ extern const u8 g_Tiles_Colors[];
 #include "data/font_jp.h"
 #include "data/font_eu.h"
 
+// Données des musiques et SFX
+#include "data/sounds/music_main.h"
+// #include "data/sounds/music_phone.h"
+// #include "data/sounds/music_empty.h"
+
+// Données des pièces
+#include "data/level/level001.h"
+#include "data/level/level002.h"
+#include "data/level/level003.h"
+#include "data/level/level004.h"
+#include "data/level/level005.h"
+#include "data/level/level006.h"
+#include "data/level/level007.h"
+#include "data/level/level008.h"
+// #include "data/level/level009.h"
+// #include "data/level/level010.h"
+// #include "data/level/level011.h"
+// #include "data/level/level012.h"
+// #include "data/level/level013.h"
+// #include "data/level/level014.h"
+// #include "data/level/level015.h"
+// #include "data/level/level016.h"
+// #include "data/level/level017.h"
+// #include "data/level/level018.h"
+// #include "data/level/level019.h"
+// #include "data/level/level020.h"
+// #include "data/level/level021.h"
+// #include "data/level/level022.h"
+// #include "data/level/level023.h"
+// #include "data/level/level024.h"
+// #include "data/level/level025.h"
+// #include "data/level/level026.h"
+// #include "data/level/level027.h"
+// #include "data/level/level028.h"
+// #include "data/level/level029.h"
+// #include "data/level/level030.h"
+// #include "data/level/level031.h"
+// #include "data/level/level032.h"
+
 // Liste des frames d'animation du personnage
 const u8 g_PlayerFramesMove[] = {1, 2, 3, 4};
 const u8 g_PlayerFramesAction[] = {5, 6, 7, 8, 9, 10, 9, 11};
@@ -1398,16 +1437,17 @@ void handleTypeSaveCode()
 
 	// clean screen
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
+	VDP_FillVRAM_16K(COLOR_MERGE(COLOR_WHITE, COLOR_BLACK), g_ScreenColorLow, 32);
 	// initFont();
 
 	// Initialisation du menu
 
 	for (u8 i = 0; i < 16; i++)
 	{
-		Print_SetPosition(10, MARGIN_CHAR_CODE + i);
+		Print_SetPosition(10, CODE_CURSORY + i);
 		Print_DrawChar(g_CryptRoom5Map[i]);
 	}
-	Print_DrawCharAt(12, MARGIN_CHAR_CODE + 8, '>');
+	Print_DrawTextAt(CODE_CURSORX + 5, CODE_CURSORY + CODE_VAL_OFFSET, "CODE:");
 
 	Mem_Set(0, g_SaveCodeBuffer, PLAYER_CODE_SIZE);
 
@@ -1416,7 +1456,7 @@ void handleTypeSaveCode()
 
 	// Affichage du curseur
 	u8 charIndex = 8;
-	setTileByTileCoord(8, charIndex + MARGIN_CHAR_CODE, SPT_CURSOR);
+	setTileByTileCoord(CODE_CURSORX, charIndex + CODE_CURSORY, SPT_CURSOR);
 
 	while (bContinue)
 	{
@@ -1430,29 +1470,21 @@ void handleTypeSaveCode()
 
 		if (isMoveCursorUp())
 		{
-			setTileByTileCoord(8, charIndex + MARGIN_CHAR_CODE, TILE_EMPTY);
+			setTileByTileCoord(CODE_CURSORX, charIndex + CODE_CURSORY, TILE_EMPTY);
 			if (charIndex == 0)
-			{
 				charIndex = 15;
-			}
 			else
-			{
 				charIndex--;
-			}
-			setTileByTileCoord(8, charIndex + MARGIN_CHAR_CODE, SPT_CURSOR);
+			setTileByTileCoord(CODE_CURSORX, charIndex + CODE_CURSORY, SPT_CURSOR);
 		}
 		else if (isMoveCursorDown())
 		{
-			setTileByTileCoord(8, charIndex + MARGIN_CHAR_CODE, TILE_EMPTY);
+			setTileByTileCoord(CODE_CURSORX, charIndex + CODE_CURSORY, TILE_EMPTY);
 			if (charIndex == 15)
-			{
 				charIndex = 0;
-			}
 			else
-			{
 				charIndex++;
-			}
-			setTileByTileCoord(8, charIndex + MARGIN_CHAR_CODE, SPT_CURSOR);
+			setTileByTileCoord(CODE_CURSORX, charIndex + CODE_CURSORY, SPT_CURSOR);
 		}
 		if (isSelect())
 		{
@@ -1479,7 +1511,7 @@ void handleTypeSaveCode()
 				// TODO vérifier le code, si pas bon,
 				bContinue = FALSE;
 			}
-			Print_DrawTextAt(14, MARGIN_CHAR_CODE + 8, (const c8 *)g_SaveCodeBuffer);
+			Print_DrawTextAt(CODE_CURSORX + 10, CODE_CURSORY + CODE_VAL_OFFSET, (const c8 *)g_SaveCodeBuffer);
 		}
 
 		// ICI

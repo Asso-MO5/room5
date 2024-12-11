@@ -166,10 +166,10 @@ AppID = 'R5'
 //*******************************************************************************
 
 //-- Force to generate MSXgl static library even if 'msxgl.lib' already exist (boolean)
-BuildLibrary = false
+BuildLibrary = true
 
 //-- Prepare program for debug (boolean)
-Debug = true
+Debug = false
 
 //-- Move debug symbols to deployement folder (boolean)
 DebugSymbols = true
@@ -212,13 +212,13 @@ DebugSymbols = true
 //-- List files to be localized (array)
 LocFiles = [
 	'assets/translate_en.ini',
-	// 'assets/translate_es.ini',
+	'assets/translate_es.ini',
 	'assets/translate_fr.ini',
-	// 'assets/translate_it.ini',
+	'assets/translate_it.ini',
 	'assets/translate_ja.ini',
-	// 'assets/translate_nl.ini',
-	// 'assets/translate_pt_BR.ini',
-	// 'assets/translate_tl.ini',
+	'assets/translate_nl.ini',
+	'assets/translate_pt_BR.ini',
+	'assets/translate_tl.ini',
 ]
 
 //-- Localization output filename (string)

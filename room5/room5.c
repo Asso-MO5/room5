@@ -87,14 +87,14 @@ extern const u8 g_Tiles_Colors[];
 #include "data/level/level006.h"
 #include "data/level/level007.h"
 #include "data/level/level008.h"
-// #include "data/level/level009.h"
-// #include "data/level/level010.h"
-// #include "data/level/level011.h"
-// #include "data/level/level012.h"
-// #include "data/level/level013.h"
-// #include "data/level/level014.h"
-// #include "data/level/level015.h"
-// #include "data/level/level016.h"
+#include "data/level/level009.h"
+#include "data/level/level010.h"
+#include "data/level/level011.h"
+#include "data/level/level012.h"
+#include "data/level/level013.h"
+#include "data/level/level014.h"
+#include "data/level/level015.h"
+#include "data/level/level016.h"
 // #include "data/level/level017.h"
 // #include "data/level/level018.h"
 // #include "data/level/level019.h"
@@ -526,9 +526,15 @@ void updatePlayer()
 	else if (Keyboard_IsKeyPressed(KEY_CTRL)) // Déplacement de debug (sans collision ni gravité)
 	{
 		if (Keyboard_IsKeyPushed(KEY_SPACE))
-		{
 			displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
-		}
+		else if (Keyboard_IsKeyPushed(KEY_1))
+			displayLevel(28); // Fin - Hospital
+		else if (Keyboard_IsKeyPushed(KEY_2))
+			displayLevel(29); // Fin - Alien
+		else if (Keyboard_IsKeyPushed(KEY_3))
+			displayLevel(30); // Fin - Matrix
+		else if (Keyboard_IsKeyPushed(KEY_0))
+			displayLevel(0); // Page d'acceuil
 
 		if (Keyboard_IsKeyPressed(KEY_LEFT))
 			g_Player.X--;

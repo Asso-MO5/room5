@@ -3,7 +3,7 @@
 // █  █ █  ▀▀  ▄█  █  █ ██▄▀ ██ ██ █
 // ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 // MSXbin 1.4.1 by Guillaume "Aoineko" Blanchard (2022) under CC BY-SA free license
-// File generated on Wed Dec 11 23:46:44 2024
+// File generated on Thu Dec 12 17:35:07 2024
 // Soure file: data\level\level023.pl5
 const unsigned char g_Level023[] = {
 	0x3F, 0x00, 0xE1, 0x00, 0x83, 0x84, 0xEF, 0x0F, 0x00, 0x85, 0x00, 0x86, 0x63, 0x2E, 0x86, 0x88, //      0

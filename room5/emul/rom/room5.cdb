@@ -3341,7 +3341,7 @@ S:G$g_Level022$0_0$0({197}DA197d,SC:U),D,0,0
 S:G$g_Level023$0_0$0({201}DA201d,SC:U),D,0,0
 S:G$g_Level024$0_0$0({97}DA97d,SC:U),D,0,0
 S:G$g_Level025$0_0$0({176}DA176d,SC:U),D,0,0
-S:G$g_Level026$0_0$0({70}DA70d,SC:U),D,0,0
+S:G$g_Level026$0_0$0({231}DA231d,SC:U),D,0,0
 S:G$g_Level027$0_0$0({98}DA98d,SC:U),D,0,0
 S:G$g_Level028$0_0$0({131}DA131d,SC:U),D,0,0
 S:G$g_Level029$0_0$0({83}DA83d,SC:U),D,0,0
@@ -9263,9 +9263,9 @@ L:G$g_Level023$0_0$0:181A
 L:G$g_Level024$0_0$0:18E3
 L:G$g_Level025$0_0$0:1944
 L:G$g_Level026$0_0$0:19F4
-L:G$g_Level027$0_0$0:1A3A
-L:G$g_Level028$0_0$0:1A9C
-L:G$g_Level029$0_0$0:1B1F
-L:G$g_Level030$0_0$0:1B72
-L:G$g_Level031$0_0$0:1BC6
-L:G$g_Level032$0_0$0:1C27
+L:G$g_Level027$0_0$0:1ADB
+L:G$g_Level028$0_0$0:1B3D
+L:G$g_Level029$0_0$0:1BC0
+L:G$g_Level030$0_0$0:1C13
+L:G$g_Level031$0_0$0:1C67
+L:G$g_Level032$0_0$0:1CC8

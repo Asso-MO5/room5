@@ -25,6 +25,7 @@
 #include "sprite_fx.h"
 #include "doors.h"
 #include "save.h"
+#include "music.h"
 
 //=============================================================================
 // DEFINITIONS
@@ -43,16 +44,10 @@ void handleTypeSaveCode();
 void applyLanguage();
 
 // Variables statiques définies dans un autre module
-extern const u8 g_AKG_MusicMain[];
-// extern const u8 g_AKG_MusicPhone[];
-// extern const u8 g_AKG_MusicEmpty[];
 extern const u8 g_Font_JP[];
 extern const u8 g_Font_EU[];
 extern const u8 g_SprtPlayer[];
-
 extern const u8 g_SprtElevator[];
-
-// Même fichier.
 extern const u8 g_Tiles_Patterns[];
 extern const u8 g_Tiles_Colors[];
 
@@ -75,8 +70,9 @@ extern const u8 g_Tiles_Colors[];
 
 // Données des musiques et SFX
 #include "data/sounds/music_main.h"
-// #include "data/sounds/music_phone.h"
-// #include "data/sounds/music_empty.h"
+#include "data/sounds/music_phone.h"
+#include "data/sounds/music_empty.h"
+#include "data/sounds/sfx.h"
 
 // Données des pièces
 #include "data/level/level001.h"
@@ -119,34 +115,39 @@ const u8 g_PlayerFramesFall[] = {1, 2, 3, 4};
 
 // Donnée d'animation des portes
 const u8 g_DoorAnimationTiles[] = {
-		44, 11, 45, 71, 46, 15, // Frame 0
-		44, 11, 45, 71, 46, 15, // Frame 1
-		44, 47, 45, 54, 46, 55, // Frame 2
-		44, 47, 45, 54, 46, 55, // Frame 3,
-		44, 47, 45, 54, 46, 55, // Frame 4,
-		44, 47, 45, 54, 46, 55, // Frame 5,
-		44, 47, 45, 54, 46, 55, // Frame 6
+	44, 11, 45, 71, 46, 15, // Frame 0
+	44, 11, 45, 71, 46, 15, // Frame 1
+	44, 47, 45, 54, 46, 55, // Frame 2
+	44, 47, 45, 54, 46, 55, // Frame 3,
+	44, 47, 45, 54, 46, 55, // Frame 4,
+	44, 47, 45, 54, 46, 55, // Frame 5,
+	44, 47, 45, 54, 46, 55, // Frame 6
 };
 const struct TileAnimation g_DoorAnimation = {
-		2,
-		3,
-		7,
-		1,
-		g_DoorAnimationTiles};
+	2,
+	3,
+	7,
+	1,
+	g_DoorAnimationTiles
+};
 
 // Donnée d'animation du téléphone
 const u8 g_PhoneAnimationTiles[] = {
-		18, 80, // Frame 0
-		18, 16, // Frame 1
-		19, 80, // Frame 2
-		19, 17, // Frame 3
+	18, 80, // Frame 0
+	18, 16, // Frame 1
+	19, 80, // Frame 2
+	19, 17, // Frame 3
 };
 const struct TileAnimation g_PhoneAnimation = {
-		1,
-		2,
-		4,
-		0,
-		g_PhoneAnimationTiles};
+	1,
+	2,
+	4,
+	0,
+	g_PhoneAnimationTiles
+};
+
+// Liste des animations
+const u8* const g_MusicTable[MUSIC_MAX] = { g_AKG_MusicMain, g_AKG_MusicPhone, g_AKG_MusicEmpty };
 
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
@@ -207,7 +208,9 @@ u8 g_TextCoordCount = 0;
 // Index de la langue sélectionnée
 u8 g_Language = LANG_EN;
 
-// Compteur de temps
+// Current music index
+u8 g_CurrentMusic = 0xFF;
+u8 g_NextMusic = 0xFF;
 
 //=============================================================================
 // FONCTIONS
@@ -226,7 +229,7 @@ u8 g_Language = LANG_EN;
 
 //-----------------------------------------------------------------------------
 // Afficher un text à une position donnée
-void displayTextAt(u8 x, u8 y, const c8 *text)
+void displayTextAt(u8 x, u8 y, const c8* text)
 {
 	u8 startX = x;
 	while (*text != '\0')
@@ -723,6 +726,7 @@ void updateSwitchTimer()
 // Répondre au téléphone
 void activatePhone(u8 xP, u8 yP, bool bPhone)
 {
+	StopMusic();
 
 	if (bPhone)
 	{
@@ -807,7 +811,6 @@ void activateLight(bool bActivate)
 // Active ou désactive l'électricité
 void activateElectricity(bool bActivate)
 {
-
 	g_CurrentElectricityOn = bActivate; // Enregistrement de l’état de la lumière
 	lightRoom(g_CurrentLightOn && bActivate);
 
@@ -1009,6 +1012,8 @@ void displayLevel(u8 levelIdx)
 {
 	VDP_EnableDisplay(FALSE);
 
+	PlayMusic(MUSIC_MAIN);
+
 	// Génération du code de sauvegarde
 	struct SaveData save;
 	save.currentLevel = levelIdx;
@@ -1144,6 +1149,7 @@ void displayLevel(u8 levelIdx)
 			else if (tile == TILE_PHONE)
 			{
 				addAnimationInstance(x, y - 1, &g_PhoneAnimation, NULL);
+				PlayMusic(MUSIC_PHONE);
 			}
 			if ((tile == TILE_RAILS) && canAddElevator()) // Detection des rails pour placer les élévateurs
 			{
@@ -1168,17 +1174,39 @@ void displayLevel(u8 levelIdx)
 
 	displayTextByMode(TEXT_MODE_DEFAULT);
 
-	/*
-	Ceci est tout à fait normal, nous avons besoin de régulièrement tester les thèmes
+	// Print_SetPosition(0, 22);
+	// Print_DrawText("L:");
+	// Print_DrawInt(levelIdx);
+	// Print_DrawText(" E:");
+	// Print_DrawInt(g_DoorThemeCount[0]);
+	// Print_DrawChar('-');
+	// Print_DrawInt(g_DoorThemeCount[1]);
+	// Print_DrawChar('-');
+	// Print_DrawInt(g_DoorThemeCount[2]);
+	// Print_DrawText(" T:");
+	// Print_DrawInt(g_SecondCounter);
+	// Print_DrawText("    ");
 
-	Print_SetPosition(0, 23);
-	Print_DrawFormat("TEST %i, %i, %i / %i, %i, %i", g_DoorThemeCount[0], g_DoorThemeCount[1], g_DoorThemeCount[2], g_DoorTheme[0], g_DoorTheme[1], g_DoorTheme[2]);
-	*/
+	if (levelIdx == 31)
+	{
+		Print_SetPosition(0, 23);
+		Print_DrawText("TIME ");
+		u16 sec = g_SecondCounter % 60;
+		u16 min = (g_SecondCounter / 60) % 60;
+		u16 hour = g_SecondCounter / 60 / 60;
+		Print_DrawInt(hour);
+		Print_DrawChar(':');
+		Print_DrawInt(min);
+		Print_DrawChar(':');
+		Print_DrawInt(sec);
+	}
 
-	Print_SetPosition(24, 23);
-	Print_DrawText(g_SaveCodeBuffer);
-
-	// Print_DrawText(g_SecondCounter);
+	if (levelIdx != 0)
+	{
+		Print_SetPosition(19, 23);
+		Print_DrawText("ROOM ");
+		Print_DrawText(g_SaveCodeBuffer);
+	}
 
 	VDP_EnableDisplay(TRUE);
 }
@@ -1200,6 +1228,17 @@ bool interact(u8 x, u8 y)
 	{
 		if (addItemToInventory(tile))
 		{
+			switch (tile)
+			{
+			case TILE_ITEM_GIFT:
+			case TILE_ITEM_APPLE:
+				if (g_SecondCounter > 0)
+					g_SecondCounter -= 10;
+				else
+					g_SecondCounter = 0;
+				break;
+			};
+
 			setTile(x, y, TILE_EMPTY);
 			for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 			{
@@ -1444,7 +1483,6 @@ void handleTypeSaveCode()
 	// clean screen
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 	VDP_FillVRAM_16K(COLOR_MERGE(COLOR_WHITE, COLOR_BLACK), g_ScreenColorLow, 32);
-	// initFont();
 
 	// Initialisation du menu
 
@@ -1453,7 +1491,7 @@ void handleTypeSaveCode()
 		Print_SetPosition(10, CODE_CURSORY + i);
 		Print_DrawChar(g_CryptRoom5Map[i]);
 	}
-	Print_DrawTextAt(CODE_CURSORX + 5, CODE_CURSORY + CODE_VAL_OFFSET, "CODE:");
+	Print_DrawTextAt(CODE_CURSORX + 5, CODE_CURSORY + CODE_VAL_OFFSET, "ROOM");
 
 	Mem_Set(0, g_SaveCodeBuffer, PLAYER_CODE_SIZE);
 
@@ -1507,23 +1545,21 @@ void handleTypeSaveCode()
 			{
 				// Initialise la structure
 				struct SaveData save;
-
-				SaveDecode(g_SaveCodeBuffer, &save);
-				numDestLevel = save.currentLevel;
-				g_SecondCounter = save.currentTime;
-				g_DoorThemeCount[0] = save.themes[0];
-				g_DoorThemeCount[1] = save.themes[1];
-				g_DoorThemeCount[2] = save.themes[2];
-				// TODO vérifier le code, si pas bon,
+				if (SaveDecode(g_SaveCodeBuffer, &save))
+				{
+					numDestLevel = save.currentLevel;
+					g_SecondCounter = save.currentTime;
+					g_DoorThemeCount[0] = save.themes[0];
+					g_DoorThemeCount[1] = save.themes[1];
+					g_DoorThemeCount[2] = save.themes[2];
+					// TODO vérifier le code, si pas bon,
+				}
 				bContinue = FALSE;
 			}
 			Print_DrawTextAt(CODE_CURSORX + 10, CODE_CURSORY + CODE_VAL_OFFSET, (const c8 *)g_SaveCodeBuffer);
 		}
-
-		// ICI
-		//  Mise à jour du menu
-		//  TODO déplacer les data dans la PAGE 0.
 	}
+
 	applyLanguage();
 	displayLevel(numDestLevel);
 }
@@ -1535,6 +1571,17 @@ void VDP_InterruptHandler()
 {
 	//@see https://aoineko.org/msxgl/index.php?title=Build_tool
 	g_vSync = TRUE;
+
+	if ((g_NextMusic != 0xFF) && (g_frameVSyncCounter != 6))
+	{
+		if (g_NextMusic != g_CurrentMusic)
+		{
+			Pletter_UnpackToRAM((const void*)g_MusicTable[g_NextMusic], (void*)MUSIC_ADDRESS);
+			AKG_Init((const void*)MUSIC_ADDRESS, 0);
+			g_CurrentMusic = g_NextMusic;
+		}
+		AKG_Decode();
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1549,7 +1596,6 @@ void waitVSync()
 
 	if (g_isNTSC)
 	{
-
 		g_frameVSyncCounter++;
 		if (g_frameVSyncCounter == 6)
 		{
@@ -1562,11 +1608,11 @@ void waitVSync()
 	}
 
 	g_frameTimeCounter++;
-
 	if (g_frameTimeCounter == 50)
 	{
 		g_frameTimeCounter = 0;
-		g_SecondCounter++;
+		if (g_SecondCounter < 0x4000) // 4,5 heures maximum
+			g_SecondCounter++;
 	}
 }
 
@@ -1589,13 +1635,16 @@ void main()
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16); // Sprite de taille 16x16
 	VDP_SetColor(COLOR_BLACK);						 // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();
+	VDP_EnableVBlank(TRUE);
+
+////////////////////////////////////////////////////////////////////
+	// PlayMusic(MUSIC_MAIN);
+	// while (1)
+	// 	waitVSync();
+////////////////////////////////////////////////////////////////////
 
 	// === SAVE ===
 	SaveInit();
-
-	// === MUSIQUE ===
-	// Pletter_UnpackToRAM(g_AKG_MusicMain, MUSIC_ADDRESS);
-	// AKG_Init(MUSIC_ADDRESS, 0);
 
 	// 29673
 	//  Chargement des données graphique en mémoire vidéo (VRAM)
@@ -1616,17 +1665,10 @@ void main()
 		// Attente de la synchronisation avec le processeur graphique (à 50 ou 60 Hz)
 		waitVSync();
 
-		// COMPRESSER prochain live
-		// --- SON
-		AKG_Decode();
-
 		// Mise à jour des élévateurs
 		if (g_FrameCounter % 4 == 0)
 		{
-			if (g_CurrentElectricityOn)
-			{
-				updateAllElevators();
-			}
+			updateAllElevators();
 
 			updateSwitchTimer();
 

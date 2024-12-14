@@ -5,6 +5,10 @@
 #include "objects.h"
 #include "msxgl.h"
 
+//=============================================================================
+// DEFINITIONS
+//=============================================================================
+
 // Paramètres des élévateurs
 #define MAX_ELEVATOR 8
 #define MAX_MANUAL_ELEVATOR 8
@@ -34,6 +38,13 @@ struct ElevatorDefinition
 	u8 Timer;
 };
 
+// Définie si l'électricité est active ou non
+extern bool g_CurrentElectricityOn;
+
+//=============================================================================
+// VARIABLES
+//=============================================================================
+
 // Variables pour la gestion des ascenseurs automatiques
 u8 g_ElevatorCount = 0;
 struct ElevatorDefinition g_Elevator[MAX_ELEVATOR];
@@ -42,15 +53,23 @@ struct ElevatorDefinition g_Elevator[MAX_ELEVATOR];
 u8 g_ManualElevatorCount = 0;
 struct ActiveObject g_ManualElevator[MAX_MANUAL_ELEVATOR];
 
+//=============================================================================
+// FUNCTIONS
+//=============================================================================
+
 //-----------------------------------------------------------------------------
 // Test la présence d'un rail à la position indiquée
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+//
 bool checkRails(u8 x, u8 y)
 {
 	return getTile(x, y) == TILE_RAILS; // N° de la tuile des rails
 }
 
+//-----------------------------------------------------------------------------
+//
 bool checkManualRails(u8 x, u8 y)
 {
 	return getTileByTileCoord(x, y) == TILE_MANUAL_RAILS; // N° de la tuile des rails
@@ -60,17 +79,23 @@ bool checkManualRails(u8 x, u8 y)
 // Gestion des élévateurs automatiques
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+//
 void resetElevators()
 {
 	g_ElevatorCount = 0;
 	g_ManualElevatorCount = 0;
 }
 
+//-----------------------------------------------------------------------------
+//
 bool canAddElevator()
 {
 	return g_ElevatorCount < MAX_ELEVATOR;
 }
 
+//-----------------------------------------------------------------------------
+//
 void addElevator(u8 x, u8 y)
 {
 	u8 num = g_ElevatorCount;
@@ -79,21 +104,24 @@ void addElevator(u8 x, u8 y)
 	elevator->X = x;
 	elevator->Y = y;
 	elevator->VelocityY = 1;
-	elevator->State = ELEVATOR_STATE_MOVE;
-	elevator->Timer = 0;
+	elevator->State = ELEVATOR_STAND;
+	elevator->Timer = ELEVATOR_STATE_STAND;
 
 	VDP_SetSpriteSM1(SPT_ELEVATOR + num, x, y - 9, 4 * 4 * 12, COLOR_WHITE);
 
 	g_ElevatorCount += 1;
 }
 
+//-----------------------------------------------------------------------------
+//
 void updateElevator(u8 num)
 {
 	struct ElevatorDefinition *elevator = &g_Elevator[num];
 
 	if (elevator->Timer > 0) // Attendre que le timer d'attente tombe à 0
 	{
-		elevator->Timer--;
+		if (g_CurrentElectricityOn)
+			elevator->Timer--;
 		return;
 	}
 
@@ -120,11 +148,14 @@ void updateElevator(u8 num)
 	}
 
 	// Mise à jour de la position d'un élévateur
+	elevator->State = ELEVATOR_STATE_MOVE;
 	elevator->Y += elevator->VelocityY;
 
 	VDP_SetSpritePosition(SPT_ELEVATOR + num, elevator->X, elevator->Y - 9);
 }
 
+//-----------------------------------------------------------------------------
+//
 void updateAllElevators()
 {
 	for (u8 i = 0; i < g_ElevatorCount; ++i)
@@ -133,6 +164,8 @@ void updateAllElevators()
 	}
 }
 
+//-----------------------------------------------------------------------------
+//
 void changeAllElevatorsColor(u8 color)
 {
 	for (u8 i = 0; i < g_ElevatorCount; ++i)
@@ -143,6 +176,8 @@ void changeAllElevatorsColor(u8 color)
 	VDP_Poke_16K(color << 4, VDP_GetColorTable() + 13);
 }
 
+//-----------------------------------------------------------------------------
+//
 void hideAllElevators()
 {
 	for (u8 i = g_ElevatorCount; i < MAX_ELEVATOR; ++i)
@@ -151,6 +186,8 @@ void hideAllElevators()
 	}
 }
 
+//-----------------------------------------------------------------------------
+//
 bool isOnElevator(u8 *X, u8 *Y)
 {
 	for (u8 i = 0; i < g_ElevatorCount; ++i)
@@ -172,6 +209,8 @@ bool isOnElevator(u8 *X, u8 *Y)
 // Gestion des élévateurs manuels
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+//
 void addManualElevator(u8 x, u8 y)
 {
 	u8 num = g_ManualElevatorCount;
@@ -184,6 +223,8 @@ void addManualElevator(u8 x, u8 y)
 	g_ManualElevatorCount += 1;
 }
 
+//-----------------------------------------------------------------------------
+//
 void moveManualElevator(u8 num, u8 direction)
 {
 	struct ActiveObject *elevator = &g_ManualElevator[num];
@@ -212,6 +253,8 @@ void moveManualElevator(u8 num, u8 direction)
 	}
 }
 
+//-----------------------------------------------------------------------------
+//
 void moveAllManualElevators(u8 tile)
 {
 	for (u8 i = 0; i < g_ManualElevatorCount; ++i)

@@ -166,7 +166,7 @@ AppID = 'R5'
 //*******************************************************************************
 
 //-- Force to generate MSXgl static library even if 'msxgl.lib' already exist (boolean)
-BuildLibrary = true
+BuildLibrary = false
 
 //-- Prepare program for debug (boolean)
 Debug = false

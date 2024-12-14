@@ -57,6 +57,8 @@
 #define TILE_ITEM_KEY_THREE 98
 #define TILE_ITEM_FUSE 99
 #define TILE_ITEM_TAPE 100
+#define TILE_ITEM_GIFT 101
+#define TILE_ITEM_APPLE 102
 
 // tuiles spéciales de conditions
 #define TILE_START_POS 127

@@ -38,8 +38,8 @@
 struct RoomDefinition
 {
 	const u8 *Layout;
-	const c8 *Name;
 	i8 NextLvlIdx;
+	u8 TotalThemes;
 };
 
 extern const struct RoomDefinition g_Rooms[];

@@ -35,14 +35,17 @@ for %%G in (data\level\*.bin) do (
 %Tools%\compress\Pletter\pletter assets\music\music_main.akg  assets\music\music_main.pl5
 %MSXtk%\MSXbin assets\music\music_main.pl5 -ad -t g_AKG_MusicMain -o data\sounds\music_main.h
 
-@REM %Tools%\compress\Pletter\pletter assets\music\music_phone.akg  assets\music\music_phone.pl5
-@REM %MSXtk%\MSXbin assets\music\music_phone.pl5 -ad -t g_AKG_MusicPhone -o data\sounds\music_phone.h
+%Tools%\compress\Pletter\pletter assets\music\music_phone.akg  assets\music\music_phone.pl5
+%MSXtk%\MSXbin assets\music\music_phone.pl5 -ad -t g_AKG_MusicPhone -o data\sounds\music_phone.h
 
-@REM %Tools%\compress\Pletter\pletter assets\music\music_empty.akg  assets\music\music_empty.pl5
-@REM %MSXtk%\MSXbin assets\music\music_empty.pl5 -ad -t g_AKG_MusicEmpty -o data\sounds\music_empty.h
+%Tools%\compress\Pletter\pletter assets\music\music_empty.akg  assets\music\music_empty.pl5
+%MSXtk%\MSXbin assets\music\music_empty.pl5 -ad -t g_AKG_MusicEmpty -o data\sounds\music_empty.h
+
+%Tools%\compress\Pletter\pletter assets\music\sfx.akx  assets\music\sfx.pl5
+%MSXtk%\MSXbin assets\music\sfx.pl5 -ad -t g_AKG_SoundFX -o data\sounds\sfx.h
 
 :: Convert font
 %MSXtk%\MSXimg assets\font_kana8.png -out data\font_jp.h -pos 0 0 -size 8 8  -gap 0 0 -num 8 13  -trans 0x000000 -bpc 1 -name g_Font_JP
-@REM %MSXtk%\MSXimg assets\font_euro.png -out data\font_eu.h -pos 0 0 -size 8 8  -gap 0 0 -num 8 13  -trans 0x000000 -bpc 1 -name g_Font_EU
+%MSXtk%\MSXimg assets\font_euro.png -out data\font_eu.h -pos 0 0 -size 8 8  -gap 0 0 -num 8 13  -trans 0x000000 -bpc 1 -name g_Font_EU
 
 REM pause

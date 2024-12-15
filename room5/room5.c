@@ -64,7 +64,7 @@ extern const u8 g_Tiles_Colors[];
 // Données des sprites du joueur
 #include "data/sprt_player.h"
 
-// Données des polices de character 
+// Données des polices de character
 #include "data/font_jp.h"
 #include "data/font_eu.h"
 
@@ -115,39 +115,37 @@ const u8 g_PlayerFramesFall[] = {1, 2, 3, 4};
 
 // Donnée d'animation des portes
 const u8 g_DoorAnimationTiles[] = {
-	44, 11, 45, 71, 46, 15, // Frame 0
-	44, 11, 45, 71, 46, 15, // Frame 1
-	44, 47, 45, 54, 46, 55, // Frame 2
-	44, 47, 45, 54, 46, 55, // Frame 3,
-	44, 47, 45, 54, 46, 55, // Frame 4,
-	44, 47, 45, 54, 46, 55, // Frame 5,
-	44, 47, 45, 54, 46, 55, // Frame 6
+		44, 11, 45, 71, 46, 15, // Frame 0
+		44, 11, 45, 71, 46, 15, // Frame 1
+		44, 47, 45, 54, 46, 55, // Frame 2
+		44, 47, 45, 54, 46, 55, // Frame 3,
+		44, 47, 45, 54, 46, 55, // Frame 4,
+		44, 47, 45, 54, 46, 55, // Frame 5,
+		44, 47, 45, 54, 46, 55, // Frame 6
 };
 const struct TileAnimation g_DoorAnimation = {
-	2,
-	3,
-	7,
-	1,
-	g_DoorAnimationTiles
-};
+		2,
+		3,
+		7,
+		1,
+		g_DoorAnimationTiles};
 
 // Donnée d'animation du téléphone
 const u8 g_PhoneAnimationTiles[] = {
-	18, 80, // Frame 0
-	18, 16, // Frame 1
-	19, 80, // Frame 2
-	19, 17, // Frame 3
+		18, 80, // Frame 0
+		18, 16, // Frame 1
+		19, 80, // Frame 2
+		19, 17, // Frame 3
 };
 const struct TileAnimation g_PhoneAnimation = {
-	1,
-	2,
-	4,
-	0,
-	g_PhoneAnimationTiles
-};
+		1,
+		2,
+		4,
+		0,
+		g_PhoneAnimationTiles};
 
 // Liste des animations
-const u8* const g_MusicTable[MUSIC_MAX] = { g_AKG_MusicMain, g_AKG_MusicPhone, g_AKG_MusicEmpty };
+const u8 *const g_MusicTable[MUSIC_MAX] = {g_AKG_MusicMain, g_AKG_MusicPhone, g_AKG_MusicEmpty};
 
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
@@ -229,7 +227,7 @@ u8 g_NextMusic = 0xFF;
 
 //-----------------------------------------------------------------------------
 // Afficher un text à une position donnée
-void displayTextAt(u8 x, u8 y, const c8* text)
+void displayTextAt(u8 x, u8 y, const c8 *text)
 {
 	u8 startX = x;
 	while (*text != '\0')
@@ -950,6 +948,21 @@ void addNotElectricWall(u8 levelIdx, u8 i, u8 j)
 	g_NotElectricWallCount++;
 }
 
+// Possibilité de regroupé avec la fonction addNotElectricWall
+void addNotElectricGround(u8 levelIdx, u8 i, u8 j)
+{
+
+	if (g_NotElectricWallCount >= MAX_NOT_ELECTRIC_WALL)
+		return;
+
+	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
+	struct ActiveObject *pObj = &g_NotElectricWalls[g_NotElectricWallCount];
+	pObj->X = j;
+	pObj->Y = i;
+	pObj->Tile = TILE_NOT_ELECTRIC_GROUND;
+	g_NotElectricWallCount++;
+}
+
 //--- PORTE -------------------------------------------------------------------
 
 void startDoorAnim(u8 x, u8 y, u8 tile)
@@ -1086,7 +1099,7 @@ void displayLevel(u8 levelIdx)
 					sTile = getTileByTileCoord(sX, y);
 				}
 				struct TextCoordInstance *txt = &g_TextCoordInstances[g_TextCoordCount++];
-				txt->X = 1;//(tile == TILE_SPE_TRANSLATE_PHONE) ? 1 : x;
+				txt->X = 1; //(tile == TILE_SPE_TRANSLATE_PHONE) ? 1 : x;
 				txt->Y = y;
 				txt->Key = transKey;
 				txt->Mode = (tile == TILE_SPE_TRANSLATE_PHONE) ? TEXT_MODE_PHONE : TEXT_MODE_DEFAULT;
@@ -1124,6 +1137,11 @@ void displayLevel(u8 levelIdx)
 			else if (tile == TILE_NOT_ELECTRIC_WALL)
 			{
 				addNotElectricWall(levelIdx, i, j);
+			}
+			else if (tile == TILE_NOT_ELECTRIC_GROUND)
+			{
+				// Même logique que les murs
+				addNotElectricGround(levelIdx, i, j);
 			}
 			else if (tile == TILE_MANUAL_ELEVATOR)
 			{
@@ -1576,8 +1594,8 @@ void VDP_InterruptHandler()
 	{
 		if (g_NextMusic != g_CurrentMusic)
 		{
-			Pletter_UnpackToRAM((const void*)g_MusicTable[g_NextMusic], (void*)MUSIC_ADDRESS);
-			AKG_Init((const void*)MUSIC_ADDRESS, 0);
+			Pletter_UnpackToRAM((const void *)g_MusicTable[g_NextMusic], (void *)MUSIC_ADDRESS);
+			AKG_Init((const void *)MUSIC_ADDRESS, 0);
 			g_CurrentMusic = g_NextMusic;
 		}
 		AKG_Decode();
@@ -1637,11 +1655,11 @@ void main()
 	VDP_ClearVRAM();
 	VDP_EnableVBlank(TRUE);
 
-////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////
 	// PlayMusic(MUSIC_MAIN);
 	// while (1)
 	// 	waitVSync();
-////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////
 
 	// === SAVE ===
 	SaveInit();

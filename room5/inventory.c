@@ -1,6 +1,7 @@
+#include "msxgl.h"
 #include "inventory.h"
 #include "tiles.h"
-#include "msxgl.h"
+#include "tiles_defs.h"
 
 #define INVENTORY_SIZE 4
 #define INVENTORY_DISPLAY_X 24
@@ -57,7 +58,7 @@ bool removeItemFromInventory(u8 item)
 		if (g_Inventory[i] == item)
 		{
 			g_Inventory[i] = EMPTY_ITEM;
-			setTile(8 + i * 16, (u8)(192 - 8), 0);
+			setTile(INVENTORY_DISPLAY_X + i * 16, (u8)(INVENTORY_DISPLAY_Y - 8), TILE_EMPTY);
 			return TRUE;
 		}
 	}

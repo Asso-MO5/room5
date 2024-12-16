@@ -26,10 +26,13 @@
 #include "doors.h"
 #include "save.h"
 #include "music.h"
+#include "control.h"
 
 //=============================================================================
 // DEFINITIONS
 //=============================================================================
+
+#define DEBUG_DISPLAY_INFO			FALSE
 
 // Prototypes de fonctions
 void waitVSync();
@@ -40,7 +43,7 @@ void activateElectricity(bool bActivate);
 void displayLevel(u8 levelIdx);
 bool onDoorAnimEnd();
 bool interact(u8 x, u8 y);
-void handleTypeSaveCode();
+void menuEnterCode();
 void applyLanguage();
 
 // Variables statiques définies dans un autre module
@@ -150,6 +153,8 @@ const u8 *const g_MusicTable[MUSIC_MAX] = {g_AKG_MusicMain, g_AKG_MusicPhone, g_
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
 //=============================================================================
+
+bool g_Debug = FALSE;
 
 volatile bool g_vSync = TRUE;
 bool g_isNTSC = TRUE;
@@ -359,117 +364,6 @@ void loadData()
 	VDP_SetSpriteSM1(SPT_PLAYER_OUTLINE, 0, 0, 12, COLOR_BLACK);
 }
 
-//.............................................................................
-//
-//  GESTION DES CONTRÔLEURS (clavier et joysticks)
-//
-//.............................................................................
-
-//-----------------------------------------------------------------------------
-// Test de la direction 'droite' sur n'importe quel contrôleur
-bool isMoveRight()
-{
-	if (Keyboard_IsKeyPressed(KEY_RIGHT))
-		return TRUE;
-	if ((Joystick_Read(JOY_PORT_1) & JOY_INPUT_DIR_RIGHT) == 0)
-		return TRUE;
-	if ((Joystick_Read(JOY_PORT_2) & JOY_INPUT_DIR_RIGHT) == 0)
-		return TRUE;
-
-	return FALSE;
-}
-
-//-----------------------------------------------------------------------------
-// Test de la direction 'gauche' sur n'importe quel contrôleur
-bool isMoveLeft()
-{
-	if (Keyboard_IsKeyPressed(KEY_LEFT))
-		return TRUE;
-	if ((Joystick_Read(JOY_PORT_1) & JOY_INPUT_DIR_LEFT) == 0)
-		return TRUE;
-	if ((Joystick_Read(JOY_PORT_2) & JOY_INPUT_DIR_LEFT) == 0)
-		return TRUE;
-
-	return FALSE;
-}
-
-//-----------------------------------------------------------------------------
-//
-bool isMoveCursorUp()
-{
-	if (Keyboard_IsKeyPushed(KEY_UP))
-		return TRUE;
-
-	if (Joystick_GetDirectionChange(JOY_PORT_1) == JOY_INPUT_DIR_UP)
-		return TRUE;
-	if (Joystick_GetDirectionChange(JOY_PORT_2) == JOY_INPUT_DIR_UP)
-		return TRUE;
-
-	return FALSE;
-}
-
-//-----------------------------------------------------------------------------
-//
-bool isMoveCursorDown()
-{
-	if (Keyboard_IsKeyPushed(KEY_DOWN))
-		return TRUE;
-	if (Joystick_GetDirectionChange(JOY_PORT_1) == JOY_INPUT_DIR_DOWN)
-		return TRUE;
-	if (Joystick_GetDirectionChange(JOY_PORT_2) == JOY_INPUT_DIR_DOWN)
-		return TRUE;
-
-	return FALSE;
-}
-
-//-----------------------------------------------------------------------------
-// Test de l'action 'interact' sur n'importe quel contrôleur
-bool isInteract()
-{
-	if (Keyboard_IsKeyPressed(KEY_SPACE))
-		return TRUE;
-	if ((Joystick_Read(JOY_PORT_1) & JOY_INPUT_TRIGGER_A) == 0)
-		return TRUE;
-	if ((Joystick_Read(JOY_PORT_2) & JOY_INPUT_TRIGGER_A) == 0)
-		return TRUE;
-
-	return FALSE;
-}
-
-/**
- *
- *
- * @TODO factoriser en une fonction de test de bouton
- *
- *
- */
-// interact Pour les cursors
-bool isSelect()
-{
-	if (Keyboard_IsKeyPushed(KEY_SPACE))
-		return TRUE;
-	if (Joystick_IsButtonPushed(JOY_PORT_1, JOY_INPUT_TRIGGER_A))
-		return TRUE;
-	if (Joystick_IsButtonPushed(JOY_PORT_2, JOY_INPUT_TRIGGER_A))
-		return TRUE;
-
-	return FALSE;
-}
-
-//-----------------------------------------------------------------------------
-// Test de l'action 'cancel' sur n'importe quel contrôleur
-bool isCancel()
-{
-	if (Keyboard_IsKeyPressed(KEY_ESC))
-		return TRUE;
-	if ((Joystick_Read(JOY_PORT_1) & JOY_INPUT_TRIGGER_B) == 0)
-		return TRUE;
-	if ((Joystick_Read(JOY_PORT_2) & JOY_INPUT_TRIGGER_B) == 0)
-		return TRUE;
-
-	return FALSE;
-}
-
 //-----------------------------------------------------------------------------
 // Utilitaire pour afficher un texte à l'écran
 void displayTextByMode(u8 mode)
@@ -507,6 +401,10 @@ void initPlayer(u8 x, u8 y)
 // Mise à jour du personnage
 void updatePlayer()
 {
+	// Activation des options de debug avec les boutons M+O+5
+	if (Keyboard_IsKeyPressed(KEY_M) && Keyboard_IsKeyPressed(KEY_O) && Keyboard_IsKeyPressed(KEY_5))
+		g_Debug = TRUE;
+
 	if (g_Player.State == PLAYER_STATE_ACTION)
 	{
 		if (g_FrameCounter == 2 * 8)
@@ -524,7 +422,7 @@ void updatePlayer()
 			}
 		}
 	}
-	else if (Keyboard_IsKeyPressed(KEY_CTRL)) // Déplacement de debug (sans collision ni gravité)
+	else if (g_Debug && Keyboard_IsKeyPressed(KEY_CTRL)) // Déplacement de debug (sans collision ni gravité)
 	{
 		if (Keyboard_IsKeyPushed(KEY_SPACE))
 			displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
@@ -558,13 +456,13 @@ void updatePlayer()
 		g_Player.State = PLAYER_STATE_IDLE;
 
 		// Test des déplacements gauche/droite
-		if (isMoveLeft())
+		if (isInputPressed(INPUT_LEFT))
 		{
 			xTemp--;
 			g_Player.State = PLAYER_STATE_MOVE;
 			g_Player.isLeft = TRUE;
 		}
-		else if (isMoveRight())
+		else if (isInputPressed(INPUT_RIGHT))
 		{
 			xTemp++;
 			g_Player.State = PLAYER_STATE_MOVE;
@@ -572,13 +470,13 @@ void updatePlayer()
 		}
 
 		// Test du bouton d'interaction
-		if (isInteract())
+		if (isInputPressed(INPUT_BUTTON_A))
 		{
 			g_FrameCounter = 0;
 			g_Player.State = PLAYER_STATE_ACTION;
 		}
 
-		if (isCancel())
+		if (isInputPressed(INPUT_BUTTON_B))
 		{
 			g_ResetCount++;
 			if (g_ResetCount > RESET_DURATION)
@@ -1192,18 +1090,20 @@ void displayLevel(u8 levelIdx)
 
 	displayTextByMode(TEXT_MODE_DEFAULT);
 
-	// Print_SetPosition(0, 22);
-	// Print_DrawText("L:");
-	// Print_DrawInt(levelIdx);
-	// Print_DrawText(" E:");
-	// Print_DrawInt(g_DoorThemeCount[0]);
-	// Print_DrawChar('-');
-	// Print_DrawInt(g_DoorThemeCount[1]);
-	// Print_DrawChar('-');
-	// Print_DrawInt(g_DoorThemeCount[2]);
-	// Print_DrawText(" T:");
-	// Print_DrawInt(g_SecondCounter);
-	// Print_DrawText("    ");
+#if (DEBUG_DISPLAY_INFO)
+	Print_SetPosition(0, 22);
+	Print_DrawText("L:");
+	Print_DrawInt(levelIdx);
+	Print_DrawText(" E:");
+	Print_DrawInt(g_DoorThemeCount[0]);
+	Print_DrawChar('-');
+	Print_DrawInt(g_DoorThemeCount[1]);
+	Print_DrawChar('-');
+	Print_DrawInt(g_DoorThemeCount[2]);
+	Print_DrawText(" T:");
+	Print_DrawInt(g_SecondCounter);
+	Print_DrawText("    ");
+#endif
 
 	if (levelIdx == 31)
 	{
@@ -1273,7 +1173,7 @@ bool interact(u8 x, u8 y)
 	switch (tile)
 	{
 	case TILE_PC_CODE:
-		handleTypeSaveCode();
+		menuEnterCode();
 		return TRUE;
 	// Téléphone
 	case TILE_PHONE:
@@ -1436,7 +1336,7 @@ void applyLanguage()
 
 //-----------------------------------------------------------------------------
 // Menu de selection d'une langue
-void langMenu()
+void menuLangSelect()
 {
 	// Initialisation du menu
 	for (u8 i = 0; i < LANG_MAX; i++)
@@ -1451,36 +1351,27 @@ void langMenu()
 	while (1)
 	{
 		waitVSync();
-		Keyboard_Update();
-		if (Keyboard_IsKeyPushed(KEY_UP))
+		if (isInputPushed(INPUT_UP))
 		{
 			setTileByTileCoord(LANG_CURSORX, LANG_CURSORY + g_Language, TILE_EMPTY);
 			if (g_Language == 0)
-			{
 				g_Language = LANG_MAX - 1;
-			}
 			else
-			{
 				g_Language--;
-			}
 
 			setTileByTileCoord(LANG_CURSORX, LANG_CURSORY + g_Language, SPT_CURSOR);
 		}
-		else if (Keyboard_IsKeyPushed(KEY_DOWN))
+		else if (isInputPushed(INPUT_DOWN))
 		{
 			setTileByTileCoord(LANG_CURSORX, LANG_CURSORY + g_Language, TILE_EMPTY);
 			if (g_Language == LANG_MAX - 1)
-			{
 				g_Language = 0;
-			}
 			else
-			{
 				g_Language++;
-			}
 
 			setTileByTileCoord(LANG_CURSORX, LANG_CURSORY + g_Language, SPT_CURSOR);
 		}
-		else if (Keyboard_IsKeyPushed(KEY_ENTER) || Keyboard_IsKeyPushed(KEY_SPACE))
+		else if (isInputPushed(INPUT_BUTTON_A))
 		{
 			Loc_SetLanguage(g_Language);
 			break;
@@ -1492,7 +1383,7 @@ void langMenu()
 
 //-----------------------------------------------------------------------------
 // Menu de saisi d'un code de sauvegarde
-void handleTypeSaveCode()
+void menuEnterCode()
 {
 
 	VDP_DisableSpritesFrom(0);
@@ -1523,14 +1414,12 @@ void handleTypeSaveCode()
 	while (bContinue)
 	{
 		waitVSync();
-		Keyboard_Update();
-		Joystick_Update();
-		if (isCancel())
+		if (isInputPushed(INPUT_BUTTON_B))
 		{
 			bContinue = FALSE;
 		}
 
-		if (isMoveCursorUp())
+		if (isInputPushed(INPUT_UP))
 		{
 			setTileByTileCoord(CODE_CURSORX, charIndex + CODE_CURSORY, TILE_EMPTY);
 			if (charIndex == 0)
@@ -1539,7 +1428,7 @@ void handleTypeSaveCode()
 				charIndex--;
 			setTileByTileCoord(CODE_CURSORX, charIndex + CODE_CURSORY, SPT_CURSOR);
 		}
-		else if (isMoveCursorDown())
+		else if (isInputPushed(INPUT_DOWN))
 		{
 			setTileByTileCoord(CODE_CURSORX, charIndex + CODE_CURSORY, TILE_EMPTY);
 			if (charIndex == 15)
@@ -1548,7 +1437,7 @@ void handleTypeSaveCode()
 				charIndex++;
 			setTileByTileCoord(CODE_CURSORX, charIndex + CODE_CURSORY, SPT_CURSOR);
 		}
-		if (isSelect())
+		if (isInputPushed(INPUT_BUTTON_A))
 		{
 			u8 i = 0;
 			for (; i < PLAYER_CODE_SIZE; i++)
@@ -1632,6 +1521,9 @@ void waitVSync()
 		if (g_SecondCounter < 0x4000) // 4,5 heures maximum
 			g_SecondCounter++;
 	}
+
+	Keyboard_Update();
+	Joystick_Update();
 }
 
 //-----------------------------------------------------------------------------
@@ -1668,7 +1560,7 @@ void main()
 	//  Chargement des données graphique en mémoire vidéo (VRAM)
 	loadData();
 
-	langMenu();
+	menuLangSelect();
 
 	initializeDoors();
 
@@ -1693,7 +1585,6 @@ void main()
 			updateTileAnimations();
 		}
 		// Mise à jour du personnage
-		Keyboard_Update();
 		updatePlayer();
 
 		g_FrameCounter++;

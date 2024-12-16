@@ -39,13 +39,14 @@ ProjName = 'room5'
 
 //-- List of project modules to build (array). If empty, ProjName will be added
 ProjModules = [
-  ProjName,
-  'level_defs',
-  'tiles',
-  'inventory',
-  'elevator',
-  'doors',
-  'save',
+	ProjName,
+	'level_defs',
+	'tiles',
+	'inventory',
+	'elevator',
+	'doors',
+	'save',
+	'control',
 ]
 
 //-- Project segments base name (string). ProjName will be used if not defined
@@ -53,17 +54,17 @@ ProjModules = [
 
 //-- List of library modules to build (array)
 LibModules = [
-  'system',
-  'bios',
-  'vdp',
-  'print',
-  'input',
-  'memory',
-  'sprite_fx',
-  'compress/pletter',
-  'localize',
-  'arkos/akg_player',
-  'crypt',
+	'system',
+	'bios',
+	'vdp',
+	'print',
+	'input',
+	'memory',
+	'sprite_fx',
+	'compress/pletter',
+	'localize',
+	'arkos/akg_player',
+	'crypt',
 ]
 
 //-- Additional sources to be compiled and linked with the project (array)

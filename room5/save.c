@@ -35,18 +35,18 @@ bool SaveEncode(struct SaveData *pData, c8 *saveCode)
 {
 	u16 saveBuffer[2];
 
-	//  F |  E  D  C |  B  A  9 |  8  7  6 |  5  4  3  2  1  0
-	//----+----------+----------+----------+-------------------
-	// L0 | M2 M1 M0 | A2 A1 A0 | I2 I1 I2 | L5 L4 L3 L2 L1 L0
-	saveBuffer[0] = pData->currentLevel & 0b111111 | (pData->themes[0] & 0b111) << 6 | (pData->themes[1] & 0b111) << 9 | (pData->themes[2] & 0b111) << 12;
-	if (saveBuffer[0] & 0x0001)
-		saveBuffer[0] |= 0x8000;
-
 	//  F  E |  D  C  B  A  9  8  7  6  5  4  3  2  1  0
 	//-------+------------------------------------------
 	// T1 T0 | TD TC TB TA T9 T8 T7 T6 T5 T4 T3 T2 T1 T0
-	saveBuffer[1] = pData->currentTime;
-	saveBuffer[1] |= (pData->currentTime & 0x0003) << 14;
+	saveBuffer[0] = pData->currentTime;
+	saveBuffer[0] |= (pData->currentTime & 0x0003) << 14;
+
+	//  F |  E  D  C |  B  A  9 |  8  7  6 |  5  4  3  2  1  0
+	//----+----------+----------+----------+-------------------
+	// L0 | M2 M1 M0 | A2 A1 A0 | I2 I1 I2 | L5 L4 L3 L2 L1 L0
+	saveBuffer[1] = pData->currentLevel & 0b111111 | (pData->themes[0] & 0b111) << 6 | (pData->themes[1] & 0b111) << 9 | (pData->themes[2] & 0b111) << 12;
+	if (saveBuffer[1] & 0x0001)
+		saveBuffer[1] |= 0x8000;
 
 	Crypt_Encode((u8 *)saveBuffer, 4, (u8 *)saveCode);
 	return TRUE;
@@ -60,28 +60,28 @@ bool SaveDecode(const c8 *saveCode, struct SaveData *pData)
 	if (!Crypt_Decode(saveCode, (u8 *)saveBuffer))
 		return FALSE;
 
-	if ((saveBuffer[0] >> 15) != (saveBuffer[0] & 0x0001))
+	if ((saveBuffer[0] >> 14) != (saveBuffer[0] & 0x0003))
 		return FALSE;
 
-	if ((saveBuffer[1] >> 14) != (saveBuffer[1] & 0x0003))
-		return FALSE;
-
-	//  F |  E  D  C |  B  A  9 |  8  7  6 |  5  4  3  2  1  0
-	//----+----------+----------+----------+-------------------
-	// L0 | M2 M1 M0 | A2 A1 A0 | I2 I1 I2 | L5 L4 L3 L2 L1 L0
-	pData->currentLevel = saveBuffer[0] & 0b111111;
-	pData->themes[0] = (saveBuffer[0] >> 6) & 0b111;
-	pData->themes[1] = (saveBuffer[0] >> 9) & 0b111;
-	pData->themes[2] = (saveBuffer[0] >> 12) & 0b111;
-
-	u8 totalThemes = pData->themes[0] + pData->themes[1] + pData->themes[2];
-	if (totalThemes != g_Rooms[pData->currentLevel].TotalThemes)
+	if ((saveBuffer[1] >> 15) != (saveBuffer[1] & 0x0001))
 		return FALSE;
 
 	//  F  E |  D  C  B  A  9  8  7  6  5  4  3  2  1  0
 	//-------+------------------------------------------
 	// T1 T0 | TD TC TB TA T9 T8 T7 T6 T5 T4 T3 T2 T1 T0
-	pData->currentTime = saveBuffer[1] & 0x3FFF;
+	pData->currentTime = saveBuffer[0] & 0x3FFF;
+
+	//  F |  E  D  C |  B  A  9 |  8  7  6 |  5  4  3  2  1  0
+	//----+----------+----------+----------+-------------------
+	// L0 | M2 M1 M0 | A2 A1 A0 | I2 I1 I2 | L5 L4 L3 L2 L1 L0
+	pData->currentLevel = saveBuffer[1] & 0b111111;
+	pData->themes[0] = (saveBuffer[1] >> 6) & 0b111;
+	pData->themes[1] = (saveBuffer[1] >> 9) & 0b111;
+	pData->themes[2] = (saveBuffer[1] >> 12) & 0b111;
+
+	u8 totalThemes = pData->themes[0] + pData->themes[1] + pData->themes[2];
+	if (totalThemes != g_Rooms[pData->currentLevel].TotalThemes)
+		return FALSE;
 
 	return TRUE;
 }

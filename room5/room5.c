@@ -117,35 +117,41 @@ const u8 g_PlayerFramesAction[] = {5, 6, 7, 8, 9, 10, 9, 11};
 const u8 g_PlayerFramesFall[] = {1, 2, 3, 4};
 
 // Donnée d'animation des portes
-const u8 g_DoorAnimationTiles[] = {
-		44, 11, 45, 71, 46, 15, // Frame 0
-		44, 11, 45, 71, 46, 15, // Frame 1
-		44, 47, 45, 54, 46, 55, // Frame 2
-		44, 47, 45, 54, 46, 55, // Frame 3,
-		44, 47, 45, 54, 46, 55, // Frame 4,
-		44, 47, 45, 54, 46, 55, // Frame 5,
-		44, 47, 45, 54, 46, 55, // Frame 6
+const u8 g_DoorAnimationTiles[] = 
+{
+	44, 11, 45, 71, 46, 15, // Frame 0
+	44, 11, 45, 71, 46, 15, // Frame 1
+	44, 47, 45, 54, 46, 55, // Frame 2
+	44, 47, 45, 54, 46, 55, // Frame 3,
+	44, 47, 45, 54, 46, 55, // Frame 4,
+	44, 47, 45, 54, 46, 55, // Frame 5,
+	44, 47, 45, 54, 46, 55, // Frame 6
 };
-const struct TileAnimation g_DoorAnimation = {
-		2,
-		3,
-		7,
-		1,
-		g_DoorAnimationTiles};
+const struct TileAnimation g_DoorAnimation =
+{
+	2,
+	3,
+	7,
+	1,
+	g_DoorAnimationTiles
+};
 
 // Donnée d'animation du téléphone
-const u8 g_PhoneAnimationTiles[] = {
-		18, 80, // Frame 0
-		18, 16, // Frame 1
-		19, 80, // Frame 2
-		19, 17, // Frame 3
+const u8 g_PhoneAnimationTiles[] =
+{
+	18, 80, // Frame 0
+	18, 16, // Frame 1
+	19, 80, // Frame 2
+	19, 17, // Frame 3
 };
-const struct TileAnimation g_PhoneAnimation = {
-		1,
-		2,
-		4,
-		0,
-		g_PhoneAnimationTiles};
+const struct TileAnimation g_PhoneAnimation =
+{
+	1,
+	2,
+	4,
+	0,
+	g_PhoneAnimationTiles
+};
 
 // Liste des animations
 const u8 *const g_MusicTable[MUSIC_MAX] = {g_AKG_MusicMain, g_AKG_MusicPhone, g_AKG_MusicEmpty};
@@ -660,7 +666,6 @@ void activatePhone(u8 xP, u8 yP, bool bPhone)
 // Application des effets en fonction de l'état de la lumière
 void lightRoom(bool bActivate)
 {
-
 	// Change la couleur des tuiles du décor
 	u8 firstCol = bActivate ? 0xA1 : 0x41;
 	u8 secondCol = bActivate ? 0xB1 : 0x51;
@@ -765,7 +770,6 @@ void activateCupboard(u8 x, u8 y)
 //
 void activateCloset(u8 x, u8 y)
 {
-
 	u8 gX = x / 8;
 	u8 gY = y / 8;
 	u8 tile = TILE_EMPTY;
@@ -797,7 +801,6 @@ void activateCloset(u8 x, u8 y)
 // Ajout d'un objet conditionnel
 void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
 {
-
 	if (g_VisibleObjectCount >= MAX_VISIBLE_OBJECTS)
 		return;
 
@@ -819,7 +822,6 @@ void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
 // Ajout d'un mur électrique
 void addElectricWall(u8 levelIdx, u8 i, u8 j)
 {
-
 	if (g_ElectricWallCount >= MAX_ELECTRIC_WALL)
 		return;
 
@@ -834,7 +836,6 @@ void addElectricWall(u8 levelIdx, u8 i, u8 j)
 // Ajout d'un mur non électrique
 void addNotElectricWall(u8 levelIdx, u8 i, u8 j)
 {
-
 	if (g_NotElectricWallCount >= MAX_NOT_ELECTRIC_WALL)
 		return;
 
@@ -849,7 +850,6 @@ void addNotElectricWall(u8 levelIdx, u8 i, u8 j)
 // Possibilité de regroupé avec la fonction addNotElectricWall
 void addNotElectricGround(u8 levelIdx, u8 i, u8 j)
 {
-
 	if (g_NotElectricWallCount >= MAX_NOT_ELECTRIC_WALL)
 		return;
 
@@ -900,7 +900,6 @@ bool onDoorAnimEnd()
 
 	if (doorIndex < 255)
 	{
-
 		// Nous sommes dans une room avec téléphone.
 		// On incrément le compte de doorTheme
 		g_DoorThemeCount[g_DoorTheme[doorIndex]]++;
@@ -983,7 +982,6 @@ void displayLevel(u8 levelIdx)
 
 			else if (tile == TILE_SPE_TRANSLATE || tile == TILE_SPE_TRANSLATE_PHONE)
 			{
-
 				u8 sX = x + 1;
 				u8 sTile = getTileByTileCoord(sX, y);
 				u8 transKey = 0;
@@ -1002,9 +1000,7 @@ void displayLevel(u8 levelIdx)
 				txt->Key = transKey;
 				txt->Mode = (tile == TILE_SPE_TRANSLATE_PHONE) ? TEXT_MODE_PHONE : TEXT_MODE_DEFAULT;
 			}
-			else if (tile == TILE_SPE_THEME_HOSPITAL ||
-							 tile == TILE_SPE_THEME_ALIEN ||
-							 tile == TILE_SPE_THEME_MATRIX)
+			else if (tile == TILE_SPE_THEME_HOSPITAL || tile == TILE_SPE_THEME_ALIEN || tile == TILE_SPE_THEME_MATRIX)
 			{
 				u8 theme = (tile - TILE_SPE_THEME_HOSPITAL);
 				setDoorTheme(themeCounter, theme);
@@ -1090,20 +1086,20 @@ void displayLevel(u8 levelIdx)
 
 	displayTextByMode(TEXT_MODE_DEFAULT);
 
-#if (DEBUG_DISPLAY_INFO)
-	Print_SetPosition(0, 22);
-	Print_DrawText("L:");
-	Print_DrawInt(levelIdx);
-	Print_DrawText(" E:");
-	Print_DrawInt(g_DoorThemeCount[0]);
-	Print_DrawChar('-');
-	Print_DrawInt(g_DoorThemeCount[1]);
-	Print_DrawChar('-');
-	Print_DrawInt(g_DoorThemeCount[2]);
-	Print_DrawText(" T:");
-	Print_DrawInt(g_SecondCounter);
-	Print_DrawText("    ");
-#endif
+	#if (DEBUG_DISPLAY_INFO)
+		Print_SetPosition(0, 22);
+		Print_DrawText("L:");
+		Print_DrawInt(levelIdx);
+		Print_DrawText(" E:");
+		Print_DrawInt(g_DoorThemeCount[0]);
+		Print_DrawChar('-');
+		Print_DrawInt(g_DoorThemeCount[1]);
+		Print_DrawChar('-');
+		Print_DrawInt(g_DoorThemeCount[2]);
+		Print_DrawText(" T:");
+		Print_DrawInt(g_SecondCounter);
+		Print_DrawText("    ");
+	#endif
 
 	if (levelIdx == 31)
 	{
@@ -1114,8 +1110,12 @@ void displayLevel(u8 levelIdx)
 		u16 hour = g_SecondCounter / 60 / 60;
 		Print_DrawInt(hour);
 		Print_DrawChar(':');
+		if(min < 10)
+			Print_DrawChar('0');
 		Print_DrawInt(min);
 		Print_DrawChar(':');
+		if(sec < 10)
+			Print_DrawChar('0');
 		Print_DrawInt(sec);
 	}
 
@@ -1400,7 +1400,7 @@ void menuEnterCode()
 		Print_SetPosition(10, CODE_CURSORY + i);
 		Print_DrawChar(g_CryptRoom5Map[i]);
 	}
-	Print_DrawTextAt(CODE_CURSORX + 5, CODE_CURSORY + CODE_VAL_OFFSET, "ROOM");
+	Print_DrawTextAt(CODE_CURSORX + 6, CODE_CURSORY + CODE_VAL_OFFSET, "ROOM");
 
 	Mem_Set(0, g_SaveCodeBuffer, PLAYER_CODE_SIZE);
 
@@ -1463,7 +1463,7 @@ void menuEnterCode()
 				}
 				bContinue = FALSE;
 			}
-			Print_DrawTextAt(CODE_CURSORX + 10, CODE_CURSORY + CODE_VAL_OFFSET, (const c8 *)g_SaveCodeBuffer);
+			Print_DrawTextAt(CODE_CURSORX + 11, CODE_CURSORY + CODE_VAL_OFFSET, (const c8 *)g_SaveCodeBuffer);
 		}
 	}
 

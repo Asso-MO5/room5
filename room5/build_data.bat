@@ -32,7 +32,7 @@ for %%G in (data\level\*.bin) do (
 )
 
 :: Convert Arkos Tracker music
-%Tools%\compress\Pletter\pletter assets\music\music_main.akg  assets\music\music_main.pl5
+%Tools%\compress\Pletter\pletter assets\music\music_main2.akg  assets\music\music_main.pl5
 %MSXtk%\MSXbin assets\music\music_main.pl5 -ad -t g_AKG_MusicMain -o data\sounds\music_main.h
 
 %Tools%\compress\Pletter\pletter assets\music\music_phone.akg  assets\music\music_phone.pl5

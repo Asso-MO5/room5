@@ -3,10 +3,6 @@
 #include "tiles.h"
 #include "tiles_defs.h"
 
-#define INVENTORY_SIZE 4
-#define INVENTORY_DISPLAY_X 24
-#define INVENTORY_DISPLAY_Y 192
-
 u8 g_Inventory[INVENTORY_SIZE]; // Contenu de l'inventaire
 
 //-----------------------------------------------------------------------------

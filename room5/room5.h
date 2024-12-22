@@ -16,7 +16,7 @@
 #define TEXT_MODE_PHONE 1
 #define TEXT_MODE_TALK 2
 #define MUSIC_ADDRESS 0xD000
-// #define SFX_ADDRESS 0xE000
+#define SFX_ADDRESS 0xE000
 #define LANG_CURSORX 8
 #define LANG_CURSORY 6
 #define CODE_CURSORX 8

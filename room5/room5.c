@@ -154,7 +154,7 @@ const struct TileAnimation g_PhoneAnimation =
 };
 
 // Liste des animations
-const u8 *const g_MusicTable[MUSIC_MAX] = {g_AKG_MusicMain, g_AKG_MusicPhone, g_AKG_MusicEmpty};
+const u8* const g_MusicTable[MUSIC_MAX] = {g_AKG_MusicMain, g_AKG_MusicPhone, g_AKG_MusicEmpty};
 
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
@@ -220,25 +220,15 @@ u8 g_Language = LANG_EN;
 // Current music index
 u8 g_CurrentMusic = 0xFF;
 u8 g_NextMusic = 0xFF;
+u8 g_NextSFX = 0xFF;
 
 //=============================================================================
 // FONCTIONS
 //=============================================================================
 
 //-----------------------------------------------------------------------------
-// Initialisation de la police de caractère
-// void initFont()
-// {
-// 	// Initialisation de la font de caractère
-// 	Print_SetMode(PRINT_MODE_TEXT);
-// 	Print_SetFontEx(8, 8, 1, 1, ' ', '_', g_Tiles_Patterns + 192);
-// 	Print_Initialize();
-// 	g_PrintData.PatternOffset = 192;
-// }
-
-//-----------------------------------------------------------------------------
 // Afficher un text à une position donnée
-void displayTextAt(u8 x, u8 y, const c8 *text)
+void displayTextAt(u8 x, u8 y, const c8* text)
 {
 	u8 startX = x;
 	while (*text != '\0')
@@ -259,11 +249,11 @@ void displayTextAt(u8 x, u8 y, const c8 *text)
 
 //-----------------------------------------------------------------------------
 // Ajoute une nouvelle animation de tuiles à la position indiquée
-bool addAnimationInstance(u8 X, u8 Y, const struct TileAnimation *pAnimation, animCallback OnAnimationEnd)
+bool addAnimationInstance(u8 X, u8 Y, const struct TileAnimation* pAnimation, animCallback OnAnimationEnd)
 {
 	for (u8 i = 0; i < MAX_TILE_ANIMATION; ++i)
 	{
-		struct TileAnimationInstance *pInstance = &g_AnimationInstances[i];
+		struct TileAnimationInstance* pInstance = &g_AnimationInstances[i];
 
 		if (!pInstance->isPlaying)
 		{
@@ -283,12 +273,12 @@ bool addAnimationInstance(u8 X, u8 Y, const struct TileAnimation *pAnimation, an
 
 //-----------------------------------------------------------------------------
 //
-bool stopAnimationInstance(const struct TileAnimation *pAnimation)
+bool stopAnimationInstance(const struct TileAnimation* pAnimation)
 {
 	bool foundThis = FALSE;
 	for (u8 i = 0; i < MAX_TILE_ANIMATION; ++i)
 	{
-		struct TileAnimationInstance *pInstance = &g_AnimationInstances[i];
+		struct TileAnimationInstance* pInstance = &g_AnimationInstances[i];
 
 		if (pInstance->isPlaying && pInstance->Animation == pAnimation)
 		{
@@ -306,7 +296,7 @@ void updateTileAnimations()
 {
 	for (u8 i = 0; i < MAX_TILE_ANIMATION; ++i)
 	{
-		struct TileAnimationInstance *pInstance = &g_AnimationInstances[i];
+		struct TileAnimationInstance* pInstance = &g_AnimationInstances[i];
 
 		if (pInstance->isPlaying)
 		{
@@ -376,7 +366,7 @@ void displayTextByMode(u8 mode)
 {
 	for (u8 i = 0; i < g_TextCoordCount; i++)
 	{
-		struct TextCoordInstance *txt = &g_TextCoordInstances[i];
+		struct TextCoordInstance* txt = &g_TextCoordInstances[i];
 
 		if (txt->Mode == mode)
 		{
@@ -408,8 +398,11 @@ void initPlayer(u8 x, u8 y)
 void updatePlayer()
 {
 	// Activation des options de debug avec les boutons M+O+5
-	if (Keyboard_IsKeyPressed(KEY_M) && Keyboard_IsKeyPressed(KEY_O) && Keyboard_IsKeyPressed(KEY_5))
+	if (!g_Debug && Keyboard_IsKeyPressed(KEY_M) && Keyboard_IsKeyPressed(KEY_O) && Keyboard_IsKeyPressed(KEY_5))
+	{
+		PlaySFX(SFX_DEBUG);
 		g_Debug = TRUE;
+	}
 
 	if (g_Player.State == PLAYER_STATE_ACTION)
 	{
@@ -628,10 +621,11 @@ void updateSwitchTimer()
 // Répondre au téléphone
 void activatePhone(u8 xP, u8 yP, bool bPhone)
 {
-	StopMusic();
-
 	if (bPhone)
 	{
+		StopMusic();
+		PlaySFX(SFX_PHONE_PICK);
+
 		// Arrêt de l'animation
 		stopAnimationInstance(&g_PhoneAnimation);
 		setTile(xP, yP, TILE_PHONE);
@@ -684,7 +678,7 @@ void lightRoom(bool bActivate)
 
 	for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 	{
-		struct VisibleObject *pObj = &g_VisibleObjects[i];
+		struct VisibleObject* pObj = &g_VisibleObjects[i];
 		u8 x = pObj->X;
 		u8 y = pObj->Y;
 		if (pObj->ItemCondition == ITEM_COND_LIGHT_ON)
@@ -717,7 +711,7 @@ void activateElectricity(bool bActivate)
 
 	for (u8 i = 0; i < g_ElectricWallCount; ++i)
 	{
-		struct ActiveObject *pObj = &g_ElectricWalls[i];
+		struct ActiveObject* pObj = &g_ElectricWalls[i];
 		u8 x = pObj->X;
 		u8 y = pObj->Y;
 		setTileByTileCoord(x, y, bActivate ? pObj->Tile : EMPTY_ITEM);
@@ -725,7 +719,7 @@ void activateElectricity(bool bActivate)
 
 	for (u8 i = 0; i < g_NotElectricWallCount; ++i)
 	{
-		struct ActiveObject *pObj = &g_NotElectricWalls[i];
+		struct ActiveObject* pObj = &g_NotElectricWalls[i];
 		u8 x = pObj->X;
 		u8 y = pObj->Y;
 		setTileByTileCoord(x, y, !bActivate ? pObj->Tile : EMPTY_ITEM);
@@ -736,6 +730,8 @@ void activateElectricity(bool bActivate)
 // Ouvre les placard
 void activateCupboard(u8 x, u8 y)
 {
+	PlaySFX(SFX_CLICK);
+
 	u8 gX = x / 8;
 	u8 gY = y / 8;
 	setTileByTileCoord(gX, gY, TILE_CUPBOARD_OPEN);
@@ -745,7 +741,7 @@ void activateCupboard(u8 x, u8 y)
 
 	for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 	{
-		struct VisibleObject *pObj = &g_VisibleObjects[i];
+		struct VisibleObject* pObj = &g_VisibleObjects[i];
 		if ((pObj->X == gX + 1) && (pObj->Y == gY) && (pObj->ItemCondition == ITEM_COND_CUPBOARD))
 		{
 			tile = pObj->Tile;
@@ -776,7 +772,7 @@ void activateCloset(u8 x, u8 y)
 
 	for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 	{
-		struct VisibleObject *pObj = &g_VisibleObjects[i];
+		struct VisibleObject* pObj = &g_VisibleObjects[i];
 		if ((pObj->X == gX) && (pObj->Y == gY) && (pObj->ItemCondition == ITEM_COND_CUPBOARD))
 		{
 			tile = pObj->Tile;
@@ -804,9 +800,9 @@ void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
 	if (g_VisibleObjectCount >= MAX_VISIBLE_OBJECTS)
 		return;
 
-	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
+	const struct RoomDefinition* pRoom = &g_Rooms[levelIdx];
 	u8 targetItem = g_ScreenBuffer[32 * (i + 1) + j];
-	struct VisibleObject *pObj = &g_VisibleObjects[g_VisibleObjectCount];
+	struct VisibleObject* pObj = &g_VisibleObjects[g_VisibleObjectCount];
 	pObj->X = j;
 	pObj->Y = (i + 1);
 	pObj->ItemCondition = condition;
@@ -825,8 +821,8 @@ void addElectricWall(u8 levelIdx, u8 i, u8 j)
 	if (g_ElectricWallCount >= MAX_ELECTRIC_WALL)
 		return;
 
-	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
-	struct ActiveObject *pObj = &g_ElectricWalls[g_ElectricWallCount];
+	const struct RoomDefinition* pRoom = &g_Rooms[levelIdx];
+	struct ActiveObject* pObj = &g_ElectricWalls[g_ElectricWallCount];
 	pObj->X = j;
 	pObj->Y = i;
 	pObj->Tile = TILE_ELECTRIC_WALL;
@@ -839,8 +835,8 @@ void addNotElectricWall(u8 levelIdx, u8 i, u8 j)
 	if (g_NotElectricWallCount >= MAX_NOT_ELECTRIC_WALL)
 		return;
 
-	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
-	struct ActiveObject *pObj = &g_NotElectricWalls[g_NotElectricWallCount];
+	const struct RoomDefinition* pRoom = &g_Rooms[levelIdx];
+	struct ActiveObject* pObj = &g_NotElectricWalls[g_NotElectricWallCount];
 	pObj->X = j;
 	pObj->Y = i;
 	pObj->Tile = TILE_NOT_ELECTRIC_WALL;
@@ -853,8 +849,8 @@ void addNotElectricGround(u8 levelIdx, u8 i, u8 j)
 	if (g_NotElectricWallCount >= MAX_NOT_ELECTRIC_WALL)
 		return;
 
-	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
-	struct ActiveObject *pObj = &g_NotElectricWalls[g_NotElectricWallCount];
+	const struct RoomDefinition* pRoom = &g_Rooms[levelIdx];
+	struct ActiveObject* pObj = &g_NotElectricWalls[g_NotElectricWallCount];
 	pObj->X = j;
 	pObj->Y = i;
 	pObj->Tile = TILE_NOT_ELECTRIC_GROUND;
@@ -865,6 +861,8 @@ void addNotElectricGround(u8 levelIdx, u8 i, u8 j)
 
 void startDoorAnim(u8 x, u8 y, u8 tile)
 {
+	PlaySFX(SFX_DOOR);
+
 	g_Player.canMove = FALSE;
 	// Récupérer la tuile qui est 2 haut dessus
 	if (tile == TILE_DOOR2 || tile == TILE_LOCK_DOOR2)
@@ -954,8 +952,8 @@ void displayLevel(u8 levelIdx)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 
 	// Décompression de la pièce dans le buffet en RAM
-	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
-	const u8 *pLayout = g_ScreenBuffer;
+	const struct RoomDefinition* pRoom = &g_Rooms[levelIdx];
+	const u8* pLayout = g_ScreenBuffer;
 	Pletter_Unpack(pRoom->Layout, g_ScreenBuffer);
 
 	// Dessin de la pièce ligne par ligne
@@ -994,7 +992,7 @@ void displayLevel(u8 levelIdx)
 					sX++;
 					sTile = getTileByTileCoord(sX, y);
 				}
-				struct TextCoordInstance *txt = &g_TextCoordInstances[g_TextCoordCount++];
+				struct TextCoordInstance* txt = &g_TextCoordInstances[g_TextCoordCount++];
 				txt->X = 1; //(tile == TILE_SPE_TRANSLATE_PHONE) ? 1 : x;
 				txt->Y = y;
 				txt->Key = transKey;
@@ -1150,8 +1148,8 @@ bool interact(u8 x, u8 y)
 			{
 			case TILE_ITEM_GIFT:
 			case TILE_ITEM_APPLE:
-				if (g_SecondCounter > 0)
-					g_SecondCounter -= 10;
+				if (g_SecondCounter > 30)
+					g_SecondCounter -= 30;
 				else
 					g_SecondCounter = 0;
 				break;
@@ -1160,12 +1158,13 @@ bool interact(u8 x, u8 y)
 			setTile(x, y, TILE_EMPTY);
 			for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 			{
-				struct VisibleObject *pObj = &g_VisibleObjects[i];
+				struct VisibleObject* pObj = &g_VisibleObjects[i];
 				if ((pObj->X == x / 8) && (pObj->Y == y / 8))
 				{
 					pObj->ItemCondition = ITEM_COND_DISABLED;
 				}
 			}
+			PlaySFX(SFX_CLICK);
 			return TRUE;
 		}
 	}
@@ -1173,6 +1172,7 @@ bool interact(u8 x, u8 y)
 	switch (tile)
 	{
 	case TILE_PC_CODE:
+		PlaySFX(SFX_CLICK);
 		menuEnterCode();
 		return TRUE;
 	// Téléphone
@@ -1181,20 +1181,22 @@ bool interact(u8 x, u8 y)
 	case TILE_PHONE_ANIM_TWO:
 		activatePhone(x, y, true);
 		return TRUE;
+
 	case TILE_PNJ_HEAD_DOC:
 	case TILE_PNJ_HEAD_NEO:
 	case TILE_PNJ_HEAD_ALIEN:
-
 		activatePhone(x, y, false);
 		return TRUE;
 
 	// Lumière allumée/éteinte
 	case TILE_LIGHT1:
+		PlaySFX(SFX_CLICK);
 		activateLight(!g_CurrentLightOn);
 		return TRUE;
 	case TILE_LIGHT2:
 		if (getTile(x - 8, y + 8) == TILE_CABLE)
 		{
+			PlaySFX(SFX_CLICK);
 			activateLight(!g_CurrentLightOn);
 			return TRUE;
 		}
@@ -1204,6 +1206,7 @@ bool interact(u8 x, u8 y)
 	case TILE_BROKEN_CABLE:
 		if (hasItemInInventory(TILE_ITEM_TAPE))
 		{
+			PlaySFX(SFX_CLICK);
 			removeItemFromInventory(TILE_ITEM_TAPE);
 			setTile(x, y, TILE_CABLE);
 			return TRUE;
@@ -1218,9 +1221,9 @@ bool interact(u8 x, u8 y)
 		}
 		if (hasItemInInventory(TILE_ITEM_FUSE))
 		{
+			PlaySFX(SFX_CLICK);
 			removeItemFromInventory(TILE_ITEM_FUSE);
 			activateElectricity(TRUE);
-
 			setTile(x, y, TILE_FUSEBOX_ON);
 			return TRUE;
 		}
@@ -1229,6 +1232,7 @@ bool interact(u8 x, u8 y)
 	case TILE_FUSEBOX_ON:
 		if (addItemToInventory(TILE_ITEM_FUSE))
 		{
+			PlaySFX(SFX_CLICK);
 			activateElectricity(FALSE);
 			setTile(x, y, TILE_FUSEBOX);
 			return TRUE;
@@ -1241,6 +1245,7 @@ bool interact(u8 x, u8 y)
 		{
 			return FALSE;
 		}
+		PlaySFX(SFX_CLICK);
 		moveAllManualElevators(tile);
 		return TRUE;
 
@@ -1280,6 +1285,7 @@ bool interact(u8 x, u8 y)
 	case TILE_CLOSET + 1:
 		if (hasItemInInventory(TILE_ITEM_KEY_CLOSET))
 		{
+			PlaySFX(SFX_CLICK);
 			removeItemFromInventory(TILE_ITEM_KEY_CLOSET);
 			activateCloset(x, y);
 			return TRUE;
@@ -1291,10 +1297,9 @@ bool interact(u8 x, u8 y)
 	case TILE_SWITCH_TIMER + 2:
 	case TILE_SWITCH_TIMER + 3:
 		if (g_CurrentElectricityOn && g_SwitchTimer.Timer == 0)
-		{
 			return FALSE;
-		}
 
+		PlaySFX(SFX_CLICK);
 		g_SwitchTimer.X = x;
 		g_SwitchTimer.Y = y;
 		g_SwitchTimer.Timer = MAX_SWITCH_TIMER;
@@ -1463,7 +1468,7 @@ void menuEnterCode()
 				}
 				bContinue = FALSE;
 			}
-			Print_DrawTextAt(CODE_CURSORX + 11, CODE_CURSORY + CODE_VAL_OFFSET, (const c8 *)g_SaveCodeBuffer);
+			Print_DrawTextAt(CODE_CURSORX + 11, CODE_CURSORY + CODE_VAL_OFFSET, (const c8*)g_SaveCodeBuffer);
 		}
 	}
 
@@ -1483,10 +1488,22 @@ void VDP_InterruptHandler()
 	{
 		if (g_NextMusic != g_CurrentMusic)
 		{
-			Pletter_UnpackToRAM((const void *)g_MusicTable[g_NextMusic], (void *)MUSIC_ADDRESS);
-			AKG_Init((const void *)MUSIC_ADDRESS, 0);
+			// Load music data
+			Pletter_UnpackToRAM((const void*)g_MusicTable[g_NextMusic], (void*)MUSIC_ADDRESS);
+			AKG_Init((const void*)MUSIC_ADDRESS, 0);
+
+			// Load SFX data
+			Pletter_UnpackToRAM((const void*)g_AKG_SoundFX, (void*)SFX_ADDRESS);
+			AKG_InitSFX((const void*)SFX_ADDRESS);
+
 			g_CurrentMusic = g_NextMusic;
 		}
+		if (g_NextSFX != 0xFF)
+		{
+			AKG_PlaySFX(g_NextSFX, ARKOS_CHANNEL_C, 0);
+			g_NextSFX = 0xFF;
+		}
+
 		AKG_Decode();
 	}
 }

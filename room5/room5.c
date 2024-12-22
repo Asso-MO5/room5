@@ -178,6 +178,7 @@ u8 g_CurrRoomIdx;
 
 u8 g_SpriteBuffer1[8 * 4 * 4];
 u8 g_SpriteBuffer2[8 * 4 * 4];
+u8 g_SpriteCameraNum;
 
 u8 g_SaveCodeBuffer[PLAYER_CODE_SIZE];
 
@@ -352,6 +353,9 @@ void loadData()
 
 	// Chargement des formes des sprites
 	VDP_WriteVRAM_16K(g_SprtElevator, g_SpritePatternLow + 4 * 4 * 12 * 8, sizeof(g_SprtElevator));
+
+	// Chargement des formes des sprites
+	VDP_Poke_16K(0x80, g_SpritePatternLow + 128 * 8);
 
 	// Creation des 4 sprites du personnage (leur position et leur pattern seront mis-à-jour à chaque frame dans la boucle principale)
 	VDP_SetSpriteSM1(SPT_PLAYER_HAIR, 0, 0, 0, COLOR_DARK_YELLOW);
@@ -948,6 +952,11 @@ void displayLevel(u8 levelIdx)
 	g_SwitchTimer.Timer = 0;
 	g_TextCoordCount = 0;
 
+	// Initialisation des sprites de caméra
+	g_SpriteCameraNum = 0;
+	loop(i, SPT_CAMERA_MAX)
+		VDP_HideSprite(SPT_CAMERA + i);
+
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 
@@ -1005,13 +1014,25 @@ void displayLevel(u8 levelIdx)
 				setTileByTileCoord(x, y, TILE_EMPTY);
 				themeCounter++;
 			}
-			else if (tile == TILE_SPE_LIGHT_ON ||
-							 tile == TILE_SPE_LIGHT_OFF)
+			else if (tile == TILE_SPE_LIGHT_ON || tile == TILE_SPE_LIGHT_OFF)
 			{
 				// Ne fonctionne que si les tuiles sont dans le même ordre que l'enum
 				addConditionalItem(levelIdx, i, j, tile - TILE_SPE_LIGHT_ON + ITEM_COND_LIGHT_ON);
 			}
-
+			else if (tile == TILE_CAMERA_L || tile == TILE_CAMERA_R)
+			{
+				if (g_SpriteCameraNum < SPT_CAMERA_MAX - 1)
+				{
+					u8 sx = x * 8;
+					u8 sy = y * 8;
+					if(tile == TILE_CAMERA_L)
+						sx += 3;
+					else
+						sx += 4;
+					VDP_SetSpriteSM1(SPT_CAMERA + g_SpriteCameraNum, sx, sy, 128 + 4, COLOR_LIGHT_RED);
+					g_SpriteCameraNum++;
+				}
+			}
 			else if (tile == TILE_FUSEBOX)
 			{
 				activateElectricity(FALSE);
@@ -1148,8 +1169,8 @@ bool interact(u8 x, u8 y)
 			{
 			case TILE_ITEM_GIFT:
 			case TILE_ITEM_APPLE:
-				if (g_SecondCounter > 30)
-					g_SecondCounter -= 30;
+				if (g_SecondCounter > BONUS_TIME)
+					g_SecondCounter -= BONUS_TIME;
 				else
 					g_SecondCounter = 0;
 				break;
@@ -1390,7 +1411,6 @@ void menuLangSelect()
 // Menu de saisi d'un code de sauvegarde
 void menuEnterCode()
 {
-
 	VDP_DisableSpritesFrom(0);
 	Pletter_UnpackToVRAM(g_Tiles_Patterns, g_ScreenPatternLow);
 
@@ -1600,6 +1620,9 @@ void main()
 			updateSwitchTimer();
 
 			updateTileAnimations();
+
+			loop(i, g_SpriteCameraNum)
+				VDP_SetSpritePattern(SPT_CAMERA + i, (g_CurrentElectricityOn && g_FrameCounter & 0b00010000) ? 128 : 128 + 4);
 		}
 		// Mise à jour du personnage
 		updatePlayer();

@@ -23,6 +23,17 @@
 #define CODE_CURSORY 4
 #define CODE_VAL_OFFSET 8
 #define PLAYER_CODE_SIZE 16
+#define BONUS_TIME 30 // Time gained when getting a bonus
+
+// Numéro de sprite
+#define SPT_ELEVATOR 0
+#define SPT_PLAYER_HAIR 8
+#define SPT_PLAYER_SKIN 9
+#define SPT_PLAYER_CHAIR 10
+#define SPT_PLAYER_OUTLINE 11
+#define SPT_CAMERA 16
+
+#define SPT_CAMERA_MAX 8
 
 typedef bool (*animCallback)(void);
 

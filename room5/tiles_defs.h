@@ -29,6 +29,8 @@
 #define TILE_NIGHT_LIGHT 44
 #define TILE_ALPHABET_ONE 209
 #define TILE_MANUAL_ELEVATOR 104
+#define TILE_CAMERA_L 51
+#define TILE_CAMERA_R 52
 
 // placard en anglais
 #define TILE_CUPBOARD 67
@@ -74,13 +76,6 @@
 #define TILE_SPE_TRANSLATE 115
 #define TILE_NUM_ZERO 208
 #define TILE_SPE_TRANSLATE_PHONE 116
-
-// Numéro de sprite
-#define SPT_PLAYER_HAIR 8
-#define SPT_PLAYER_SKIN 9
-#define SPT_PLAYER_CHAIR 10
-#define SPT_PLAYER_OUTLINE 11
-#define SPT_ELEVATOR 0
 
 // UI
 #define SPT_CURSOR 52

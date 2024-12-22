@@ -1,9 +1,10 @@
+#include "msxgl.h"
+#include "room5.h"
 #include "elevator.h"
 #include "tiles.h"
 #include "tiles_defs.h"
 #include "color.h"
 #include "objects.h"
-#include "msxgl.h"
 
 //=============================================================================
 // DEFINITIONS

@@ -159,10 +159,31 @@ const struct TileAnimation g_PhoneAnimation =
 // Liste des animations
 const u8* const g_MusicTable[MUSIC_MAX] = {g_AKG_MusicMain, g_AKG_MusicPhone, g_AKG_MusicEmpty};
 
+// Palette de couleur pour le MSX2
+const u16 g_CustomPalette[15] =
+{
+	RGB16_From32B(0x010121), // 1
+	RGB16_From32B(0x3EB849), // 2
+	RGB16_From32B(0x74D07D), // 3
+	RGB16_From32B(0x5955E0), // 4
+	RGB16_From32B(0x8076F1), // 5
+	RGB16_From32B(0xB95E51), // 6
+	RGB16_From32B(0x65DBEF), // 7
+	RGB16_From32B(0xDB6559), // 8
+	RGB16_From32B(0xFF897D), // 9
+	RGB16_From32B(0xCCC35E), // 10
+	RGB16_From32B(0xDED087), // 11
+	RGB16_From32B(0x3AA241), // 12
+	RGB16_From32B(0xB766B5), // 13
+	RGB16_From32B(0xCCCCCC), // 14
+	RGB16_From32B(0xFFFFFF), // 15
+};
+
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
 //=============================================================================
 
+u8 g_VersionVDP;
 volatile bool g_vSync = TRUE;
 bool g_isNTSC = TRUE;
 u8 g_frameVSyncCounter = 0;
@@ -380,6 +401,7 @@ void displayTextByMode(u8 mode)
 		}
 	}
 }
+
 //.............................................................................
 //
 //  GESTION DU JOUEUR
@@ -397,6 +419,16 @@ void initPlayer(u8 x, u8 y)
 	g_Player.InAir = TRUE;
 	g_Player.isLeft = FALSE;
 	g_Player.canMove = TRUE;
+}
+
+//-----------------------------------------------------------------------------
+// Gerer la fin d'un saut
+void stopFalling()
+{
+	if (g_Player.VelocityY > 2)
+		PlaySFX(SFX_LAND);
+
+	g_Player.VelocityY = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -516,15 +548,9 @@ void updatePlayer()
 			bFalling = FALSE;
 
 		if (!bCollide) // Application du déplacement si aucune collision n'est détectée
-		{
 			g_Player.X = xTemp;
-			// VDP_SetColor(COLOR_BLACK);
-		}
-		else
-		{
-			g_Player.VelocityY = 0;
-			// VDP_SetColor(COLOR_DARK_RED);
-		}
+		else if (!bFalling) // + bCollide
+			stopFalling();
 
 		bool onElevator = FALSE;
 
@@ -533,18 +559,16 @@ void updatePlayer()
 			onElevator = isOnElevator(&g_Player.X, &g_Player.Y);
 
 			if (onElevator)
-			{
 				bFalling = FALSE;
-			}
 		}
 
 		if (onElevator)
 		{
-			g_Player.VelocityY = 0;
+			stopFalling();
 		}
 		else if (bFalling)
 		{
-			if (g_Player.VelocityY < 8)
+			if ((g_Player.VelocityY < 7) && ((g_FrameCounter & 0x03) == 0))
 				g_Player.VelocityY++;
 
 			g_Player.Y = yTemp + g_Player.VelocityY;
@@ -552,12 +576,12 @@ void updatePlayer()
 		}
 		else
 		{
-			g_Player.VelocityY = 0;
+			stopFalling();
 			g_Player.Y &= 0b11111000;
 		}
 	}
 
-	// Activation des tests
+	// Tests
 	if (!g_Test && Keyboard_IsKeyPressed(KEY_M) && Keyboard_IsKeyPressed(KEY_O) && Keyboard_IsKeyPressed(KEY_5))
 	{
 		PlaySFX(SFX_TEST);
@@ -618,8 +642,8 @@ void updateSwitchTimer()
 	{
 		g_SwitchTimer.Timer--;
 
-		if ((g_SwitchTimer.Timer & 0x0F) == 0)
-			PlaySFX(g_SwitchTimer.Timer & 0x10 ? SFX_TIC : SFX_TAC);
+		if ((g_SwitchTimer.Timer & 0x07) == 0)
+			PlaySFX(g_SwitchTimer.Timer & 0x08 ? SFX_TIC : SFX_TAC);
 
 		setTile(g_SwitchTimer.X, g_SwitchTimer.Y, TILE_SWITCH_TIMER + 3 - g_SwitchTimer.Timer / 32);
 		if (g_SwitchTimer.Timer == 0)
@@ -649,7 +673,8 @@ void activatePhone(u8 xP, u8 yP, bool bPhone)
 		setTile(xP, yP, TILE_PHONE);
 		setTile(xP, yP - 8, TILE_EMPTY);
 	}
-	// Else = les fins
+	else
+		PlaySFX(SFX_SPEAK);
 
 	// Afficher le texte
 	VDP_FillVRAM_16K((u8)(COLOR_WHITE << 4), g_ScreenColorLow + 152 / 8, 8);
@@ -1043,7 +1068,7 @@ void displayLevel(u8 levelIdx)
 						sx += 3;
 					else
 						sx += 4;
-					VDP_SetSpriteSM1(SPT_CAMERA + g_SpriteCameraNum, sx, sy, 128 + 4, COLOR_LIGHT_RED);
+					VDP_SetSpriteSM1(SPT_CAMERA + g_SpriteCameraNum, sx, sy, (u8)(128 + 4), COLOR_LIGHT_RED);
 					g_SpriteCameraNum++;
 				}
 			}
@@ -1199,7 +1224,7 @@ bool interact(u8 x, u8 y)
 					pObj->ItemCondition = ITEM_COND_DISABLED;
 				}
 			}
-			PlaySFX(SFX_CLICK);
+			PlaySFX(SFX_LOOT);
 			return TRUE;
 		}
 	}
@@ -1394,6 +1419,7 @@ void menuLangSelect()
 		waitVSync();
 		if (isInputPushed(INPUT_UP))
 		{
+			PlaySFX(SFX_TIC);
 			setTileByTileCoord(LANG_CURSORX, LANG_CURSORY + g_Language, TILE_EMPTY);
 			if (g_Language == 0)
 				g_Language = LANG_MAX - 1;
@@ -1404,6 +1430,7 @@ void menuLangSelect()
 		}
 		else if (isInputPushed(INPUT_DOWN))
 		{
+			PlaySFX(SFX_TAC);
 			setTileByTileCoord(LANG_CURSORX, LANG_CURSORY + g_Language, TILE_EMPTY);
 			if (g_Language == LANG_MAX - 1)
 				g_Language = 0;
@@ -1414,6 +1441,7 @@ void menuLangSelect()
 		}
 		else if (isInputPushed(INPUT_BUTTON_A))
 		{
+			PlaySFX(SFX_CLICK);
 			Loc_SetLanguage(g_Language);
 			break;
 		}
@@ -1590,6 +1618,18 @@ void main()
 {
 	g_isNTSC = !(g_VersionROM & 0x80);
 
+	// Get VDP version
+	if (Keyboard_IsKeyPressed(KEY_1))
+		g_VersionVDP = VDP_VERSION_TMS9918A;
+	else if (Keyboard_IsKeyPressed(KEY_2))
+		g_VersionVDP = VDP_VERSION_V9938;
+	else
+		g_VersionVDP = VDP_GetVersion();
+
+	// Initialize palette
+	if (g_VersionVDP > VDP_VERSION_TMS9918A)
+		VDP_SetPalette((u8*)g_CustomPalette);
+
 	// Initialisation de la table de localisation
 	// Key click du MSX
 	Bios_SetKeyClick(FALSE);
@@ -1605,11 +1645,8 @@ void main()
 	VDP_ClearVRAM();
 	VDP_EnableVBlank(TRUE);
 
-	////////////////////////////////////////////////////////////////////
-	// PlayMusic(MUSIC_MAIN);
-	// while (1)
-	// 	waitVSync();
-	////////////////////////////////////////////////////////////////////
+	// Joue une musique vide pour permettre de jouer les sons
+	PlayMusic(MUSIC_EMPTY);
 
 	// === SAVE ===
 	SaveInit();

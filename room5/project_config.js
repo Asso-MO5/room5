@@ -81,7 +81,7 @@ LibModules = [
 //   - 0        MSX0
 //   - TR       MSX turbo R
 //   - 3        MSX3 (reserved)
-Machine = '1'
+Machine = "12"
 
 //-- Target program format (string)
 //   - BIN              .bin    BASIC binary program (starting at 8000h)

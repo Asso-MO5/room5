@@ -18,15 +18,17 @@ enum MUSIC_ID
 
 enum SFX_ID
 {
-	SFX_1 = 0,
+	SFX_CLICK = 0,
 	SFX_PHONE_RING,
 	SFX_PHONE_PICK,
-	SFX_4,
-	SFX_5,
-	SFX_CLICK,
-	SFX_DEBUG,
-	SFX_8,
+	SFX_UNLOCK,
+	SFX_TIC,
+	SFX_TAC,
+	SFX_TEST,
+	SFX_CABINET,
 	SFX_DOOR,
+	SFX_LAND,
+	SFX_MAX,
 };
 
 // Set the new music to be player

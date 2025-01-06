@@ -111,6 +111,9 @@ extern const u8 g_Tiles_Colors[];
 // #include "data/level/level031.h"
 // #include "data/level/level032.h"
 
+// Test SFX
+const u8 g_TestSFX[SFX_MAX] = { KEY_A, KEY_Z, KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P };
+
 // Liste des frames d'animation du personnage
 const u8 g_PlayerFramesMove[] = {1, 2, 3, 4};
 const u8 g_PlayerFramesAction[] = {5, 6, 7, 8, 9, 10, 9, 11};
@@ -160,8 +163,6 @@ const u8* const g_MusicTable[MUSIC_MAX] = {g_AKG_MusicMain, g_AKG_MusicPhone, g_
 // VARIABLES GLOBALES (alloué en RAM)
 //=============================================================================
 
-bool g_Debug = FALSE;
-
 volatile bool g_vSync = TRUE;
 bool g_isNTSC = TRUE;
 u8 g_frameVSyncCounter = 0;
@@ -205,6 +206,7 @@ struct ActiveObject g_NotElectricWalls[MAX_NOT_ELECTRIC_WALL];
 
 // Compte de RESET
 u8 g_ResetCount = 0;
+bool g_Test = FALSE;
 
 // Switch minuteur
 struct SwitchTimer g_SwitchTimer;
@@ -401,13 +403,6 @@ void initPlayer(u8 x, u8 y)
 // Mise à jour du personnage
 void updatePlayer()
 {
-	// Activation des options de debug avec les boutons M+O+5
-	if (!g_Debug && Keyboard_IsKeyPressed(KEY_M) && Keyboard_IsKeyPressed(KEY_O) && Keyboard_IsKeyPressed(KEY_5))
-	{
-		PlaySFX(SFX_DEBUG);
-		g_Debug = TRUE;
-	}
-
 	if (g_Player.State == PLAYER_STATE_ACTION)
 	{
 		if (g_FrameCounter == 2 * 8)
@@ -425,18 +420,18 @@ void updatePlayer()
 			}
 		}
 	}
-	else if (g_Debug && Keyboard_IsKeyPressed(KEY_CTRL)) // Déplacement de debug (sans collision ni gravité)
+	else if (g_Test && Keyboard_IsKeyPressed(KEY_CTRL)) // Test
 	{
 		if (Keyboard_IsKeyPushed(KEY_SPACE))
 			displayLevel(g_Rooms[g_CurrRoomIdx].NextLvlIdx);
 		else if (Keyboard_IsKeyPushed(KEY_1))
-			displayLevel(28); // Fin - Hospital
+			displayLevel(28);
 		else if (Keyboard_IsKeyPushed(KEY_2))
-			displayLevel(29); // Fin - Alien
+			displayLevel(29);
 		else if (Keyboard_IsKeyPushed(KEY_3))
-			displayLevel(30); // Fin - Matrix
+			displayLevel(30);
 		else if (Keyboard_IsKeyPushed(KEY_0))
-			displayLevel(0); // Page d'acceuil
+			displayLevel(0);
 
 		if (Keyboard_IsKeyPressed(KEY_LEFT))
 			g_Player.X--;
@@ -448,6 +443,15 @@ void updatePlayer()
 			g_Player.Y++;
 
 		g_Player.VelocityY = 0;
+
+		loop(i, SFX_MAX)
+		{
+			if (Keyboard_IsKeyPushed(g_TestSFX[i]))
+			{
+				PlaySFX(i);
+				break;
+			}
+		}
 	}
 	else if (g_Player.canMove)
 	{
@@ -553,6 +557,13 @@ void updatePlayer()
 		}
 	}
 
+	// Activation des tests
+	if (!g_Test && Keyboard_IsKeyPressed(KEY_M) && Keyboard_IsKeyPressed(KEY_O) && Keyboard_IsKeyPressed(KEY_5))
+	{
+		PlaySFX(SFX_TEST);
+		g_Test = TRUE;
+	}
+
 	// Calcul de la frame d'animation à jouer en fonction de l'état du joueur
 	u8 baseNumPattern = 0;
 	switch (g_Player.State)
@@ -606,6 +617,9 @@ void updateSwitchTimer()
 	if (g_SwitchTimer.Timer > 0)
 	{
 		g_SwitchTimer.Timer--;
+
+		if ((g_SwitchTimer.Timer & 0x0F) == 0)
+			PlaySFX(g_SwitchTimer.Timer & 0x10 ? SFX_TIC : SFX_TAC);
 
 		setTile(g_SwitchTimer.X, g_SwitchTimer.Y, TILE_SWITCH_TIMER + 3 - g_SwitchTimer.Timer / 32);
 		if (g_SwitchTimer.Timer == 0)
@@ -734,7 +748,7 @@ void activateElectricity(bool bActivate)
 // Ouvre les placard
 void activateCupboard(u8 x, u8 y)
 {
-	PlaySFX(SFX_CLICK);
+	PlaySFX(SFX_CABINET);
 
 	u8 gX = x / 8;
 	u8 gY = y / 8;
@@ -1274,6 +1288,7 @@ bool interact(u8 x, u8 y)
 	case TILE_LOCK_DOOR2:
 		if (hasItemInInventory(TILE_ITEM_KEY_DOOR))
 		{
+			PlaySFX(SFX_UNLOCK);
 			removeItemFromInventory(TILE_ITEM_KEY_DOOR);
 			startDoorAnim(x, y, tile);
 			return TRUE;
@@ -1306,7 +1321,7 @@ bool interact(u8 x, u8 y)
 	case TILE_CLOSET + 1:
 		if (hasItemInInventory(TILE_ITEM_KEY_CLOSET))
 		{
-			PlaySFX(SFX_CLICK);
+			PlaySFX(SFX_UNLOCK);
 			removeItemFromInventory(TILE_ITEM_KEY_CLOSET);
 			activateCloset(x, y);
 			return TRUE;
@@ -1441,11 +1456,13 @@ void menuEnterCode()
 		waitVSync();
 		if (isInputPushed(INPUT_BUTTON_B))
 		{
+			PlaySFX(SFX_PHONE_PICK);
 			bContinue = FALSE;
 		}
 
 		if (isInputPushed(INPUT_UP))
 		{
+			PlaySFX(SFX_TIC);
 			setTileByTileCoord(CODE_CURSORX, charIndex + CODE_CURSORY, TILE_EMPTY);
 			if (charIndex == 0)
 				charIndex = 15;
@@ -1455,6 +1472,7 @@ void menuEnterCode()
 		}
 		else if (isInputPushed(INPUT_DOWN))
 		{
+			PlaySFX(SFX_TAC);
 			setTileByTileCoord(CODE_CURSORX, charIndex + CODE_CURSORY, TILE_EMPTY);
 			if (charIndex == 15)
 				charIndex = 0;
@@ -1464,6 +1482,7 @@ void menuEnterCode()
 		}
 		if (isInputPushed(INPUT_BUTTON_A))
 		{
+			PlaySFX(SFX_CLICK);
 			u8 i = 0;
 			for (; i < PLAYER_CODE_SIZE; i++)
 			{
@@ -1479,13 +1498,15 @@ void menuEnterCode()
 				struct SaveData save;
 				if (SaveDecode(g_SaveCodeBuffer, &save))
 				{
+					PlaySFX(SFX_UNLOCK);
 					numDestLevel = save.currentLevel;
 					g_SecondCounter = save.currentTime;
 					g_DoorThemeCount[0] = save.themes[0];
 					g_DoorThemeCount[1] = save.themes[1];
 					g_DoorThemeCount[2] = save.themes[2];
-					// TODO vérifier le code, si pas bon,
 				}
+				else
+					PlaySFX(SFX_PHONE_PICK);
 				bContinue = FALSE;
 			}
 			Print_DrawTextAt(CODE_CURSORX + 11, CODE_CURSORY + CODE_VAL_OFFSET, (const c8*)g_SaveCodeBuffer);

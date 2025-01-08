@@ -32,8 +32,10 @@
 #define SPT_PLAYER_CHAIR 10
 #define SPT_PLAYER_OUTLINE 11
 #define SPT_CAMERA 16
+#define SPT_INVENTORY 28 // 28-31
 
 #define SPT_CAMERA_MAX 8
+#define SPT_INVENTORY_Y 176
 
 typedef bool (*animCallback)(void);
 

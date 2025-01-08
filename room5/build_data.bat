@@ -19,6 +19,10 @@ echo -- Export player sprite data...
 	-l i16 0 8 1 1 0xDB6559 ^
 	-l i16 0 0 1 1 0x010101
 
+:: Export inventory sprite
+echo -- Export inventory sprite data...
+%MSXtk%\MSXimg.exe assets\inventory.png -out %Dest%/sprt_inventory.h -pos 0 0 -size 16 16 -num 4 1 -name g_SprtInventory -mode sprt -l i16 0 0 1 1 0xFFFFFF
+
 :: Export environment sprite
 echo -- Export environment sprite data...
 %MSXtk%\MSXimg.exe assets\sprt_enviro.png -out %Dest%/sprt_elevator.h -pos 0 0 -size 16 16 -num 2 1 -name g_SprtElevator -mode sprt -l i16 0 0 1 1 0xFFFFFF

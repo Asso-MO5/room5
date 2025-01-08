@@ -66,6 +66,7 @@ extern const u8 g_Tiles_Colors[];
 
 // Données des sprites du joueur
 #include "data/sprt_player.h"
+#include "data/sprt_inventory.h"
 
 // Données des polices de character
 #include "data/font_jp.h"
@@ -374,17 +375,25 @@ void loadData()
 	applyLanguage();
 	// initFont();
 
-	// Chargement des formes des sprites
-	VDP_WriteVRAM_16K(g_SprtElevator, g_SpritePatternLow + 4 * 4 * 12 * 8, sizeof(g_SprtElevator));
+	// Chargement des patterns de sprites de l'inventaire
+	VDP_WriteVRAM_16K(g_SprtInventory, g_SpritePatternLow + 64 * 8, sizeof(g_SprtInventory));
 
-	// Chargement des formes des sprites
+	// Création du pattern de sprite des caméras
 	VDP_Poke_16K(0x80, g_SpritePatternLow + 128 * 8);
+
+	// Chargement des patterns de sprites des ascenseurs
+	VDP_WriteVRAM_16K(g_SprtElevator, g_SpritePatternLow + 192 * 8, sizeof(g_SprtElevator));
 
 	// Creation des 4 sprites du personnage (leur position et leur pattern seront mis-à-jour à chaque frame dans la boucle principale)
 	VDP_SetSpriteSM1(SPT_PLAYER_HAIR, 0, 0, 0, COLOR_DARK_YELLOW);
 	VDP_SetSpriteSM1(SPT_PLAYER_SKIN, 0, 0, 4, COLOR_WHITE);
 	VDP_SetSpriteSM1(SPT_PLAYER_CHAIR, 0, 0, 8, COLOR_DARK_RED);
 	VDP_SetSpriteSM1(SPT_PLAYER_OUTLINE, 0, 0, 12, COLOR_BLACK);
+
+	// Initialisation des sprites de l'inventaire
+	u8 inventorySprt[4] = { 64, 68, 68, 72 };
+	loop(i, 4)
+		VDP_SetSpriteSM1(SPT_INVENTORY + i, INVENTORY_DISPLAY_X - 2 + 16 * i, VDP_SPRITE_HIDE, inventorySprt[i], COLOR_WHITE);
 }
 
 //-----------------------------------------------------------------------------
@@ -995,6 +1004,13 @@ void displayLevel(u8 levelIdx)
 	g_SpriteCameraNum = 0;
 	loop(i, SPT_CAMERA_MAX)
 		VDP_HideSprite(SPT_CAMERA + i);
+
+	// Initialisation des sprites de l'inventaire
+	{
+		u8 sprtY = ((levelIdx < 1) || (levelIdx > 27)) ? VDP_SPRITE_HIDE : SPT_INVENTORY_Y;
+		loop(i, 4)
+			VDP_SetSpritePositionY(SPT_INVENTORY + i, sprtY);
+	}
 
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);

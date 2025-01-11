@@ -33,6 +33,8 @@ enum SFX_ID
 	SFX_MAX,
 };
 
+#define SFX_LOCK SFX_TAC
+
 // Set the new music to be player
 inline void PlayMusic(u8 id) { g_NextMusic = id; }
 

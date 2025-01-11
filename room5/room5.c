@@ -27,6 +27,8 @@
 #include "save.h"
 #include "music.h"
 #include "control.h"
+#include "math.h"
+#include "color.h"
 
 //=============================================================================
 // DEFINITIONS
@@ -163,22 +165,70 @@ const u8* const g_MusicTable[MUSIC_MAX] = {g_AKG_MusicMain, g_AKG_MusicPhone, g_
 // Palette de couleur pour le MSX2
 const u16 g_CustomPalette[15] =
 {
-	RGB16_From32B(0x010121), // 1
-	RGB16_From32B(0x3EB849), // 2
-	RGB16_From32B(0x74D07D), // 3
-	RGB16_From32B(0x5955E0), // 4
-	RGB16_From32B(0x8076F1), // 5
-	RGB16_From32B(0xB95E51), // 6
-	RGB16_From32B(0x65DBEF), // 7
-	RGB16_From32B(0xDB6559), // 8
-	RGB16_From32B(0xFF897D), // 9
-	RGB16_From32B(0xCCC35E), // 10
-	RGB16_From32B(0xDED087), // 11
-	RGB16_From32B(0x3AA241), // 12
-	RGB16_From32B(0xB766B5), // 13
-	RGB16_From32B(0xCCCCCC), // 14
-	RGB16_From32B(0xFFFFFF), // 15
+	RGB16(0,0,0), // 1
+	RGB16(3,2,6), // 2
+	RGB16(0,0,0), // 3
+	RGB16(1,1,5), // 4
+	RGB16(2,2,6), // 5
+	RGB16(3,3,7), // 6
+	RGB16(5,5,7), // 7
+	RGB16(6,3,2), // 8
+	RGB16(7,3,3), // 9
+	RGB16(6,6,2), // 10
+	RGB16(7,7,4), // 11
+	RGB16(3,1,5), // 12
+	RGB16(5,5,2), // 13
+	RGB16(7,6,6), // 14
+	RGB16(7,7,7), // 15
 };
+
+// Table de correspondance des couleurs
+const u8 g_ColorIndex_MSX1[COLOR_ID_MAX] =
+{
+	COLOR_BLACK,		// COLOR_BACKGROUND,
+	COLOR_DARK_BLUE,	// COLOR_SCENE_NIGHT_DARK,
+	COLOR_DARK_BLUE,	// COLOR_PLAYER_NIGHT_DARK,
+	COLOR_LIGHT_BLUE,	// COLOR_SCENE_NIGHT_MED,
+	COLOR_LIGHT_BLUE,	// COLOR_PLAYER_NIGHT_MED,
+	COLOR_CYAN,			// COLOR_PLAYER_NIGHT_LIGHT,
+	COLOR_MEDIUM_RED,	// COLOR_PLAYER_DAY_DARK,
+	COLOR_LIGHT_RED,	// COLOR_CAMERA,
+	COLOR_LIGHT_RED,	// COLOR_NIGHTLIGHT_ON,
+	COLOR_DARK_YELLOW,	// COLOR_SCENE_DAY_DARK,
+	COLOR_LIGHT_YELLOW,	// COLOR_SCENE_DAY_MED,
+	COLOR_LIGHT_YELLOW,	// COLOR_PLAYER_DAY_MED,
+	COLOR_WHITE,		// COLOR_TEXT,
+	COLOR_WHITE,		// COLOR_PLAYER_DAY_LIGHT
+	COLOR_CYAN,			// COLOR_NIGHTLIGHT_OFF,
+	COLOR_WHITE,		// COLOR_ELEVATOR_ON,
+	COLOR_CYAN,			// COLOR_ELEVATOR_OFF,
+};
+
+// Table de correspondance des couleurs
+const u8 g_ColorIndex_MSX2[COLOR_ID_MAX] =
+{
+	1,	// COLOR_BACKGROUND,
+	4,	// COLOR_SCENE_NIGHT_DARK,
+	12,	// COLOR_PLAYER_NIGHT_DARK,
+	5,	// COLOR_SCENE_NIGHT_MED,
+	2,	// COLOR_PLAYER_NIGHT_MED,
+	7,	// COLOR_PLAYER_NIGHT_LIGHT,
+	8,	// COLOR_PLAYER_DAY_DARK,
+	9,	// COLOR_CAMERA,
+	9,	// COLOR_NIGHTLIGHT_ON,
+	10,	// COLOR_SCENE_DAY_DARK,
+	11,	// COLOR_SCENE_DAY_MED,
+	13,	// COLOR_PLAYER_DAY_MED,
+	15,	// COLOR_TEXT,
+	14,	// COLOR_PLAYER_DAY_LIGHT
+	6,	// COLOR_NIGHTLIGHT_OFF,
+	15,	// COLOR_ELEVATOR_ON,
+	6,	// COLOR_ELEVATOR_OFF,
+};
+
+// Offset de position pour les interactions
+const VectorI8 g_LeftInteractOffset[4] = { {7, 4}, {7, 12}, {-1, 4}, {-1, 12} };
+const VectorI8 g_RightInteractOffset[4] = { {8, 4}, {8, 12}, {16, 4}, {16, 12} };
 
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
@@ -241,7 +291,8 @@ u8 g_TextCoordCount = 0;
 
 // Index de la langue sélectionnée
 u8 g_Language = LANG_EN;
-
+// Table d'index des couleurs
+const u8* g_CurrentColorIdx = g_ColorIndex_MSX1;
 // Current music index
 u8 g_CurrentMusic = 0xFF;
 u8 g_NextMusic = 0xFF;
@@ -250,6 +301,13 @@ u8 g_NextSFX = 0xFF;
 //=============================================================================
 // FONCTIONS
 //=============================================================================
+
+//-----------------------------------------------------------------------------
+// Récupérer la couleur en fonction de son index
+inline u8 getColor(u8 index)
+{
+	return g_CurrentColorIdx[index];
+} 
 
 //-----------------------------------------------------------------------------
 // Afficher un text à une position donnée
@@ -385,15 +443,15 @@ void loadData()
 	VDP_WriteVRAM_16K(g_SprtElevator, g_SpritePatternLow + 192 * 8, sizeof(g_SprtElevator));
 
 	// Creation des 4 sprites du personnage (leur position et leur pattern seront mis-à-jour à chaque frame dans la boucle principale)
-	VDP_SetSpriteSM1(SPT_PLAYER_HAIR, 0, 0, 0, COLOR_DARK_YELLOW);
-	VDP_SetSpriteSM1(SPT_PLAYER_SKIN, 0, 0, 4, COLOR_WHITE);
-	VDP_SetSpriteSM1(SPT_PLAYER_CHAIR, 0, 0, 8, COLOR_DARK_RED);
-	VDP_SetSpriteSM1(SPT_PLAYER_OUTLINE, 0, 0, 12, COLOR_BLACK);
+	VDP_SetSpriteSM1(SPT_PLAYER_HAIR, 0, 0, 0, 0);
+	VDP_SetSpriteSM1(SPT_PLAYER_SKIN, 0, 0, 4, 0);
+	VDP_SetSpriteSM1(SPT_PLAYER_CHAIR, 0, 0, 8, 0);
+	VDP_SetSpriteSM1(SPT_PLAYER_OUTLINE, 0, 0, 12, getColor(COLOR_BACKGROUND));
 
 	// Initialisation des sprites de l'inventaire
 	u8 inventorySprt[4] = { 64, 68, 68, 72 };
 	loop(i, 4)
-		VDP_SetSpriteSM1(SPT_INVENTORY + i, INVENTORY_DISPLAY_X - 2 + 16 * i, VDP_SPRITE_HIDE, inventorySprt[i], COLOR_WHITE);
+		VDP_SetSpriteSM1(SPT_INVENTORY + i, INVENTORY_DISPLAY_X - 2 + 16 * i, VDP_SPRITE_HIDE, inventorySprt[i], getColor(COLOR_TEXT));
 }
 
 //-----------------------------------------------------------------------------
@@ -448,16 +506,16 @@ void updatePlayer()
 	{
 		if (g_FrameCounter == 2 * 8)
 		{
-			i8 interactOffset = g_Player.isLeft ? 4 : 12;
+			const VectorI8* interactOffset = g_Player.isLeft ? g_LeftInteractOffset : g_RightInteractOffset;
 			// Interaction au milieu du personnage
-			if (interact(g_Player.X + interactOffset, g_Player.Y + 4) || interact(g_Player.X + interactOffset, g_Player.Y + 12))
+			g_Player.State = PLAYER_STATE_IDLE;
+			loop(i, 4)
 			{
-				g_Player.State = PLAYER_STATE_IDLE;
-			}
-			else
-			{
-				// TODO mettre animation haussement épaule
-				g_Player.State = PLAYER_STATE_IDLE;
+				if (interact(g_Player.X + interactOffset[i].x, g_Player.Y + interactOffset[i].y))
+				{
+					g_Player.State = PLAYER_STATE_IDLE;
+					break;
+				}
 			}
 		}
 	}
@@ -686,7 +744,7 @@ void activatePhone(u8 xP, u8 yP, bool bPhone)
 		PlaySFX(SFX_SPEAK);
 
 	// Afficher le texte
-	VDP_FillVRAM_16K((u8)(COLOR_WHITE << 4), g_ScreenColorLow + 152 / 8, 8);
+	VDP_FillVRAM_16K(COLOR_MERGE(getColor(COLOR_TEXT), getColor(COLOR_BACKGROUND)), g_ScreenColorLow + 152 / 8, 8);
 
 	// Déverrouillage des portes
 	for (u8 y = 0; y < 24; ++y)
@@ -722,11 +780,11 @@ void lightRoom(bool bActivate)
 	// VDP_FillVRAM_16K(bActivate ? 0xf1 : 0x71, g_ScreenColorLow + (184 / 8), 1);
 
 	// Change la couleur du personnage
-	VDP_SetSpriteColorSM1(SPT_PLAYER_HAIR, bActivate ? COLOR_LIGHT_YELLOW : COLOR_LIGHT_BLUE);
-	VDP_SetSpriteColorSM1(SPT_PLAYER_SKIN, bActivate ? COLOR_WHITE : COLOR_CYAN);
-	VDP_SetSpriteColorSM1(SPT_PLAYER_CHAIR, bActivate ? COLOR_MEDIUM_RED : COLOR_DARK_BLUE);
+	VDP_SetSpriteColorSM1(SPT_PLAYER_HAIR, bActivate ? getColor(COLOR_PLAYER_DAY_MED) : getColor(COLOR_PLAYER_NIGHT_MED));
+	VDP_SetSpriteColorSM1(SPT_PLAYER_SKIN, bActivate ? getColor(COLOR_PLAYER_DAY_LIGHT) : getColor(COLOR_PLAYER_NIGHT_LIGHT));
+	VDP_SetSpriteColorSM1(SPT_PLAYER_CHAIR, bActivate ? getColor(COLOR_PLAYER_DAY_DARK) : getColor(COLOR_PLAYER_NIGHT_DARK));
 
-	changeAllElevatorsColor(bActivate ? COLOR_WHITE : COLOR_CYAN);
+	changeAllElevatorsColor(bActivate ? getColor(COLOR_ELEVATOR_ON) : getColor(COLOR_ELEVATOR_OFF));
 
 	for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 	{
@@ -749,7 +807,7 @@ void lightRoom(bool bActivate)
 void activateLight(bool bActivate)
 {
 	g_CurrentLightOn = bActivate; // Enregistrement de l’état de la lumière
-	VDP_Poke_16K(bActivate ? COLOR_LIGHT_RED << 4 : COLOR_CYAN << 4, g_ScreenColorLow + 7);
+	VDP_Poke_16K(bActivate ? COLOR_MERGE(getColor(COLOR_NIGHTLIGHT_ON), getColor(COLOR_BACKGROUND)) : COLOR_MERGE(getColor(COLOR_NIGHTLIGHT_OFF), getColor(COLOR_BACKGROUND)), g_ScreenColorLow + 7);
 	if (g_CurrentElectricityOn)
 		lightRoom(bActivate);
 }
@@ -1084,7 +1142,7 @@ void displayLevel(u8 levelIdx)
 						sx += 3;
 					else
 						sx += 4;
-					VDP_SetSpriteSM1(SPT_CAMERA + g_SpriteCameraNum, sx, sy, (u8)(128 + 4), COLOR_LIGHT_RED);
+					VDP_SetSpriteSM1(SPT_CAMERA + g_SpriteCameraNum, sx, sy, (u8)(128 + 4), getColor(COLOR_CAMERA));
 					g_SpriteCameraNum++;
 				}
 			}
@@ -1287,6 +1345,8 @@ bool interact(u8 x, u8 y)
 			setTile(x, y, TILE_CABLE);
 			return TRUE;
 		}
+		else
+			PlaySFX(SFX_LOCK);
 		return FALSE;
 
 	// Fusible et boite à fusible
@@ -1303,6 +1363,8 @@ bool interact(u8 x, u8 y)
 			setTile(x, y, TILE_FUSEBOX_ON);
 			return TRUE;
 		}
+		else
+			PlaySFX(SFX_LOCK);
 		return FALSE;
 
 	case TILE_FUSEBOX_ON:
@@ -1334,6 +1396,8 @@ bool interact(u8 x, u8 y)
 			startDoorAnim(x, y, tile);
 			return TRUE;
 		}
+		else
+			PlaySFX(SFX_LOCK);
 		return FALSE;
 
 	// Porte de sortie
@@ -1367,6 +1431,8 @@ bool interact(u8 x, u8 y)
 			activateCloset(x, y);
 			return TRUE;
 		}
+		else
+			PlaySFX(SFX_LOCK);
 		return FALSE;
 
 	case TILE_SWITCH_TIMER:
@@ -1475,7 +1541,7 @@ void menuEnterCode()
 
 	// clean screen
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
-	VDP_FillVRAM_16K(COLOR_MERGE(COLOR_WHITE, COLOR_BLACK), g_ScreenColorLow, 32);
+	VDP_FillVRAM_16K(COLOR_MERGE(getColor(COLOR_TEXT), getColor(COLOR_BACKGROUND)), g_ScreenColorLow, 32);
 
 	// Initialisation du menu
 
@@ -1644,7 +1710,10 @@ void main()
 
 	// Initialize palette
 	if (g_VersionVDP > VDP_VERSION_TMS9918A)
+	{
 		VDP_SetPalette((u8*)g_CustomPalette);
+		g_CurrentColorIdx = g_ColorIndex_MSX2;
+	}
 
 	// Initialisation de la table de localisation
 	// Key click du MSX
@@ -1657,7 +1726,7 @@ void main()
 	// Initialisation de l'affichage
 	VDP_SetMode(VDP_MODE_SCREEN1);				 // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs parmi 32 combinaisons)
 	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16); // Sprite de taille 16x16
-	VDP_SetColor(COLOR_BLACK);						 // Couleur de la bordure et de la couleur 0
+	VDP_SetColor(getColor(COLOR_BACKGROUND));						 // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();
 	VDP_EnableVBlank(TRUE);
 

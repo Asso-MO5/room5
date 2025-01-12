@@ -34,7 +34,7 @@
 // DEFINITIONS
 //=============================================================================
 
-#define DEBUG_DISPLAY_INFO			FALSE
+#define DEBUG_DISPLAY_INFO FALSE
 
 // Prototypes de fonctions
 void waitVSync();
@@ -115,7 +115,7 @@ extern const u8 g_Tiles_Colors[];
 // #include "data/level/level032.h"
 
 // Test SFX
-const u8 g_TestSFX[SFX_MAX] = { KEY_A, KEY_Z, KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P };
+const u8 g_TestSFX[SFX_MAX] = {KEY_A, KEY_Z, KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P};
 
 // Liste des frames d'animation du personnage
 const u8 g_PlayerFramesMove[] = {1, 2, 3, 4};
@@ -123,112 +123,110 @@ const u8 g_PlayerFramesAction[] = {5, 6, 7, 8, 9, 10, 9, 11};
 const u8 g_PlayerFramesFall[] = {1, 2, 3, 4};
 
 // Donnée d'animation des portes
-const u8 g_DoorAnimationTiles[] = 
-{
-	44, 11, 45, 71, 46, 15, // Frame 0
-	44, 11, 45, 71, 46, 15, // Frame 1
-	44, 47, 45, 54, 46, 55, // Frame 2
-	44, 47, 45, 54, 46, 55, // Frame 3,
-	44, 47, 45, 54, 46, 55, // Frame 4,
-	44, 47, 45, 54, 46, 55, // Frame 5,
-	44, 47, 45, 54, 46, 55, // Frame 6
+const u8 g_DoorAnimationTiles[] =
+		{
+				44, 11, 45, 71, 46, 15, // Frame 0
+				44, 11, 45, 71, 46, 15, // Frame 1
+				44, 47, 45, 54, 46, 55, // Frame 2
+				44, 47, 45, 54, 46, 55, // Frame 3,
+				44, 47, 45, 54, 46, 55, // Frame 4,
+				44, 47, 45, 54, 46, 55, // Frame 5,
+				44, 47, 45, 54, 46, 55, // Frame 6
 };
 const struct TileAnimation g_DoorAnimation =
-{
-	2,
-	3,
-	7,
-	1,
-	g_DoorAnimationTiles
-};
+		{
+				2,
+				3,
+				7,
+				1,
+				g_DoorAnimationTiles};
 
 // Donnée d'animation du téléphone
 const u8 g_PhoneAnimationTiles[] =
-{
-	18, 80, // Frame 0
-	18, 16, // Frame 1
-	19, 80, // Frame 2
-	19, 17, // Frame 3
+		{
+				18, 80, // Frame 0
+				18, 16, // Frame 1
+				19, 80, // Frame 2
+				19, 17, // Frame 3
 };
 const struct TileAnimation g_PhoneAnimation =
-{
-	1,
-	2,
-	4,
-	0,
-	g_PhoneAnimationTiles
-};
+		{
+				1,
+				2,
+				4,
+				0,
+				g_PhoneAnimationTiles};
 
 // Liste des animations
-const u8* const g_MusicTable[MUSIC_MAX] = {g_AKG_MusicMain, g_AKG_MusicPhone, g_AKG_MusicEmpty};
+const u8 *const g_MusicTable[MUSIC_MAX] = {g_AKG_MusicMain, g_AKG_MusicPhone, g_AKG_MusicEmpty};
 
 // Palette de couleur pour le MSX2
 const u16 g_CustomPalette[15] =
-{
-	RGB16(0,0,0), // 1
-	RGB16(3,2,6), // 2
-	RGB16(0,0,0), // 3
-	RGB16(1,1,5), // 4
-	RGB16(2,2,6), // 5
-	RGB16(3,3,7), // 6
-	RGB16(5,5,7), // 7
-	RGB16(6,3,2), // 8
-	RGB16(7,3,3), // 9
-	RGB16(6,6,2), // 10
-	RGB16(7,7,4), // 11
-	RGB16(3,1,5), // 12
-	RGB16(5,5,2), // 13
-	RGB16(7,6,6), // 14
-	RGB16(7,7,7), // 15
+		{
+				RGB16(0, 0, 0), // 1
+				RGB16(3, 2, 6), // 2
+				RGB16(0, 0, 0), // 3
+				RGB16(1, 1, 5), // 4
+				RGB16(2, 2, 6), // 5
+				RGB16(3, 3, 7), // 6
+				RGB16(5, 5, 7), // 7
+				RGB16(6, 3, 2), // 8
+				RGB16(7, 3, 3), // 9
+				RGB16(6, 6, 2), // 10
+				RGB16(7, 7, 4), // 11
+				RGB16(3, 1, 5), // 12
+				RGB16(5, 5, 2), // 13
+				RGB16(7, 6, 6), // 14
+				RGB16(7, 7, 7), // 15
 };
 
 // Table de correspondance des couleurs
 const u8 g_ColorIndex_MSX1[COLOR_ID_MAX] =
-{
-	COLOR_BLACK,		// COLOR_BACKGROUND,
-	COLOR_DARK_BLUE,	// COLOR_SCENE_NIGHT_DARK,
-	COLOR_DARK_BLUE,	// COLOR_PLAYER_NIGHT_DARK,
-	COLOR_LIGHT_BLUE,	// COLOR_SCENE_NIGHT_MED,
-	COLOR_LIGHT_BLUE,	// COLOR_PLAYER_NIGHT_MED,
-	COLOR_CYAN,			// COLOR_PLAYER_NIGHT_LIGHT,
-	COLOR_MEDIUM_RED,	// COLOR_PLAYER_DAY_DARK,
-	COLOR_LIGHT_RED,	// COLOR_CAMERA,
-	COLOR_LIGHT_RED,	// COLOR_NIGHTLIGHT_ON,
-	COLOR_DARK_YELLOW,	// COLOR_SCENE_DAY_DARK,
-	COLOR_LIGHT_YELLOW,	// COLOR_SCENE_DAY_MED,
-	COLOR_LIGHT_YELLOW,	// COLOR_PLAYER_DAY_MED,
-	COLOR_WHITE,		// COLOR_TEXT,
-	COLOR_WHITE,		// COLOR_PLAYER_DAY_LIGHT
-	COLOR_CYAN,			// COLOR_NIGHTLIGHT_OFF,
-	COLOR_WHITE,		// COLOR_ELEVATOR_ON,
-	COLOR_CYAN,			// COLOR_ELEVATOR_OFF,
+		{
+				COLOR_BLACK,				// COLOR_BACKGROUND,
+				COLOR_DARK_BLUE,		// COLOR_SCENE_NIGHT_DARK,
+				COLOR_DARK_BLUE,		// COLOR_PLAYER_NIGHT_DARK,
+				COLOR_LIGHT_BLUE,		// COLOR_SCENE_NIGHT_MED,
+				COLOR_LIGHT_BLUE,		// COLOR_PLAYER_NIGHT_MED,
+				COLOR_CYAN,					// COLOR_PLAYER_NIGHT_LIGHT,
+				COLOR_MEDIUM_RED,		// COLOR_PLAYER_DAY_DARK,
+				COLOR_LIGHT_RED,		// COLOR_CAMERA,
+				COLOR_LIGHT_RED,		// COLOR_NIGHTLIGHT_ON,
+				COLOR_DARK_YELLOW,	// COLOR_SCENE_DAY_DARK,
+				COLOR_LIGHT_YELLOW, // COLOR_SCENE_DAY_MED,
+				COLOR_LIGHT_YELLOW, // COLOR_PLAYER_DAY_MED,
+				COLOR_WHITE,				// COLOR_TEXT,
+				COLOR_WHITE,				// COLOR_PLAYER_DAY_LIGHT
+				COLOR_CYAN,					// COLOR_NIGHTLIGHT_OFF,
+				COLOR_WHITE,				// COLOR_ELEVATOR_ON,
+				COLOR_CYAN,					// COLOR_ELEVATOR_OFF,
 };
 
 // Table de correspondance des couleurs
 const u8 g_ColorIndex_MSX2[COLOR_ID_MAX] =
-{
-	1,	// COLOR_BACKGROUND,
-	4,	// COLOR_SCENE_NIGHT_DARK,
-	12,	// COLOR_PLAYER_NIGHT_DARK,
-	5,	// COLOR_SCENE_NIGHT_MED,
-	2,	// COLOR_PLAYER_NIGHT_MED,
-	7,	// COLOR_PLAYER_NIGHT_LIGHT,
-	8,	// COLOR_PLAYER_DAY_DARK,
-	9,	// COLOR_CAMERA,
-	9,	// COLOR_NIGHTLIGHT_ON,
-	10,	// COLOR_SCENE_DAY_DARK,
-	11,	// COLOR_SCENE_DAY_MED,
-	13,	// COLOR_PLAYER_DAY_MED,
-	15,	// COLOR_TEXT,
-	14,	// COLOR_PLAYER_DAY_LIGHT
-	6,	// COLOR_NIGHTLIGHT_OFF,
-	15,	// COLOR_ELEVATOR_ON,
-	6,	// COLOR_ELEVATOR_OFF,
+		{
+				1,	// COLOR_BACKGROUND,
+				4,	// COLOR_SCENE_NIGHT_DARK,
+				12, // COLOR_PLAYER_NIGHT_DARK,
+				5,	// COLOR_SCENE_NIGHT_MED,
+				2,	// COLOR_PLAYER_NIGHT_MED,
+				7,	// COLOR_PLAYER_NIGHT_LIGHT,
+				8,	// COLOR_PLAYER_DAY_DARK,
+				9,	// COLOR_CAMERA,
+				9,	// COLOR_NIGHTLIGHT_ON,
+				10, // COLOR_SCENE_DAY_DARK,
+				11, // COLOR_SCENE_DAY_MED,
+				13, // COLOR_PLAYER_DAY_MED,
+				15, // COLOR_TEXT,
+				14, // COLOR_PLAYER_DAY_LIGHT
+				6,	// COLOR_NIGHTLIGHT_OFF,
+				15, // COLOR_ELEVATOR_ON,
+				6,	// COLOR_ELEVATOR_OFF,
 };
 
 // Offset de position pour les interactions
-const VectorI8 g_LeftInteractOffset[4] = { {7, 4}, {7, 12}, {-1, 4}, {-1, 12} };
-const VectorI8 g_RightInteractOffset[4] = { {8, 4}, {8, 12}, {16, 4}, {16, 12} };
+const VectorI8 g_LeftInteractOffset[4] = {{7, 4}, {7, 12}, {-1, 4}, {-1, 12}};
+const VectorI8 g_RightInteractOffset[4] = {{8, 4}, {8, 12}, {16, 4}, {16, 12}};
 
 //=============================================================================
 // VARIABLES GLOBALES (alloué en RAM)
@@ -292,7 +290,7 @@ u8 g_TextCoordCount = 0;
 // Index de la langue sélectionnée
 u8 g_Language = LANG_EN;
 // Table d'index des couleurs
-const u8* g_CurrentColorIdx = g_ColorIndex_MSX1;
+const u8 *g_CurrentColorIdx = g_ColorIndex_MSX1;
 // Current music index
 u8 g_CurrentMusic = 0xFF;
 u8 g_NextMusic = 0xFF;
@@ -307,11 +305,11 @@ u8 g_NextSFX = 0xFF;
 inline u8 getColor(u8 index)
 {
 	return g_CurrentColorIdx[index];
-} 
+}
 
 //-----------------------------------------------------------------------------
 // Afficher un text à une position donnée
-void displayTextAt(u8 x, u8 y, const c8* text)
+void displayTextAt(u8 x, u8 y, const c8 *text)
 {
 	u8 startX = x;
 	while (*text != '\0')
@@ -332,11 +330,11 @@ void displayTextAt(u8 x, u8 y, const c8* text)
 
 //-----------------------------------------------------------------------------
 // Ajoute une nouvelle animation de tuiles à la position indiquée
-bool addAnimationInstance(u8 X, u8 Y, const struct TileAnimation* pAnimation, animCallback OnAnimationEnd)
+bool addAnimationInstance(u8 X, u8 Y, const struct TileAnimation *pAnimation, animCallback OnAnimationEnd)
 {
 	for (u8 i = 0; i < MAX_TILE_ANIMATION; ++i)
 	{
-		struct TileAnimationInstance* pInstance = &g_AnimationInstances[i];
+		struct TileAnimationInstance *pInstance = &g_AnimationInstances[i];
 
 		if (!pInstance->isPlaying)
 		{
@@ -356,12 +354,12 @@ bool addAnimationInstance(u8 X, u8 Y, const struct TileAnimation* pAnimation, an
 
 //-----------------------------------------------------------------------------
 //
-bool stopAnimationInstance(const struct TileAnimation* pAnimation)
+bool stopAnimationInstance(const struct TileAnimation *pAnimation)
 {
 	bool foundThis = FALSE;
 	for (u8 i = 0; i < MAX_TILE_ANIMATION; ++i)
 	{
-		struct TileAnimationInstance* pInstance = &g_AnimationInstances[i];
+		struct TileAnimationInstance *pInstance = &g_AnimationInstances[i];
 
 		if (pInstance->isPlaying && pInstance->Animation == pAnimation)
 		{
@@ -379,7 +377,7 @@ void updateTileAnimations()
 {
 	for (u8 i = 0; i < MAX_TILE_ANIMATION; ++i)
 	{
-		struct TileAnimationInstance* pInstance = &g_AnimationInstances[i];
+		struct TileAnimationInstance *pInstance = &g_AnimationInstances[i];
 
 		if (pInstance->isPlaying)
 		{
@@ -449,9 +447,9 @@ void loadData()
 	VDP_SetSpriteSM1(SPT_PLAYER_OUTLINE, 0, 0, 12, getColor(COLOR_BACKGROUND));
 
 	// Initialisation des sprites de l'inventaire
-	u8 inventorySprt[4] = { 64, 68, 68, 72 };
+	u8 inventorySprt[4] = {64, 68, 68, 72};
 	loop(i, 4)
-		VDP_SetSpriteSM1(SPT_INVENTORY + i, INVENTORY_DISPLAY_X - 2 + 16 * i, VDP_SPRITE_HIDE, inventorySprt[i], getColor(COLOR_TEXT));
+			VDP_SetSpriteSM1(SPT_INVENTORY + i, INVENTORY_DISPLAY_X - 2 + 16 * i, VDP_SPRITE_HIDE, inventorySprt[i], getColor(COLOR_TEXT));
 }
 
 //-----------------------------------------------------------------------------
@@ -460,7 +458,7 @@ void displayTextByMode(u8 mode)
 {
 	for (u8 i = 0; i < g_TextCoordCount; i++)
 	{
-		struct TextCoordInstance* txt = &g_TextCoordInstances[i];
+		struct TextCoordInstance *txt = &g_TextCoordInstances[i];
 
 		if (txt->Mode == mode)
 		{
@@ -506,7 +504,7 @@ void updatePlayer()
 	{
 		if (g_FrameCounter == 2 * 8)
 		{
-			const VectorI8* interactOffset = g_Player.isLeft ? g_LeftInteractOffset : g_RightInteractOffset;
+			const VectorI8 *interactOffset = g_Player.isLeft ? g_LeftInteractOffset : g_RightInteractOffset;
 			// Interaction au milieu du personnage
 			g_Player.State = PLAYER_STATE_IDLE;
 			loop(i, 4)
@@ -788,7 +786,7 @@ void lightRoom(bool bActivate)
 
 	for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 	{
-		struct VisibleObject* pObj = &g_VisibleObjects[i];
+		struct VisibleObject *pObj = &g_VisibleObjects[i];
 		u8 x = pObj->X;
 		u8 y = pObj->Y;
 		if (pObj->ItemCondition == ITEM_COND_LIGHT_ON)
@@ -821,7 +819,7 @@ void activateElectricity(bool bActivate)
 
 	for (u8 i = 0; i < g_ElectricWallCount; ++i)
 	{
-		struct ActiveObject* pObj = &g_ElectricWalls[i];
+		struct ActiveObject *pObj = &g_ElectricWalls[i];
 		u8 x = pObj->X;
 		u8 y = pObj->Y;
 		setTileByTileCoord(x, y, bActivate ? pObj->Tile : EMPTY_ITEM);
@@ -829,7 +827,7 @@ void activateElectricity(bool bActivate)
 
 	for (u8 i = 0; i < g_NotElectricWallCount; ++i)
 	{
-		struct ActiveObject* pObj = &g_NotElectricWalls[i];
+		struct ActiveObject *pObj = &g_NotElectricWalls[i];
 		u8 x = pObj->X;
 		u8 y = pObj->Y;
 		setTileByTileCoord(x, y, !bActivate ? pObj->Tile : EMPTY_ITEM);
@@ -851,7 +849,7 @@ void activateCupboard(u8 x, u8 y)
 
 	for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 	{
-		struct VisibleObject* pObj = &g_VisibleObjects[i];
+		struct VisibleObject *pObj = &g_VisibleObjects[i];
 		if ((pObj->X == gX + 1) && (pObj->Y == gY) && (pObj->ItemCondition == ITEM_COND_CUPBOARD))
 		{
 			tile = pObj->Tile;
@@ -882,7 +880,7 @@ void activateCloset(u8 x, u8 y)
 
 	for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 	{
-		struct VisibleObject* pObj = &g_VisibleObjects[i];
+		struct VisibleObject *pObj = &g_VisibleObjects[i];
 		if ((pObj->X == gX) && (pObj->Y == gY) && (pObj->ItemCondition == ITEM_COND_CUPBOARD))
 		{
 			tile = pObj->Tile;
@@ -910,9 +908,9 @@ void addConditionalItem(u8 levelIdx, u8 i, u8 j, u8 condition)
 	if (g_VisibleObjectCount >= MAX_VISIBLE_OBJECTS)
 		return;
 
-	const struct RoomDefinition* pRoom = &g_Rooms[levelIdx];
+	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
 	u8 targetItem = g_ScreenBuffer[32 * (i + 1) + j];
-	struct VisibleObject* pObj = &g_VisibleObjects[g_VisibleObjectCount];
+	struct VisibleObject *pObj = &g_VisibleObjects[g_VisibleObjectCount];
 	pObj->X = j;
 	pObj->Y = (i + 1);
 	pObj->ItemCondition = condition;
@@ -931,8 +929,8 @@ void addElectricWall(u8 levelIdx, u8 i, u8 j)
 	if (g_ElectricWallCount >= MAX_ELECTRIC_WALL)
 		return;
 
-	const struct RoomDefinition* pRoom = &g_Rooms[levelIdx];
-	struct ActiveObject* pObj = &g_ElectricWalls[g_ElectricWallCount];
+	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
+	struct ActiveObject *pObj = &g_ElectricWalls[g_ElectricWallCount];
 	pObj->X = j;
 	pObj->Y = i;
 	pObj->Tile = TILE_ELECTRIC_WALL;
@@ -945,8 +943,8 @@ void addNotElectricWall(u8 levelIdx, u8 i, u8 j)
 	if (g_NotElectricWallCount >= MAX_NOT_ELECTRIC_WALL)
 		return;
 
-	const struct RoomDefinition* pRoom = &g_Rooms[levelIdx];
-	struct ActiveObject* pObj = &g_NotElectricWalls[g_NotElectricWallCount];
+	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
+	struct ActiveObject *pObj = &g_NotElectricWalls[g_NotElectricWallCount];
 	pObj->X = j;
 	pObj->Y = i;
 	pObj->Tile = TILE_NOT_ELECTRIC_WALL;
@@ -959,8 +957,8 @@ void addNotElectricGround(u8 levelIdx, u8 i, u8 j)
 	if (g_NotElectricWallCount >= MAX_NOT_ELECTRIC_WALL)
 		return;
 
-	const struct RoomDefinition* pRoom = &g_Rooms[levelIdx];
-	struct ActiveObject* pObj = &g_NotElectricWalls[g_NotElectricWallCount];
+	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
+	struct ActiveObject *pObj = &g_NotElectricWalls[g_NotElectricWallCount];
 	pObj->X = j;
 	pObj->Y = i;
 	pObj->Tile = TILE_NOT_ELECTRIC_GROUND;
@@ -1061,21 +1059,21 @@ void displayLevel(u8 levelIdx)
 	// Initialisation des sprites de caméra
 	g_SpriteCameraNum = 0;
 	loop(i, SPT_CAMERA_MAX)
-		VDP_HideSprite(SPT_CAMERA + i);
+			VDP_HideSprite(SPT_CAMERA + i);
 
 	// Initialisation des sprites de l'inventaire
 	{
 		u8 sprtY = ((levelIdx < 1) || (levelIdx > 27)) ? VDP_SPRITE_HIDE : SPT_INVENTORY_Y;
 		loop(i, 4)
-			VDP_SetSpritePositionY(SPT_INVENTORY + i, sprtY);
+				VDP_SetSpritePositionY(SPT_INVENTORY + i, sprtY);
 	}
 
 	// Nettoyage de l'écran (tuile n°0 partout)
 	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
 
 	// Décompression de la pièce dans le buffet en RAM
-	const struct RoomDefinition* pRoom = &g_Rooms[levelIdx];
-	const u8* pLayout = g_ScreenBuffer;
+	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
+	const u8 *pLayout = g_ScreenBuffer;
 	Pletter_Unpack(pRoom->Layout, g_ScreenBuffer);
 
 	// Dessin de la pièce ligne par ligne
@@ -1114,7 +1112,7 @@ void displayLevel(u8 levelIdx)
 					sX++;
 					sTile = getTileByTileCoord(sX, y);
 				}
-				struct TextCoordInstance* txt = &g_TextCoordInstances[g_TextCoordCount++];
+				struct TextCoordInstance *txt = &g_TextCoordInstances[g_TextCoordCount++];
 				txt->X = 1; //(tile == TILE_SPE_TRANSLATE_PHONE) ? 1 : x;
 				txt->Y = y;
 				txt->Key = transKey;
@@ -1138,7 +1136,7 @@ void displayLevel(u8 levelIdx)
 				{
 					u8 sx = x * 8;
 					u8 sy = y * 8;
-					if(tile == TILE_CAMERA_L)
+					if (tile == TILE_CAMERA_L)
 						sx += 3;
 					else
 						sx += 4;
@@ -1218,20 +1216,20 @@ void displayLevel(u8 levelIdx)
 
 	displayTextByMode(TEXT_MODE_DEFAULT);
 
-	#if (DEBUG_DISPLAY_INFO)
-		Print_SetPosition(0, 22);
-		Print_DrawText("L:");
-		Print_DrawInt(levelIdx);
-		Print_DrawText(" E:");
-		Print_DrawInt(g_DoorThemeCount[0]);
-		Print_DrawChar('-');
-		Print_DrawInt(g_DoorThemeCount[1]);
-		Print_DrawChar('-');
-		Print_DrawInt(g_DoorThemeCount[2]);
-		Print_DrawText(" T:");
-		Print_DrawInt(g_SecondCounter);
-		Print_DrawText("    ");
-	#endif
+#if (DEBUG_DISPLAY_INFO)
+	Print_SetPosition(0, 22);
+	Print_DrawText("L:");
+	Print_DrawInt(levelIdx);
+	Print_DrawText(" E:");
+	Print_DrawInt(g_DoorThemeCount[0]);
+	Print_DrawChar('-');
+	Print_DrawInt(g_DoorThemeCount[1]);
+	Print_DrawChar('-');
+	Print_DrawInt(g_DoorThemeCount[2]);
+	Print_DrawText(" T:");
+	Print_DrawInt(g_SecondCounter);
+	Print_DrawText("    ");
+#endif
 
 	if (levelIdx == 31)
 	{
@@ -1242,11 +1240,11 @@ void displayLevel(u8 levelIdx)
 		u16 hour = g_SecondCounter / 60 / 60;
 		Print_DrawInt(hour);
 		Print_DrawChar(':');
-		if(min < 10)
+		if (min < 10)
 			Print_DrawChar('0');
 		Print_DrawInt(min);
 		Print_DrawChar(':');
-		if(sec < 10)
+		if (sec < 10)
 			Print_DrawChar('0');
 		Print_DrawInt(sec);
 	}
@@ -1292,7 +1290,7 @@ bool interact(u8 x, u8 y)
 			setTile(x, y, TILE_EMPTY);
 			for (u8 i = 0; i < g_VisibleObjectCount; ++i)
 			{
-				struct VisibleObject* pObj = &g_VisibleObjects[i];
+				struct VisibleObject *pObj = &g_VisibleObjects[i];
 				if ((pObj->X == x / 8) && (pObj->Y == y / 8))
 				{
 					pObj->ItemCondition = ITEM_COND_DISABLED;
@@ -1409,7 +1407,10 @@ bool interact(u8 x, u8 y)
 		// Porte de fin
 	case TILE_DOOR_END1:
 	case TILE_DOOR_END2:
-		displayLevel(activateEndDoor());
+		if (hasItemInInventory(TILE_ITEM_KEY_DOOR))
+			displayLevel(activateEndDoor());
+		else
+			PlaySFX(SFX_LOCK);
 		return FALSE;
 
 	// Placard
@@ -1619,7 +1620,7 @@ void menuEnterCode()
 					PlaySFX(SFX_PHONE_PICK);
 				bContinue = FALSE;
 			}
-			Print_DrawTextAt(CODE_CURSORX + 11, CODE_CURSORY + CODE_VAL_OFFSET, (const c8*)g_SaveCodeBuffer);
+			Print_DrawTextAt(CODE_CURSORX + 11, CODE_CURSORY + CODE_VAL_OFFSET, (const c8 *)g_SaveCodeBuffer);
 		}
 	}
 
@@ -1640,12 +1641,12 @@ void VDP_InterruptHandler()
 		if (g_NextMusic != g_CurrentMusic)
 		{
 			// Load music data
-			Pletter_UnpackToRAM((const void*)g_MusicTable[g_NextMusic], (void*)MUSIC_ADDRESS);
-			AKG_Init((const void*)MUSIC_ADDRESS, 0);
+			Pletter_UnpackToRAM((const void *)g_MusicTable[g_NextMusic], (void *)MUSIC_ADDRESS);
+			AKG_Init((const void *)MUSIC_ADDRESS, 0);
 
 			// Load SFX data
-			Pletter_UnpackToRAM((const void*)g_AKG_SoundFX, (void*)SFX_ADDRESS);
-			AKG_InitSFX((const void*)SFX_ADDRESS);
+			Pletter_UnpackToRAM((const void *)g_AKG_SoundFX, (void *)SFX_ADDRESS);
+			AKG_InitSFX((const void *)SFX_ADDRESS);
 
 			g_CurrentMusic = g_NextMusic;
 		}
@@ -1711,7 +1712,7 @@ void main()
 	// Initialize palette
 	if (g_VersionVDP > VDP_VERSION_TMS9918A)
 	{
-		VDP_SetPalette((u8*)g_CustomPalette);
+		VDP_SetPalette((u8 *)g_CustomPalette);
 		g_CurrentColorIdx = g_ColorIndex_MSX2;
 	}
 
@@ -1724,9 +1725,9 @@ void main()
 	Loc_SetLanguage(LANG_EN);
 
 	// Initialisation de l'affichage
-	VDP_SetMode(VDP_MODE_SCREEN1);				 // Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs parmi 32 combinaisons)
-	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16); // Sprite de taille 16x16
-	VDP_SetColor(getColor(COLOR_BACKGROUND));						 // Couleur de la bordure et de la couleur 0
+	VDP_SetMode(VDP_MODE_SCREEN1);						// Mode écran 1 (32x24 tuiles de 8x8 pixels en 2 couleurs parmi 32 combinaisons)
+	VDP_SetSpriteFlag(VDP_SPRITE_SIZE_16);		// Sprite de taille 16x16
+	VDP_SetColor(getColor(COLOR_BACKGROUND)); // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();
 	VDP_EnableVBlank(TRUE);
 
@@ -1765,7 +1766,7 @@ void main()
 			updateTileAnimations();
 
 			loop(i, g_SpriteCameraNum)
-				VDP_SetSpritePattern(SPT_CAMERA + i, (g_CurrentElectricityOn && g_FrameCounter & 0b00010000) ? 128 : 128 + 4);
+					VDP_SetSpritePattern(SPT_CAMERA + i, (g_CurrentElectricityOn && g_FrameCounter & 0b00010000) ? 128 : 128 + 4);
 		}
 		// Mise à jour du personnage
 		updatePlayer();

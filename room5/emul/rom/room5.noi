@@ -32,7 +32,7 @@ DEF _g_MSXMID 0x2E
 DEF _g_CHAR_16 0x34
 DEF s__PAGE0 0x100
 DEF l__DATA 0x5E6
-DEF l__PAGE0 0x3E22
+DEF l__PAGE0 0x3E8F
 DEF s__CODE 0x4000
 DEF l__CODE 0x6A1E
 DEF s__HOME 0xAA1E
@@ -543,15 +543,15 @@ DEF _g_Level018 0x252
 DEF _g_Level019 0x313
 DEF _g_Level020 0x3CC
 DEF _g_Level021 0x42D
-DEF _g_Level022 0x504
-DEF _g_Level023 0x5CD
-DEF _g_Level024 0x69D
-DEF _g_Level025 0x6FD
-DEF _g_Level026 0x7BC
-DEF _g_Level027 0x87D
-DEF _g_Level028 0x8E2
-DEF _g_Level029 0x973
-DEF _g_Level030 0x9D5
-DEF _g_Level031 0xA2E
-DEF _g_Level032 0xA98
-LOAD D:\Dev\Private\MSX\MSXgl\projects\room5_dev\room5/out/room5.ihx
+DEF _g_Level022 0x50B
+DEF _g_Level023 0x5D4
+DEF _g_Level024 0x6A4
+DEF _g_Level025 0x704
+DEF _g_Level026 0x7C3
+DEF _g_Level027 0x884
+DEF _g_Level028 0x8E9
+DEF _g_Level029 0x9E0
+DEF _g_Level030 0xA42
+DEF _g_Level031 0xA9B
+DEF _g_Level032 0xB05
+LOAD F:\www\MO5\room5\room5/out/room5.ihx

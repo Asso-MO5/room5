@@ -32,7 +32,7 @@ DEF _g_MSXMID 0x2E
 DEF _g_CHAR_16 0x34
 DEF s__PAGE0 0x100
 DEF l__DATA 0x5E6
-DEF l__PAGE0 0x3E9D
+DEF l__PAGE0 0x3E99
 DEF s__CODE 0x4000
 DEF l__CODE 0x6ABC
 DEF s__HOME 0xAABC
@@ -544,14 +544,14 @@ DEF _g_Level019 0x313
 DEF _g_Level020 0x3CC
 DEF _g_Level021 0x42D
 DEF _g_Level022 0x50B
-DEF _g_Level023 0x5D4
-DEF _g_Level024 0x6A4
-DEF _g_Level025 0x704
-DEF _g_Level026 0x7C3
-DEF _g_Level027 0x884
-DEF _g_Level028 0x8E9
-DEF _g_Level029 0x9EE
-DEF _g_Level030 0xA50
-DEF _g_Level031 0xAA9
-DEF _g_Level032 0xB13
+DEF _g_Level023 0x5D3
+DEF _g_Level024 0x6A2
+DEF _g_Level025 0x702
+DEF _g_Level026 0x7BF
+DEF _g_Level027 0x880
+DEF _g_Level028 0x8E5
+DEF _g_Level029 0x9EA
+DEF _g_Level030 0xA4C
+DEF _g_Level031 0xAA5
+DEF _g_Level032 0xB0F
 LOAD F:\www\MO5\room5\room5/out/room5.ihx

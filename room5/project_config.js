@@ -112,6 +112,20 @@ Target = 'ROM_48K_ISR'
 //-- ROM mapper total size in KB (number). Must be a multiple of 8 or 16 depending on the mapper type (from 64 to 4096)
 // ROMSize = 128;
 
+//-- Check for ROM boot skipping if a given key is pressed (boolean)
+// ROMSkipBoot = false;
+
+//-- The key to be check for ROM boot skipping (string). Key must be from keyboard row #7.
+//   - F4
+//   - F5
+//   - ESC
+//   - TAB
+//   - STOP
+//   - BS
+//   - SELECT
+//   - RETURN
+// ROMSkipBootKey = "ESC";
+
 //-- Postpone the ROM startup to let the other ROMs initialize like Disk controller or Network cartridge (boolean)
 // ROMDelayBoot = false;
 
@@ -123,6 +137,7 @@ Target = 'ROM_48K_ISR'
 
 //-- Type of custom ISR to install (string). ISR is install in RAM or ROM depending on Target and InstallRAMISR parameters
 //   - NONE       No ISR
+//   - ALL        Handle all interruptions
 //   - VBLANK     V-blank handler
 //   - VHBLANK    V-blank and h-blank handler (V9938 or V9958)
 //   - V9990      V-blank, h-blank and command end handler (V9990)

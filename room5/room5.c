@@ -1407,10 +1407,7 @@ bool interact(u8 x, u8 y)
 		// Porte de fin
 	case TILE_DOOR_END1:
 	case TILE_DOOR_END2:
-		if (hasItemInInventory(TILE_ITEM_KEY_DOOR))
-			displayLevel(activateEndDoor());
-		else
-			PlaySFX(SFX_LOCK);
+		displayLevel(activateEndDoor());
 		return FALSE;
 
 	// Placard
@@ -1555,20 +1552,27 @@ void menuEnterCode()
 
 	Mem_Set(0, g_SaveCodeBuffer, PLAYER_CODE_SIZE);
 
-	bool bContinue = TRUE;
-	u8 numDestLevel = 0;
-
 	// Affichage du curseur
 	u8 charIndex = 8;
 	setTileByTileCoord(CODE_CURSORX, charIndex + CODE_CURSORY, SPT_CURSOR);
 
+	u8 numDestLevel = 0;
+	u8 curChar = 0;
+	bool bContinue = TRUE;
 	while (bContinue)
 	{
 		waitVSync();
 		if (isInputPushed(INPUT_BUTTON_B))
 		{
 			PlaySFX(SFX_PHONE_PICK);
-			bContinue = FALSE;
+			if (curChar > 0)
+			{
+				g_SaveCodeBuffer[--curChar] = 0;
+				Print_DrawTextAt(CODE_CURSORX + 11, CODE_CURSORY + CODE_VAL_OFFSET, (const c8 *)g_SaveCodeBuffer);
+				Print_DrawChar(' ');
+			}
+			else
+				bContinue = FALSE;
 		}
 
 		if (isInputPushed(INPUT_UP))
@@ -1594,16 +1598,8 @@ void menuEnterCode()
 		if (isInputPushed(INPUT_BUTTON_A))
 		{
 			PlaySFX(SFX_CLICK);
-			u8 i = 0;
-			for (; i < PLAYER_CODE_SIZE; i++)
-			{
-				if (g_SaveCodeBuffer[i] == 0)
-				{
-					g_SaveCodeBuffer[i] = g_CryptRoom5Map[charIndex];
-					break;
-				}
-			}
-			if (i == 7)
+			g_SaveCodeBuffer[curChar++] = g_CryptRoom5Map[charIndex];
+			if (curChar == 8)
 			{
 				// Initialise la structure
 				struct SaveData save;

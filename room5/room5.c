@@ -1409,7 +1409,14 @@ bool interact(u8 x, u8 y)
 		// Porte de fin
 	case TILE_DOOR_END1:
 	case TILE_DOOR_END2:
-		displayLevel(activateEndDoor());
+		if (hasItemInInventory(TILE_ITEM_KEY_DOOR))
+		{
+			PlaySFX(SFX_UNLOCK);
+			displayLevel(activateEndDoor());
+			return TRUE;
+		}
+		else
+			PlaySFX(SFX_LOCK);
 		return FALSE;
 
 	// Placard

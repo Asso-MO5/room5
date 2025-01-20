@@ -2,7 +2,7 @@
 // ██  ▀  █▄  ▀██▄ ▀ ▄█ ▄  ▄█▄█ ▄▀██
 // █  █ █  ▀▀  ▄█  █  █ ██ ██ █  ▀██
 // ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀          ▀▀
-// Data generated using MSXimg 1.20.0 on Sun Jan 19 21:02:20 2025
+// Data generated using MSXimg 1.20.1 on Mon Jan 20 01:38:50 2025
 // by Guillaume "Aoineko" Blanchard (2022) under CC BY-SA free license
 // ─────────────────────────────────────────────────────────────────────────────
 // Generation parameters:
@@ -20,7 +20,8 @@ const unsigned char g_SprtElevator[] =
 {
 // ======== Frame[0]
 // ---- Layer[0] (16x16 0,0 1,1 inc 1)
-// Sprite[0] (offset:0)
+// // Sprite[0] (offset:0)
+
 	0x00, /* ........ */ 
 	0x00, /* ........ */ 
 	0x00, /* ........ */ 
@@ -29,7 +30,8 @@ const unsigned char g_SprtElevator[] =
 	0x66, /* .##..##. */ 
 	0x66, /* .##..##. */ 
 	0x66, /* .##..##. */ 
-// Sprite[1] (offset:8)
+// // Sprite[1] (offset:8)
+
 	0xFF, /* ######## */ 
 	0xAF, /* #.#.#### */ 
 	0xAF, /* #.#.#### */ 
@@ -38,7 +40,8 @@ const unsigned char g_SprtElevator[] =
 	0x1F, /* ...##### */ 
 	0x07, /* .....### */ 
 	0x00, /* ........ */ 
-// Sprite[2] (offset:16)
+// // Sprite[2] (offset:16)
+
 	0x00, /* ........ */ 
 	0x00, /* ........ */ 
 	0x00, /* ........ */ 
@@ -47,7 +50,8 @@ const unsigned char g_SprtElevator[] =
 	0x66, /* .##..##. */ 
 	0x66, /* .##..##. */ 
 	0x66, /* .##..##. */ 
-// Sprite[3] (offset:24)
+// // Sprite[3] (offset:24)
+
 	0xFF, /* ######## */ 
 	0xF5, /* ####.#.# */ 
 	0xF5, /* ####.#.# */ 
@@ -58,7 +62,8 @@ const unsigned char g_SprtElevator[] =
 	0x00, /* ........ */ 
 // ======== Frame[1]
 // ---- Layer[0] (16x16 0,0 1,1 inc 1)
-// Sprite[4] (offset:32)
+// // Sprite[4] (offset:32)
+
 	0x00, /* ........ */ 
 	0x00, /* ........ */ 
 	0x00, /* ........ */ 
@@ -67,7 +72,8 @@ const unsigned char g_SprtElevator[] =
 	0x92, /* #..#..#. */ 
 	0x92, /* #..#..#. */ 
 	0x92, /* #..#..#. */ 
-// Sprite[5] (offset:40)
+// // Sprite[5] (offset:40)
+
 	0xFF, /* ######## */ 
 	0xAF, /* #.#.#### */ 
 	0xEF, /* ###.#### */ 
@@ -76,7 +82,8 @@ const unsigned char g_SprtElevator[] =
 	0x00, /* ........ */ 
 	0x00, /* ........ */ 
 	0x00, /* ........ */ 
-// Sprite[6] (offset:48)
+// // Sprite[6] (offset:48)
+
 	0x00, /* ........ */ 
 	0x00, /* ........ */ 
 	0x00, /* ........ */ 
@@ -85,7 +92,8 @@ const unsigned char g_SprtElevator[] =
 	0x49, /* .#..#..# */ 
 	0x49, /* .#..#..# */ 
 	0x49, /* .#..#..# */ 
-// Sprite[7] (offset:56)
+// // Sprite[7] (offset:56)
+
 	0xFF, /* ######## */ 
 	0xF5, /* ####.#.# */ 
 	0xF7, /* ####.### */ 

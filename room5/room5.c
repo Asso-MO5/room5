@@ -124,104 +124,107 @@ const u8 g_PlayerFramesFall[] = {1, 2, 3, 4};
 
 // Donnée d'animation des portes
 const u8 g_DoorAnimationTiles[] =
-		{
-				44, 11, 45, 71, 46, 15, // Frame 0
-				44, 11, 45, 71, 46, 15, // Frame 1
-				44, 47, 45, 54, 46, 55, // Frame 2
-				44, 47, 45, 54, 46, 55, // Frame 3,
-				44, 47, 45, 54, 46, 55, // Frame 4,
-				44, 47, 45, 54, 46, 55, // Frame 5,
-				44, 47, 45, 54, 46, 55, // Frame 6
+{
+	44, 11, 45, 95, 46, 15, // Frame 0
+	44, 11, 45, 95, 46, 15, // Frame 1
+	44, 47, 45, 54, 46, 55, // Frame 2
+	44, 47, 45, 54, 46, 55, // Frame 3,
+	44, 47, 45, 54, 46, 55, // Frame 4,
+	44, 47, 45, 54, 46, 55, // Frame 5,
+	44, 47, 45, 54, 46, 55, // Frame 6
 };
 const struct TileAnimation g_DoorAnimation =
-		{
-				2,
-				3,
-				7,
-				1,
-				g_DoorAnimationTiles};
+{
+	2,
+	3,
+	7,
+	1,
+	g_DoorAnimationTiles
+};
 
 // Donnée d'animation du téléphone
 const u8 g_PhoneAnimationTiles[] =
-		{
-				18, 80, // Frame 0
-				18, 16, // Frame 1
-				19, 80, // Frame 2
-				19, 17, // Frame 3
+{
+	18, 80, // Frame 0
+	18, 16, // Frame 1
+	19, 80, // Frame 2
+	19, 17, // Frame 3
 };
+
 const struct TileAnimation g_PhoneAnimation =
-		{
-				1,
-				2,
-				4,
-				0,
-				g_PhoneAnimationTiles};
+{
+	1,
+	2,
+	4,
+	0,
+	g_PhoneAnimationTiles
+};
 
 // Liste des animations
 const u8 *const g_MusicTable[MUSIC_MAX] = {g_AKG_MusicMain, g_AKG_MusicPhone, g_AKG_MusicEmpty};
 
 // Palette de couleur pour le MSX2
 const u16 g_CustomPalette[15] =
-		{
-				RGB16(0, 0, 0), // 1
-				RGB16(3, 2, 6), // 2
-				RGB16(0, 0, 0), // 3
-				RGB16(1, 1, 5), // 4
-				RGB16(2, 2, 6), // 5
-				RGB16(3, 3, 7), // 6
-				RGB16(5, 5, 7), // 7
-				RGB16(6, 3, 2), // 8
-				RGB16(7, 3, 3), // 9
-				RGB16(6, 6, 2), // 10
-				RGB16(7, 7, 4), // 11
-				RGB16(3, 1, 5), // 12
-				RGB16(5, 5, 2), // 13
-				RGB16(7, 6, 6), // 14
-				RGB16(7, 7, 7), // 15
+{
+	RGB16(0, 0, 0), // 1
+	RGB16(3, 2, 6), // 2
+	RGB16(0, 0, 0), // 3
+	RGB16(1, 1, 5), // 4
+	RGB16(2, 2, 6), // 5
+	RGB16(3, 3, 7), // 6
+	RGB16(5, 5, 7), // 7
+	RGB16(6, 3, 2), // 8
+	RGB16(7, 3, 3), // 9
+	RGB16(6, 6, 2), // 10
+	RGB16(7, 7, 4), // 11
+	RGB16(3, 1, 5), // 12
+	RGB16(5, 5, 2), // 13
+	RGB16(7, 6, 6), // 14
+	RGB16(7, 7, 7), // 15
 };
 
 // Table de correspondance des couleurs
 const u8 g_ColorIndex_MSX1[COLOR_ID_MAX] =
-		{
-				COLOR_BLACK,				// COLOR_BACKGROUND,
-				COLOR_DARK_BLUE,		// COLOR_SCENE_NIGHT_DARK,
-				COLOR_DARK_BLUE,		// COLOR_PLAYER_NIGHT_DARK,
-				COLOR_LIGHT_BLUE,		// COLOR_SCENE_NIGHT_MED,
-				COLOR_LIGHT_BLUE,		// COLOR_PLAYER_NIGHT_MED,
-				COLOR_CYAN,					// COLOR_PLAYER_NIGHT_LIGHT,
-				COLOR_MEDIUM_RED,		// COLOR_PLAYER_DAY_DARK,
-				COLOR_LIGHT_RED,		// COLOR_CAMERA,
-				COLOR_LIGHT_RED,		// COLOR_NIGHTLIGHT_ON,
-				COLOR_DARK_YELLOW,	// COLOR_SCENE_DAY_DARK,
-				COLOR_LIGHT_YELLOW, // COLOR_SCENE_DAY_MED,
-				COLOR_LIGHT_YELLOW, // COLOR_PLAYER_DAY_MED,
-				COLOR_WHITE,				// COLOR_TEXT,
-				COLOR_WHITE,				// COLOR_PLAYER_DAY_LIGHT
-				COLOR_CYAN,					// COLOR_NIGHTLIGHT_OFF,
-				COLOR_WHITE,				// COLOR_ELEVATOR_ON,
-				COLOR_CYAN,					// COLOR_ELEVATOR_OFF,
+{
+	COLOR_BLACK,		// COLOR_BACKGROUND,
+	COLOR_DARK_BLUE,	// COLOR_SCENE_NIGHT_DARK,
+	COLOR_DARK_BLUE,	// COLOR_PLAYER_NIGHT_DARK,
+	COLOR_LIGHT_BLUE,	// COLOR_SCENE_NIGHT_MED,
+	COLOR_LIGHT_BLUE,	// COLOR_PLAYER_NIGHT_MED,
+	COLOR_CYAN,			// COLOR_PLAYER_NIGHT_LIGHT,
+	COLOR_MEDIUM_RED,	// COLOR_PLAYER_DAY_DARK,
+	COLOR_LIGHT_RED,	// COLOR_CAMERA,
+	COLOR_LIGHT_RED,	// COLOR_NIGHTLIGHT_ON,
+	COLOR_DARK_YELLOW,	// COLOR_SCENE_DAY_DARK,
+	COLOR_LIGHT_YELLOW, // COLOR_SCENE_DAY_MED,
+	COLOR_LIGHT_YELLOW, // COLOR_PLAYER_DAY_MED,
+	COLOR_WHITE,		// COLOR_TEXT,
+	COLOR_WHITE,		// COLOR_PLAYER_DAY_LIGHT
+	COLOR_CYAN,			// COLOR_NIGHTLIGHT_OFF,
+	COLOR_WHITE,		// COLOR_ELEVATOR_ON,
+	COLOR_CYAN,			// COLOR_ELEVATOR_OFF,
 };
 
 // Table de correspondance des couleurs
 const u8 g_ColorIndex_MSX2[COLOR_ID_MAX] =
-		{
-				1,	// COLOR_BACKGROUND,
-				4,	// COLOR_SCENE_NIGHT_DARK,
-				12, // COLOR_PLAYER_NIGHT_DARK,
-				5,	// COLOR_SCENE_NIGHT_MED,
-				2,	// COLOR_PLAYER_NIGHT_MED,
-				7,	// COLOR_PLAYER_NIGHT_LIGHT,
-				8,	// COLOR_PLAYER_DAY_DARK,
-				9,	// COLOR_CAMERA,
-				9,	// COLOR_NIGHTLIGHT_ON,
-				10, // COLOR_SCENE_DAY_DARK,
-				11, // COLOR_SCENE_DAY_MED,
-				13, // COLOR_PLAYER_DAY_MED,
-				15, // COLOR_TEXT,
-				14, // COLOR_PLAYER_DAY_LIGHT
-				6,	// COLOR_NIGHTLIGHT_OFF,
-				15, // COLOR_ELEVATOR_ON,
-				6,	// COLOR_ELEVATOR_OFF,
+{
+	1,	// COLOR_BACKGROUND,
+	4,	// COLOR_SCENE_NIGHT_DARK,
+	12, // COLOR_PLAYER_NIGHT_DARK,
+	5,	// COLOR_SCENE_NIGHT_MED,
+	2,	// COLOR_PLAYER_NIGHT_MED,
+	7,	// COLOR_PLAYER_NIGHT_LIGHT,
+	8,	// COLOR_PLAYER_DAY_DARK,
+	9,	// COLOR_CAMERA,
+	9,	// COLOR_NIGHTLIGHT_ON,
+	10, // COLOR_SCENE_DAY_DARK,
+	11, // COLOR_SCENE_DAY_MED,
+	13, // COLOR_PLAYER_DAY_MED,
+	15, // COLOR_TEXT,
+	14, // COLOR_PLAYER_DAY_LIGHT
+	6,	// COLOR_NIGHTLIGHT_OFF,
+	15, // COLOR_ELEVATOR_ON,
+	6,	// COLOR_ELEVATOR_OFF,
 };
 
 // Offset de position pour les interactions
@@ -449,7 +452,7 @@ void loadData()
 	// Initialisation des sprites de l'inventaire
 	u8 inventorySprt[4] = {64, 68, 68, 72};
 	loop(i, 4)
-			VDP_SetSpriteSM1(SPT_INVENTORY + i, INVENTORY_DISPLAY_X - 2 + 16 * i, VDP_SPRITE_HIDE, inventorySprt[i], getColor(COLOR_TEXT));
+		VDP_SetSpriteSM1(SPT_INVENTORY + i, INVENTORY_DISPLAY_X - 3 + 16 * i, VDP_SPRITE_HIDE, inventorySprt[i], getColor(COLOR_TEXT));
 }
 
 //-----------------------------------------------------------------------------
@@ -647,7 +650,8 @@ void updatePlayer()
 	}
 
 	// Tests
-	if (!g_Test && Keyboard_IsKeyPressed(KEY_M) && Keyboard_IsKeyPressed(KEY_O) && Keyboard_IsKeyPressed(KEY_5))
+	// if (!g_Test && Keyboard_IsKeyPressed(MAKE_KEY(4, 4)) && Keyboard_IsKeyPressed(MAKE_KEY(0, 5)) && Keyboard_IsKeyPressed(MAKE_KEY(4, 2)))
+	if (!g_Test && Keyboard_IsKeyPressed(0x44) && Keyboard_IsKeyPressed(0x50) && Keyboard_IsKeyPressed(0x24))
 	{
 		PlaySFX(SFX_TEST);
 		g_Test = TRUE;
@@ -731,15 +735,13 @@ void activatePhone(u8 xP, u8 yP, bool bPhone)
 	if (bPhone)
 	{
 		StopMusic();
-		PlaySFX(SFX_PHONE_PICK);
 
 		// Arrêt de l'animation
 		stopAnimationInstance(&g_PhoneAnimation);
 		setTile(xP, yP, TILE_PHONE);
 		setTile(xP, yP - 8, TILE_EMPTY);
 	}
-	else
-		PlaySFX(SFX_SPEAK);
+	PlaySFX(SFX_SPEAK);
 
 	// Afficher le texte
 	VDP_FillVRAM_16K(COLOR_MERGE(getColor(COLOR_TEXT), getColor(COLOR_BACKGROUND)), g_ScreenColorLow + 152 / 8, 8);
@@ -769,13 +771,13 @@ void activatePhone(u8 xP, u8 yP, bool bPhone)
 void lightRoom(bool bActivate)
 {
 	// Change la couleur des tuiles du décor
-	u8 firstCol = bActivate ? 0xA1 : 0x41;
-	u8 secondCol = bActivate ? 0xB1 : 0x51;
-	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow, 7);
-	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow + (64 / 8), 8);
-	VDP_FillVRAM_16K(secondCol, g_ScreenColorLow + (128 / 8), 3);
-	// ancienne méthode pour modifier la couleurs des élévateurs manuels
-	// VDP_FillVRAM_16K(bActivate ? 0xf1 : 0x71, g_ScreenColorLow + (184 / 8), 1);
+	u8 firstCol = bActivate ? COLOR_MERGE(getColor(COLOR_SCENE_DAY_DARK), getColor(COLOR_BACKGROUND)) : COLOR_MERGE(getColor(COLOR_SCENE_NIGHT_DARK), getColor(COLOR_BACKGROUND));
+	u8 secondCol = bActivate ? COLOR_MERGE(getColor(COLOR_SCENE_DAY_MED), getColor(COLOR_BACKGROUND)) : COLOR_MERGE(getColor(COLOR_SCENE_NIGHT_MED), getColor(COLOR_BACKGROUND));
+	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow + 0, 7);
+	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow + 9, 7);
+	VDP_Poke_16K(bActivate ? COLOR_MERGE(getColor(COLOR_PLAYER_DAY_LIGHT), getColor(COLOR_BACKGROUND)) : COLOR_MERGE(getColor(COLOR_PLAYER_NIGHT_LIGHT), getColor(COLOR_BACKGROUND)), g_ScreenColorLow + 8);
+	VDP_FillVRAM_16K(secondCol, g_ScreenColorLow + 16, 3);
+
 
 	// Change la couleur du personnage
 	VDP_SetSpriteColorSM1(SPT_PLAYER_HAIR, bActivate ? getColor(COLOR_PLAYER_DAY_MED) : getColor(COLOR_PLAYER_NIGHT_MED));

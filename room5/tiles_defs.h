@@ -1,8 +1,8 @@
 
 #pragma once
 
-// Tuile de sauvegarde
-#define TILE_PC_CODE 94
+// Tuile d'ordinateur pour la sauvegarde
+#define TILE_PC_CODE 88
 // Numéros de tuile
 #define TILE_EMPTY 0
 #define TILE_RAILS 28
@@ -14,8 +14,8 @@
 #define TILE_LIGHT2 82
 #define TILE_LOCK_DOOR1 12
 #define TILE_LOCK_DOOR2 13
-#define TILE_DOOR1 70
-#define TILE_DOOR2 71
+#define TILE_DOOR1 94
+#define TILE_DOOR2 95
 #define TILE_DOOR_NUMBER_ONE 1
 #define TILE_DOOR_NUMBER_TWO 3
 #define TILE_DOOR_NUMBER_THREE 5
@@ -33,7 +33,7 @@
 #define TILE_CAMERA_R 52
 
 // placard en anglais
-#define TILE_CUPBOARD 67
+#define TILE_CUPBOARD 77
 #define TILE_CUPBOARD_UPPER_PART 25
 #define TILE_CUPBOARD_OPEN 30
 #define TILE_CLOSET 73 // placard en français
@@ -51,9 +51,9 @@
 #define TILE_DOOR_END2 76
 
 // tête de Pnj
-#define TILE_PNJ_HEAD_DOC 77
-#define TILE_PNJ_HEAD_NEO 78
-#define TILE_PNJ_HEAD_ALIEN 79
+#define TILE_PNJ_HEAD_DOC 64
+#define TILE_PNJ_HEAD_NEO 65
+#define TILE_PNJ_HEAD_ALIEN 66
 
 #define TILE_ITEM_KEY_CLOSET 96
 #define TILE_ITEM_KEY_DOOR 97

@@ -34,7 +34,7 @@
 #define SPT_CAMERA 16
 #define SPT_INVENTORY 28 // 28-31
 
-#define SPT_CAMERA_MAX 8
+#define SPT_CAMERA_MAX 12
 #define SPT_INVENTORY_Y 176
 
 // Couleurs

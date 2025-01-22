@@ -31,6 +31,7 @@
 #define SPT_PLAYER_SKIN 9
 #define SPT_PLAYER_CHAIR 10
 #define SPT_PLAYER_OUTLINE 11
+#define SPT_TV 12
 #define SPT_CAMERA 16
 #define SPT_INVENTORY 28 // 28-31
 
@@ -57,6 +58,7 @@ enum COLOR_ID
 	COLOR_NIGHTLIGHT_OFF,
 	COLOR_ELEVATOR_ON,
 	COLOR_ELEVATOR_OFF,
+	COLOR_TV,
 	COLOR_ID_MAX,
 };
 
@@ -126,6 +128,14 @@ struct SwitchTimer
 	u8 X;
 	u8 Y;
 	u8 Timer;
+};
+
+struct TVData
+{
+	u8 X;
+	u8 Y;
+	bool Activate;
+	u8 Count;
 };
 
 struct TileAnimation

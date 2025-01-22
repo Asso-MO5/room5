@@ -168,7 +168,7 @@ const u16 g_CustomPalette[15] =
 {
 	RGB16(0, 0, 0), // 1
 	RGB16(3, 2, 6), // 2
-	RGB16(0, 0, 0), // 3
+	RGB16(4, 4, 4), // 3
 	RGB16(1, 1, 5), // 4
 	RGB16(2, 2, 6), // 5
 	RGB16(3, 3, 7), // 6
@@ -203,6 +203,7 @@ const u8 g_ColorIndex_MSX1[COLOR_ID_MAX] =
 	COLOR_CYAN,			// COLOR_NIGHTLIGHT_OFF,
 	COLOR_WHITE,		// COLOR_ELEVATOR_ON,
 	COLOR_CYAN,			// COLOR_ELEVATOR_OFF,
+	COLOR_GRAY,			// COLOR_TV
 };
 
 // Table de correspondance des couleurs
@@ -225,6 +226,7 @@ const u8 g_ColorIndex_MSX2[COLOR_ID_MAX] =
 	6,	// COLOR_NIGHTLIGHT_OFF,
 	15, // COLOR_ELEVATOR_ON,
 	6,	// COLOR_ELEVATOR_OFF,
+	3,	// COLOR_TV,
 };
 
 // Offset de position pour les interactions
@@ -276,6 +278,8 @@ struct ActiveObject g_ElectricWalls[MAX_ELECTRIC_WALL];
 // Variables pour la gestion des murs non électriques (disparaissent quand il y a de l'électricité)
 u8 g_NotElectricWallCount = 0;
 struct ActiveObject g_NotElectricWalls[MAX_NOT_ELECTRIC_WALL];
+
+struct TVData g_TVData;
 
 // Compte de RESET
 u8 g_ResetCount = 0;
@@ -1018,6 +1022,47 @@ bool onDoorAnimEnd()
 	return FALSE;
 }
 
+//-----------------------------------------------------------------------------
+// Réinitialise la télévision
+void resetTV()
+{
+	g_TVData.Activate = FALSE;
+	VDP_HideSprite(SPT_TV);
+}
+
+//-----------------------------------------------------------------------------
+// Initialise la télévision
+void initTV(u8 x, u8 y)
+{
+	g_TVData.X = x;
+	g_TVData.Y = y;
+	g_TVData.Count = 0;
+	resetTV();
+}
+
+//-----------------------------------------------------------------------------
+// Appuis sur le bouton de la télévision
+inline void toggleTV()
+{
+	PlaySFX(SFX_CLICK);
+	g_TVData.Activate = !g_TVData.Activate;
+}
+
+//-----------------------------------------------------------------------------
+// Mise-à-jour de la télévision
+void updateTV()
+{
+	if (g_TVData.Activate && g_CurrentElectricityOn)
+	{
+		VDP_SetSpriteSM1(SPT_TV, g_TVData.X * 8 + 1, g_TVData.Y * 8 - 10, 80 + (g_TVData.Count & 0x03) * 4, getColor(COLOR_TV));
+		g_TVData.Count++;
+	}
+	else
+	{
+		VDP_HideSprite(SPT_TV);
+	}
+}
+
 //.............................................................................
 //
 //  AFFICHAGE
@@ -1047,6 +1092,7 @@ void displayLevel(u8 levelIdx)
 	initInventory(); // Pas possible de changer de pièce avec un objet dans les mains
 	activateElectricity(TRUE);
 	resetElevators();
+	resetTV();
 
 	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
 	g_VisibleObjectCount = 0;
@@ -1061,7 +1107,8 @@ void displayLevel(u8 levelIdx)
 	// Initialisation des sprites de caméra
 	g_SpriteCameraNum = 0;
 	loop(i, SPT_CAMERA_MAX)
-			VDP_HideSprite(SPT_CAMERA + i);
+		VDP_HideSprite(SPT_CAMERA + i);
+
 
 	// Initialisation des sprites de l'inventaire
 	{
@@ -1173,8 +1220,7 @@ void displayLevel(u8 levelIdx)
 			{
 				addManualElevator(x, y);
 			}
-			else if (tile == TILE_SPE_CUPBOARD ||
-							 tile == TILE_SPE_CUPBOARD_LIGHT)
+			else if ((tile == TILE_SPE_CUPBOARD) || (tile == TILE_SPE_CUPBOARD_LIGHT))
 			{
 				// Ne fonctionne que si les tuiles sont dans le même ordre que l'enum
 				addConditionalItem(levelIdx, i, j, tile - TILE_SPE_CUPBOARD + ITEM_COND_CUPBOARD);
@@ -1194,6 +1240,10 @@ void displayLevel(u8 levelIdx)
 			{
 				addAnimationInstance(x, y - 1, &g_PhoneAnimation, NULL);
 				PlayMusic(MUSIC_PHONE);
+			}
+			else if (tile == TILE_TV)
+			{
+				initTV(x, y);
 			}
 			if ((tile == TILE_RAILS) && canAddElevator()) // Detection des rails pour placer les élévateurs
 			{
@@ -1454,6 +1504,10 @@ bool interact(u8 x, u8 y)
 		g_SwitchTimer.Y = y;
 		g_SwitchTimer.Timer = MAX_SWITCH_TIMER;
 		activateElectricity(TRUE);
+		return TRUE;
+	
+	case TILE_TV:
+		toggleTV();
 		return TRUE;
 	}
 	return FALSE;
@@ -1769,6 +1823,8 @@ void main()
 			updateSwitchTimer();
 
 			updateTileAnimations();
+
+			updateTV();
 
 			loop(i, g_SpriteCameraNum)
 					VDP_SetSpritePattern(SPT_CAMERA + i, (g_CurrentElectricityOn && g_FrameCounter & 0b00010000) ? 128 : 128 + 4);

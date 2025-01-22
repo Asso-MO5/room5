@@ -31,6 +31,7 @@
 #define TILE_MANUAL_ELEVATOR 104
 #define TILE_CAMERA_L 51
 #define TILE_CAMERA_R 52
+#define TILE_TV 89
 
 // placard en anglais
 #define TILE_CUPBOARD 77

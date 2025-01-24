@@ -47,7 +47,7 @@ ProjModules = [
 	'doors',
 	'save',
 	'control',
-]
+];
 
 //-- Project segments base name (string). ProjName will be used if not defined
 // ProjSegments = ProjName;
@@ -65,7 +65,7 @@ LibModules = [
 	'localize',
 	'arkos/akg_player',
 	'crypt',
-]
+];
 
 //-- Additional sources to be compiled and linked with the project (array)
 // AddSources = [];
@@ -81,7 +81,7 @@ LibModules = [
 //   - 0        MSX0
 //   - TR       MSX turbo R
 //   - 3        MSX3 (reserved)
-Machine = "12"
+Machine = "12";
 
 //-- Target program format (string)
 //   - BIN              .bin    BASIC binary program (starting at 8000h)
@@ -107,7 +107,7 @@ Machine = "12"
 //   - ROM_KONAMI_SCC   .rom    Konami MegaROM SCC (aka Konami5): 8 KB segments for a total of 64 KB to 2 MB
 //   - ROM_NEO8         .rom    NEO-8: 8 KB segments for a total of 1 MB to 32 MB
 //   - ROM_NEO16        .rom    NEO-16: 16 KB segments for a total of 1 MB to 64 MB
-Target = 'ROM_48K_ISR'
+Target = 'ROM_48K_ISR';
 
 //-- ROM mapper total size in KB (number). Must be a multiple of 8 or 16 depending on the mapper type (from 64 to 4096)
 // ROMSize = 128;
@@ -141,7 +141,7 @@ Target = 'ROM_48K_ISR'
 //   - VBLANK     V-blank handler
 //   - VHBLANK    V-blank and h-blank handler (V9938 or V9958)
 //   - V9990      V-blank, h-blank and command end handler (V9990)
-CustomISR = 'VBLANK'
+CustomISR = 'VBLANK';
 
 //-- Use automatic banked call and trampoline functions (boolean). For mapped ROM
 // BankedCall = false;
@@ -166,13 +166,13 @@ CustomISR = 'VBLANK'
 //*******************************************************************************
 
 //-- Add application signature to binary data (boolean)
-AppSignature = true
+AppSignature = true;
 
 //-- Application company (*). Can be 2 character string or 16-bits integer (0~65535)
-AppCompany = 'MO'
+AppCompany = 'MO';
 
 //-- Application ID. Can be 2 character string or 16-bits integer (0~65535)
-AppID = 'R5'
+AppID = 'R5';
 
 //-- Application extra data (array). Comma-separated bytes starting with data size
 // AppExtra = [];
@@ -182,13 +182,13 @@ AppID = 'R5'
 //*******************************************************************************
 
 //-- Force to generate MSXgl static library even if 'msxgl.lib' already exist (boolean)
-BuildLibrary = false
+BuildLibrary = false;
 
 //-- Prepare program for debug (boolean)
-Debug = false
+Debug = false;
 
 //-- Move debug symbols to deployement folder (boolean)
-DebugSymbols = true
+DebugSymbols = true;
 
 //-- Allow compiler to generate undocumented Z80 instructions (boolean)
 // AllowUndocumented = false;

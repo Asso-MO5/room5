@@ -46,6 +46,7 @@ void displayLevel(u8 levelIdx);
 bool onDoorAnimEnd();
 bool interact(u8 x, u8 y);
 void menuEnterCode();
+void menuCreditSelect();
 void applyLanguage();
 
 // Variables statiques définies dans un autre module
@@ -113,6 +114,10 @@ extern const u8 g_Tiles_Colors[];
 // #include "data/level/level030.h"
 // #include "data/level/level031.h"
 // #include "data/level/level032.h"
+
+#if (TARGET_TYPE == TYPE_DOS)
+#include "room5_p0.c"
+#endif
 
 // Test SFX
 const u8 g_TestSFX[SFX_MAX] = {KEY_A, KEY_Z, KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P};
@@ -251,6 +256,7 @@ u8 g_FrameCounter = 0;
 
 // Index de la pièce courante
 u8 g_CurrRoomIdx;
+u8 g_PrevRoomIdx = 0;
 
 u8 g_SpriteBuffer1[8 * 4 * 4];
 u8 g_SpriteBuffer2[8 * 4 * 4];
@@ -302,6 +308,10 @@ const u8 *g_CurrentColorIdx = g_ColorIndex_MSX1;
 u8 g_CurrentMusic = 0xFF;
 u8 g_NextMusic = 0xFF;
 u8 g_NextSFX = 0xFF;
+
+// Keyboard buffer
+u8 g_InputNew[11];
+u8 g_InputOld[11];
 
 //=============================================================================
 // FONCTIONS
@@ -775,12 +785,13 @@ void activatePhone(u8 xP, u8 yP, bool bPhone)
 void lightRoom(bool bActivate)
 {
 	// Change la couleur des tuiles du décor
-	u8 firstCol = bActivate ? COLOR_MERGE(getColor(COLOR_SCENE_DAY_DARK), getColor(COLOR_BACKGROUND)) : COLOR_MERGE(getColor(COLOR_SCENE_NIGHT_DARK), getColor(COLOR_BACKGROUND));
-	u8 secondCol = bActivate ? COLOR_MERGE(getColor(COLOR_SCENE_DAY_MED), getColor(COLOR_BACKGROUND)) : COLOR_MERGE(getColor(COLOR_SCENE_NIGHT_MED), getColor(COLOR_BACKGROUND));
-	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow + 0, 7);
-	VDP_FillVRAM_16K(firstCol, g_ScreenColorLow + 9, 7);
-	VDP_Poke_16K(bActivate ? COLOR_MERGE(getColor(COLOR_PLAYER_DAY_LIGHT), getColor(COLOR_BACKGROUND)) : COLOR_MERGE(getColor(COLOR_PLAYER_NIGHT_LIGHT), getColor(COLOR_BACKGROUND)), g_ScreenColorLow + 8);
-	VDP_FillVRAM_16K(secondCol, g_ScreenColorLow + 16, 3);
+	u8 darkCol = bActivate ? COLOR_MERGE(getColor(COLOR_SCENE_DAY_DARK), getColor(COLOR_BACKGROUND)) : COLOR_MERGE(getColor(COLOR_SCENE_NIGHT_DARK), getColor(COLOR_BACKGROUND));
+	u8 medCol = bActivate ? COLOR_MERGE(getColor(COLOR_SCENE_DAY_MED), getColor(COLOR_BACKGROUND)) : COLOR_MERGE(getColor(COLOR_SCENE_NIGHT_MED), getColor(COLOR_BACKGROUND));
+	u8 playerCol = bActivate ? COLOR_MERGE(getColor(COLOR_PLAYER_DAY_LIGHT), getColor(COLOR_BACKGROUND)) : COLOR_MERGE(getColor(COLOR_PLAYER_NIGHT_LIGHT), getColor(COLOR_BACKGROUND));
+	VDP_FillVRAM_16K(darkCol, g_ScreenColorLow + 0, 7);
+	VDP_FillVRAM_16K(darkCol, g_ScreenColorLow + 9, 7);
+	VDP_Poke_16K((g_CurrRoomIdx == 0) ? darkCol : playerCol, g_ScreenColorLow + 8);
+	VDP_FillVRAM_16K(medCol, g_ScreenColorLow + 16, 3);
 
 
 	// Change la couleur du personnage
@@ -1094,6 +1105,7 @@ void displayLevel(u8 levelIdx)
 	resetElevators();
 	resetTV();
 
+	g_PrevRoomIdx = g_CurrRoomIdx;
 	g_CurrRoomIdx = levelIdx; // Enregistrement du numéro de la pièce
 	g_VisibleObjectCount = 0;
 	g_ElectricWallCount = 0;
@@ -1118,7 +1130,7 @@ void displayLevel(u8 levelIdx)
 	}
 
 	// Nettoyage de l'écran (tuile n°0 partout)
-	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
+	VDP_FillVRAM_16K(0, VDP_GetLayoutTable(), 32 * 24);
 
 	// Décompression de la pièce dans le buffet en RAM
 	const struct RoomDefinition *pRoom = &g_Rooms[levelIdx];
@@ -1131,7 +1143,7 @@ void displayLevel(u8 levelIdx)
 	{
 		// Copie une ligne de donnée en VRAM
 		u16 lineIdx = 32 * i;
-		VDP_WriteVRAM_16K(pLayout + lineIdx, g_ScreenLayoutLow + 32 * i, 32);
+		VDP_WriteVRAM_16K(pLayout + lineIdx, VDP_GetLayoutTable() + 32 * i, 32);
 
 		for (u8 j = 0; j < 32; ++j)
 		{
@@ -1283,6 +1295,7 @@ void displayLevel(u8 levelIdx)
 	Print_DrawText("    ");
 #endif
 
+	// Credits
 	if (levelIdx == 31)
 	{
 		Print_SetPosition(0, 23);
@@ -1324,7 +1337,7 @@ bool interact(u8 x, u8 y)
 	u8 tile = getTile(x, y);
 
 	// objet que l'on peut ajouter à l'inventaire
-	if ((tile & 0b11110000) == 0b01100000)
+	if ((tile & 0b11111000) == 0b01100000)
 	{
 		if (addItemToInventory(tile))
 		{
@@ -1332,6 +1345,7 @@ bool interact(u8 x, u8 y)
 			{
 			case TILE_ITEM_GIFT:
 			case TILE_ITEM_APPLE:
+			case TILE_ITEM_GIFT2:
 				if (g_SecondCounter > BONUS_TIME)
 					g_SecondCounter -= BONUS_TIME;
 				else
@@ -1456,7 +1470,13 @@ bool interact(u8 x, u8 y)
 		startDoorAnim(x, y, tile);
 		return FALSE;
 
-		// Porte de fin
+	// Credits
+	case TILE_CREDITS1:
+	case TILE_CREDITS2:
+		menuCreditSelect();
+		return TRUE;
+
+	// Porte de fin
 	case TILE_DOOR_END1:
 	case TILE_DOOR_END2:
 		if (hasItemInInventory(TILE_ITEM_KEY_DOOR))
@@ -1594,6 +1614,32 @@ void menuLangSelect()
 }
 
 //-----------------------------------------------------------------------------
+// Page d'affichage des credits
+void menuCreditSelect()
+{
+	PlaySFX(SFX_CLICK);
+
+	VDP_FillVRAM_16K(0, VDP_GetLayoutTable(), 32 * 24);
+	VDP_DisableSpritesFrom(0);
+
+	// Affichage des credites
+	displayTextAt(12, 2, "CREDITS");
+	displayTextAt(1,  7, Loc_GetText(TEXT_CREDITS));
+	displayTextAt(0, 23, "MO5.COM 2025         VERSION 1.1");
+
+	bool bContinue = TRUE;
+	while (bContinue)
+	{
+		waitVSync();
+		if (isInputPushed(INPUT_BUTTON_A) || isInputPushed(INPUT_BUTTON_B))
+			bContinue = FALSE;
+	}
+
+	PlaySFX(SFX_PHONE_PICK);
+	displayLevel(g_CurrRoomIdx);
+}
+
+//-----------------------------------------------------------------------------
 // Menu de saisi d'un code de sauvegarde
 void menuEnterCode()
 {
@@ -1601,14 +1647,14 @@ void menuEnterCode()
 	Pletter_UnpackToVRAM(g_Tiles_Patterns, g_ScreenPatternLow);
 
 	// clean screen
-	VDP_FillVRAM_16K(0, g_ScreenLayoutLow, 32 * 24);
+	VDP_FillVRAM_16K(0, VDP_GetLayoutTable(), 32 * 24);
 	VDP_FillVRAM_16K(COLOR_MERGE(getColor(COLOR_TEXT), getColor(COLOR_BACKGROUND)), g_ScreenColorLow, 32);
 
 	// Initialisation du menu
-
+	Print_DrawTextAt(12, 2, "PASSWORD");
 	for (u8 i = 0; i < 16; i++)
 	{
-		Print_SetPosition(10, CODE_CURSORY + i);
+		Print_SetPosition(CODE_CURSORX + 2, CODE_CURSORY + i);
 		Print_DrawChar(g_CryptRoom5Map[i]);
 	}
 	Print_DrawTextAt(CODE_CURSORX + 6, CODE_CURSORY + CODE_VAL_OFFSET, "ROOM");
@@ -1695,6 +1741,7 @@ void VDP_InterruptHandler()
 	//@see https://aoineko.org/msxgl/index.php?title=Build_tool
 	g_vSync = TRUE;
 
+#if (TARGET_TYPE == TYPE_ROM)
 	if ((g_NextMusic != 0xFF) && (g_frameVSyncCounter != 6))
 	{
 		if (g_NextMusic != g_CurrentMusic)
@@ -1717,6 +1764,7 @@ void VDP_InterruptHandler()
 
 		AKG_Decode();
 	}
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1758,7 +1806,10 @@ void waitVSync()
 // Point d'entrée du programme principal
 void main()
 {
+#if (TARGET_TYPE == TYPE_ROM)
 	g_isNTSC = !(g_VersionROM & 0x80);
+#elif (TARGET_TYPE == TYPE_DOS)
+#endif
 
 	// Get VDP version
 	if (Keyboard_IsKeyPressed(KEY_1))
@@ -1776,10 +1827,6 @@ void main()
 	}
 
 	// Initialisation de la table de localisation
-	// Key click du MSX
-	Bios_SetKeyClick(FALSE);
-
-	// langue
 	Loc_Initialize(g_TransData, TEXT_MAX);
 	Loc_SetLanguage(LANG_EN);
 
@@ -1789,6 +1836,12 @@ void main()
 	VDP_SetColor(getColor(COLOR_BACKGROUND)); // Couleur de la bordure et de la couleur 0
 	VDP_ClearVRAM();
 	VDP_EnableVBlank(TRUE);
+
+	Keyboard_SetBuffer(g_InputNew, g_InputOld);
+#if (TARGET_TYPE == TYPE_DOS)
+	Bios_SetKeyClick(FALSE);
+	Bios_SetHookDirectCallback(H_TIMI, VDP_InterruptHandler);
+#endif
 
 	// Joue une musique vide pour permettre de jouer les sons
 	PlayMusic(MUSIC_EMPTY);
@@ -1827,7 +1880,7 @@ void main()
 			updateTV();
 
 			loop(i, g_SpriteCameraNum)
-					VDP_SetSpritePattern(SPT_CAMERA + i, (g_CurrentElectricityOn && g_FrameCounter & 0b00010000) ? 128 : 128 + 4);
+				VDP_SetSpritePattern(SPT_CAMERA + i, (g_CurrentElectricityOn && g_FrameCounter & 0b00010000) ? 128 : 128 + 4);
 		}
 		// Mise à jour du personnage
 		updatePlayer();

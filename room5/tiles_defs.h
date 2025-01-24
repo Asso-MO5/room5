@@ -32,6 +32,8 @@
 #define TILE_CAMERA_L 51
 #define TILE_CAMERA_R 52
 #define TILE_TV 89
+#define TILE_CREDITS1 69
+#define TILE_CREDITS2 70
 
 // placard en anglais
 #define TILE_CUPBOARD 77
@@ -63,6 +65,7 @@
 #define TILE_ITEM_TAPE 100
 #define TILE_ITEM_GIFT 101
 #define TILE_ITEM_APPLE 102
+#define TILE_ITEM_GIFT2 103
 
 // tuiles spéciales de conditions
 #define TILE_START_POS 127

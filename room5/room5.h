@@ -20,7 +20,7 @@
 #define LANG_CURSORX 8
 #define LANG_CURSORY 6
 #define CODE_CURSORX 8
-#define CODE_CURSORY 4
+#define CODE_CURSORY 6
 #define CODE_VAL_OFFSET 8
 #define PLAYER_CODE_SIZE 16
 #define BONUS_TIME 30 // Time gained when getting a bonus

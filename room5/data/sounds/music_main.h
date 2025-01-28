@@ -2,8 +2,8 @@
 // ██  ▀  █▄  ▀██▄ ▀ ▄█ ██▄  ▄  ██▀▄
 // █  █ █  ▀▀  ▄█  █  █ ██▄▀ ██ ██ █
 // ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-// MSXbin 1.4.1 by Guillaume "Aoineko" Blanchard (2022) under CC BY-SA free license
-// File generated on Fri Jan 24 22:45:18 2025
+// MSXbin 1.4.2 by Guillaume "Aoineko" Blanchard (2022) under CC BY-SA free license
+// File generated on Tue Jan 28 23:50:36 2025
 // Soure file: assets\music\music_main.pl5
 const unsigned char g_AKG_MusicMain[] = {
 	0x40, 0x41, 0x54, 0x32, 0x30, 0x0E, 0xD0, 0x24, 0x40, 0xD1, 0x01, 0xA2, 0x01, 0xD4, 0x00, 0x4C, //      0

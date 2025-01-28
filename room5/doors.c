@@ -37,15 +37,9 @@ u8 activateEndDoor()
 	u8 matrix = g_DoorThemeCount[THEME_MATRIX];
 
 	if (hospital > alien && hospital > matrix)
-	{
 		return 28;
-	}
 	else if (alien > hospital && alien > matrix)
-	{
 		return 29;
-	}
 	else // if (matrix > hospital && matrix > alien)
-	{
 		return 30;
-	}
 }

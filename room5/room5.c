@@ -34,6 +34,7 @@
 // DEFINITIONS
 //=============================================================================
 
+#define ROOM5_VERSION "1.2"
 #define DEBUG_DISPLAY_INFO FALSE
 
 // Prototypes de fonctions
@@ -290,7 +291,7 @@ struct TVData g_TVData;
 // Compte de RESET
 u8 g_ResetCount = 0;
 bool g_Test = FALSE;
-
+bool g_PhoneAnswered;
 // Switch minuteur
 struct SwitchTimer g_SwitchTimer;
 
@@ -599,6 +600,9 @@ void updatePlayer()
 
 		if (isInputPressed(INPUT_BUTTON_B))
 		{
+			if ((g_ResetCount & 0x0F) == 0)
+				PlaySFX((g_ResetCount & 0x10) ? SFX_TIC : SFX_TAC);
+
 			g_ResetCount++;
 			if (g_ResetCount > RESET_DURATION)
 			{
@@ -718,6 +722,30 @@ void updatePlayer()
 //.............................................................................
 
 //-----------------------------------------------------------------------------
+// Appuie sur un bouton d'éléctricité temporaire
+void disactivateSwitchTimer()
+{
+	if (g_SwitchTimer.Timer > 0)
+	{
+		setTile(g_SwitchTimer.X, g_SwitchTimer.Y, TILE_SWITCH_TIMER + 3);
+		g_SwitchTimer.Timer = 0;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Appuie sur un bouton d'éléctricité temporaire
+void activateSwitchTimer(u8 x, u8 y)
+{
+	disactivateSwitchTimer();
+
+	PlaySFX(SFX_CLICK);
+	g_SwitchTimer.X = x;
+	g_SwitchTimer.Y = y;
+	g_SwitchTimer.Timer = MAX_SWITCH_TIMER;
+	activateElectricity(TRUE);
+}
+
+//-----------------------------------------------------------------------------
 // Mise à jour des boutons d'éléctricité temporaire
 void updateSwitchTimer()
 {
@@ -746,6 +774,12 @@ void updateSwitchTimer()
 // Répondre au téléphone
 void activatePhone(u8 xP, u8 yP, bool bPhone)
 {
+	if (g_PhoneAnswered)
+	{
+		PlaySFX(SFX_LOCK);
+		return;
+	}
+
 	if (bPhone)
 	{
 		StopMusic();
@@ -778,6 +812,7 @@ void activatePhone(u8 xP, u8 yP, bool bPhone)
 	}
 
 	displayTextByMode(TEXT_MODE_PHONE);
+	g_PhoneAnswered = TRUE;
 }
 
 //-----------------------------------------------------------------------------
@@ -1115,6 +1150,7 @@ void displayLevel(u8 levelIdx)
 	u8 fuseBoxCount = 0;
 	g_SwitchTimer.Timer = 0;
 	g_TextCoordCount = 0;
+	g_PhoneAnswered = FALSE;
 
 	// Initialisation des sprites de caméra
 	g_SpriteCameraNum = 0;
@@ -1398,6 +1434,7 @@ bool interact(u8 x, u8 y)
 			activateLight(!g_CurrentLightOn);
 			return TRUE;
 		}
+		PlaySFX(SFX_LOCK);
 		return FALSE;
 
 		// Scotch pour réparer les fils
@@ -1409,26 +1446,21 @@ bool interact(u8 x, u8 y)
 			setTile(x, y, TILE_CABLE);
 			return TRUE;
 		}
-		else
-			PlaySFX(SFX_LOCK);
+		PlaySFX(SFX_LOCK);
 		return FALSE;
 
 	// Fusible et boite à fusible
 	case TILE_FUSEBOX:
-		if (g_SwitchTimer.Timer > 0)
-		{
-			return FALSE;
-		}
 		if (hasItemInInventory(TILE_ITEM_FUSE))
 		{
+			disactivateSwitchTimer();
 			PlaySFX(SFX_CLICK);
 			removeItemFromInventory(TILE_ITEM_FUSE);
 			activateElectricity(TRUE);
 			setTile(x, y, TILE_FUSEBOX_ON);
 			return TRUE;
 		}
-		else
-			PlaySFX(SFX_LOCK);
+		PlaySFX(SFX_LOCK);
 		return FALSE;
 
 	case TILE_FUSEBOX_ON:
@@ -1439,17 +1471,19 @@ bool interact(u8 x, u8 y)
 			setTile(x, y, TILE_FUSEBOX);
 			return TRUE;
 		}
+		PlaySFX(SFX_LOCK);
 		return FALSE;
 
 	case TILE_ELEVATOR_UP:
 	case TILE_ELEVATOR_DOWN:
-		if (!g_CurrentElectricityOn)
+		if (g_CurrentElectricityOn)
 		{
-			return FALSE;
+			PlaySFX(SFX_CLICK);
+			moveAllManualElevators(tile);
+			return TRUE;
 		}
-		PlaySFX(SFX_CLICK);
-		moveAllManualElevators(tile);
-		return TRUE;
+		PlaySFX(SFX_LOCK);
+		return FALSE;
 
 	case TILE_LOCK_DOOR1:
 	case TILE_LOCK_DOOR2:
@@ -1460,8 +1494,7 @@ bool interact(u8 x, u8 y)
 			startDoorAnim(x, y, tile);
 			return TRUE;
 		}
-		else
-			PlaySFX(SFX_LOCK);
+		PlaySFX(SFX_LOCK);
 		return FALSE;
 
 	// Porte de sortie
@@ -1485,8 +1518,7 @@ bool interact(u8 x, u8 y)
 			displayLevel(activateEndDoor());
 			return TRUE;
 		}
-		else
-			PlaySFX(SFX_LOCK);
+		PlaySFX(SFX_LOCK);
 		return FALSE;
 
 	// Placard
@@ -1508,8 +1540,7 @@ bool interact(u8 x, u8 y)
 			activateCloset(x, y);
 			return TRUE;
 		}
-		else
-			PlaySFX(SFX_LOCK);
+		PlaySFX(SFX_LOCK);
 		return FALSE;
 
 	case TILE_SWITCH_TIMER:
@@ -1517,13 +1548,11 @@ bool interact(u8 x, u8 y)
 	case TILE_SWITCH_TIMER + 2:
 	case TILE_SWITCH_TIMER + 3:
 		if (g_CurrentElectricityOn && g_SwitchTimer.Timer == 0)
+		{
+			PlaySFX(SFX_LOCK);
 			return FALSE;
-
-		PlaySFX(SFX_CLICK);
-		g_SwitchTimer.X = x;
-		g_SwitchTimer.Y = y;
-		g_SwitchTimer.Timer = MAX_SWITCH_TIMER;
-		activateElectricity(TRUE);
+		}		
+		activateSwitchTimer(x, y);
 		return TRUE;
 	
 	case TILE_TV:
@@ -1625,7 +1654,7 @@ void menuCreditSelect()
 	// Affichage des credites
 	displayTextAt(12, 2, "CREDITS");
 	displayTextAt(1,  7, Loc_GetText(TEXT_CREDITS));
-	displayTextAt(0, 23, "MO5.COM 2025         VERSION 1.1");
+	displayTextAt(0, 23, "MO5.COM 2025         VERSION " ROOM5_VERSION);
 
 	bool bContinue = TRUE;
 	while (bContinue)

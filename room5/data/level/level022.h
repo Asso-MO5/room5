@@ -2,8 +2,8 @@
 // ██  ▀  █▄  ▀██▄ ▀ ▄█ ██▄  ▄  ██▀▄
 // █  █ █  ▀▀  ▄█  █  █ ██▄▀ ██ ██ █
 // ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-// MSXbin 1.4.1 by Guillaume "Aoineko" Blanchard (2022) under CC BY-SA free license
-// File generated on Fri Jan 24 22:45:17 2025
+// MSXbin 1.4.2 by Guillaume "Aoineko" Blanchard (2022) under CC BY-SA free license
+// File generated on Tue Jan 28 23:50:36 2025
 // Soure file: data\level\level022.pl5
 const unsigned char g_Level022[] = {
 	0x2F, 0x83, 0x84, 0x78, 0x00, 0x85, 0x00, 0x1B, 0x87, 0x34, 0x00, 0xB0, 0x00, 0x38, 0x00, 0x33, //      0

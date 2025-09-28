@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../.."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.asm": "asz80",
+			"*.s": "asz80",
+			"*.inc": "c",
+			"music_main.h": "c",
+			"level032.h": "c"
+		}
+	}
+}

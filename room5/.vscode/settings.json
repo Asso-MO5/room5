@@ -1,0 +1,16 @@
+{
+	"files.associations": {
+		"*.asm": "asz80",
+		"*.s": "asz80",
+		"*.inc": "c",
+		"music_main.h": "c",
+		"music_phone.h": "c",
+		"music_empty.h": "c",
+		"sfx.h": "c",
+		"msxgl.h": "c",
+		"tiles.h": "c",
+		"math.h": "c",
+		"color.h": "c",
+		"sprt_inventory.h": "c"
+	}
+}

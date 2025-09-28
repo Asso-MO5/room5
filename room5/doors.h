@@ -13,7 +13,7 @@ void setDoorTheme(u8 doorIdx, u8 theme);
 // x, y: coordonnées de l'action du joueur sur la porte
 // currentRoom: numéro de la salle dans laquelle on se trouve
 // Renvoie le numéro de la salle dans laquelle on se rend en activant la porte
-u8 activateDoor(u8 tile, u8 x, u8 y, u8 currentRoom);
+void activateDoor(u8 tile, u8 x, u8 y, u8 currentRoom);
 
 // Renvoie le numéro de la salle dans laquelle on se rend en activant la porte de fin
 // La porte est choisie en fonction des thèmes choisis

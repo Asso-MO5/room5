@@ -34,7 +34,7 @@
 // DEFINITIONS
 //=============================================================================
 
-#define ROOM5_VERSION "1.2"
+#define ROOM5_VERSION "1.3"
 #define DEBUG_DISPLAY_INFO FALSE
 
 // Prototypes de fonctions
@@ -1830,6 +1830,9 @@ void waitVSync()
 	Keyboard_Update();
 	Joystick_Update();
 }
+
+extern u8 g_VersionROM;
+extern u8 g_VersionMSX;
 
 //-----------------------------------------------------------------------------
 // Point d'entrée du programme principal

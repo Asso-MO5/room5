@@ -14,6 +14,7 @@
 #define MAX_ELEVATOR 8
 #define MAX_MANUAL_ELEVATOR 8
 #define ELEVATOR_STAND 20
+#define ELEVATOR_SPEED 1
 
 // États des élévateurs
 enum ElevatorState
@@ -104,7 +105,7 @@ void addElevator(u8 x, u8 y)
 
 	elevator->X = x;
 	elevator->Y = y;
-	elevator->VelocityY = 1;
+	elevator->VelocityY = ELEVATOR_SPEED;
 	elevator->State = ELEVATOR_STAND;
 	elevator->Timer = ELEVATOR_STATE_STAND;
 
@@ -128,10 +129,9 @@ void updateElevator(u8 num)
 
 	if (elevator->VelocityY < 0) // Si l'élévateur monte
 	{
-		if (!checkRails(elevator->X, elevator->Y - 1))
+		if (!checkRails(elevator->X, elevator->Y - ELEVATOR_SPEED))
 		{
-
-			elevator->VelocityY = 1;
+			elevator->VelocityY = ELEVATOR_SPEED;
 			elevator->Timer = ELEVATOR_STAND;
 			elevator->State = ELEVATOR_STATE_STAND;
 			return;
@@ -139,9 +139,9 @@ void updateElevator(u8 num)
 	}
 	else // Si l'élévateur descent
 	{
-		if (!checkRails(elevator->X, elevator->Y + 1))
+		if (!checkRails(elevator->X, elevator->Y + ELEVATOR_SPEED))
 		{
-			elevator->VelocityY = -1;
+			elevator->VelocityY = -ELEVATOR_SPEED;
 			elevator->Timer = ELEVATOR_STAND;
 			elevator->State = ELEVATOR_STATE_STAND;
 			return;

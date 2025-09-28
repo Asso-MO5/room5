@@ -22,7 +22,7 @@ void setDoorTheme(u8 doorIdx, u8 theme)
 	g_DoorTheme[doorIdx] = theme;
 }
 
-u8 activateDoor(u8 tile, u8 x, u8 y, u8 currentRoom)
+void activateDoor(u8 tile, u8 x, u8 y, u8 currentRoom)
 {
 	g_InteractedDoor.tile = tile;
 	g_InteractedDoor.x = x;

@@ -15,7 +15,7 @@
 // DoMake    = true;	//-- Link all the project and engine source code (boolean). Merge all REL into one IHX file
 // DoPackage = true;	//-- Generate final binary file (boolean). Binarize the IHX file
 // DoDeploy  = true;	//-- Gathering of all files necessary for the program to work (boolean). Depends on the type of target
-DoRun     = true;	//-- Start the program automatically at the end of the build (boolean)
+// DoRun     = true;	//-- Start the program automatically at the end of the build (boolean)
 
 //*****************************************************************************
 // TOOLS SETTINGS
@@ -115,9 +115,11 @@ Machine = "12";
 //   - ROM_KONAMI_SCC   .rom    Konami MegaROM SCC (aka Konami5): 8 KB segments for a total of 64 KB to 2 MB
 //   - ROM_NEO8         .rom    NEO-8: 8 KB segments for a total of 1 MB to 32 MB
 //   - ROM_NEO16        .rom    NEO-16: 16 KB segments for a total of 1 MB to 64 MB
+//   - ROM_YAMANOOTO    .rom    Yamanooto: 8 KB segments for a total up to 8 MB
+//   - ROM_ASCII16X     .rom    ASCII16-X: 16 KB segments for a total up to 64 MB
 Target = 'ROM_48K_ISR';
 
-//-- ROM mapper total size in KB (number). Must be a multiple of 8 or 16 depending on the mapper type (from 64 to 4096)
+//-- ROM mapper total size in KB (number). Must be a multiple of 8 or 16 depending on the mapper type (from 64 to 4096 for legacy mappers; can be up to 65536 for NEO-16 mapper)
 // ROMSize = 128;
 
 //-- Check for ROM boot skipping if a given key is pressed (boolean)
@@ -163,7 +165,7 @@ CustomISR = 'VBLANK';
 //-- Overwrite RAM starting address (number). For example. 0xE0000 for 8K RAM machine
 // ForceRamAddr = 0;
 
-//-- List of raw data files to be added to final binary (array). Each entry must be in the following format: { offset=0x0000, file="myfile.bin" }
+//-- List of raw data files to be added to final binary (array). Each entry must be in the following format: { offset:0x0000, file:"myfile.bin" }
 // RawFiles = [];
 
 //-- List of data files to copy to disk (array)
@@ -196,7 +198,7 @@ AppID = 'R5';
 //*******************************************************************************
 
 //-- Force to generate MSXgl static library even if 'msxgl.lib' already exist (boolean)
-BuildLibrary = false;
+BuildLibrary = true;
 
 //-- Prepare program for debug (boolean)
 Debug = false;
@@ -255,26 +257,26 @@ DebugSymbols = true;
 // LOCALISATION SETTINGS
 //*******************************************************************************
 
-//-- List files to be localized (array)
-LocFiles = [
-	'assets/translate_en.ini',
-	'assets/translate_es.ini',
-	'assets/translate_fr.ini',
-	'assets/translate_it.ini',
-	'assets/translate_ja.ini',
-	'assets/translate_nl.ini',
-	'assets/translate_pt_BR.ini',
-	'assets/translate_tl.ini',
-]
+// //-- List files to be localized (array)
+// LocFiles = [
+// 	'assets/translate_en.ini',
+// 	'assets/translate_es.ini',
+// 	'assets/translate_fr.ini',
+// 	'assets/translate_it.ini',
+// 	'assets/translate_nl.ini',
+// 	'assets/translate_pt_BR.ini',
+// 	'assets/translate_tl.ini',
+// 	'assets/translate_ja.ini',
+// ]
 
-//-- Localization output filename (string)
-LocOutput = 'data/translate.h'
+// //-- Localization output filename (string)
+// LocOutput = 'data/translate.h'
 
-//-- Localization structure name (string)
-LocStruct = 'g_TransData'
+// //-- Localization structure name (string)
+// LocStruct = 'g_TransData'
 
-//-- Split socalization data and definitions in different files (boolean)
-LocSplitDef = true;
+// //-- Split socalization data and definitions in different files (boolean)
+// LocSplitDef = true;
 
 //*****************************************************************************
 // BUILD TOOL OPTION
